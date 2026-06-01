@@ -62,8 +62,8 @@ export default function Header() {
             {/* DESKTOP NAV (UNCHANGED) */}
             <nav className="hidden md:flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.35em] text-cyan-500/70">
               {links.map((item) => (
-                <Link
-                  key={item.label} href={item.href} 
+                <Link to={item.href}
+                  key={item.label} 
                   className="transition-colors duration-300 hover:text-cyan-300">
                   {item.label}
                 </Link>
@@ -84,8 +84,8 @@ export default function Header() {
             {open && (
               <nav className="md:hidden flex flex-col items-center gap-5 text-xs uppercase tracking-[0.35em] text-cyan-500/70">
                 {links.map((item) => (
-                  <Link
-                    key={item.label} href={item.href} onClick={() => setOpen(false)}
+                  <Link to={item.href}
+                    key={item.label} onClick={() => setOpen(false)}
                     className="transition-colors duration-300 hover:text-cyan-300">
                     {item.label}
                   </Link>
