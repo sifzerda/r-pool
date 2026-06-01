@@ -24,7 +24,7 @@ export default function Header() {
       <div className="mx-auto max-w-7xl overflow-hidden rounded-[36px] border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
 
         {/* Top Light Strip */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
+        <div className="h-0.5 w-full bg-linear-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
 
         <div className="relative px-8 py-6 md:px-14">
 
@@ -51,11 +51,11 @@ export default function Header() {
               </h1>
 
               <div className="mt-4 flex items-center justify-center gap-4">
-                <div className="h-px w-20 bg-gradient-to-r from-transparent to-cyan-400" />
+                <div className="h-px w-20 bg-linear-to-r from-transparent to-cyan-400" />
                 <span className="text-[10px] uppercase tracking-[0.6em] text-fuchsia-300/80">
                   Prisma Neon Lounge
                 </span>
-                <div className="h-px w-20 bg-gradient-to-l from-transparent to-cyan-400" />
+                <div className="h-px w-20 bg-linear-to-l from-transparent to-cyan-400" />
               </div>
             </div>
 
@@ -74,9 +74,9 @@ export default function Header() {
             <div className="md:hidden w-full flex justify-center">
               <button onClick={() => setOpen(!open)}
                 className="group flex flex-col gap-1.5 cursor-pointer">
-                <span className="h-[2px] w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
-                <span className="h-[2px] w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
-                <span className="h-[2px] w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
+                <span className="h-0.5 w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
+                <span className="h-0.5 w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
+                <span className="h-0.5 w-7 bg-cyan-300 group-hover:bg-fuchsia-300 transition-colors duration-300" />
               </button>
             </div>
 
