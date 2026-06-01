@@ -1,5 +1,7 @@
 // app/home.js
 
+import PoolGame from "../PoolGame.jsx";
+
  
 export default function HomePage() {
   return (
@@ -27,7 +29,7 @@ export default function HomePage() {
         <div className="mx-auto relative w-full max-w-3xl overflow-hidden rounded-[36px] border border-cyan-400/15 bg-black/40 p-6 backdrop-blur-2xl shadow-[0_0_60px_rgba(34,211,238,0.08)]">
           <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
-          {/* <Pool />         */}
+           <PoolGame />         
         </div>
 
         {/* Right Side Neon 8 Ball */}
