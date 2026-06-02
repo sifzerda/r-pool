@@ -15,16 +15,12 @@ import { frictionSystem } from "./ecs/systems/frictionSystem";
 import { collisionSystem } from "./ecs/systems/collisionSystem";
 import CueSystem from "./ecs/systems/CueSystem";
 
-import {
-  toRenderX,
-  toRenderZ,
-} from "./ecs/utils/coords";
+import { toRenderX, toRenderZ } from "./ecs/utils/coords";
 
 export default function PoolScene({ cueBall }) {
 const aimRef = useRef({
   angle: 0,
   power: 0,
-
   swing: 0,        // 0 = idle, 1 = pulled back, 2 = striking
   swingT: 0,       // animation timer
 });
@@ -46,6 +42,16 @@ const aimRef = useRef({
   const { camera } = useThree();
 
   useFrame((state, delta) => {
+
+
+console.log(
+  "cue",
+  cueBall.x,
+  cueBall.z,
+  cueBall.vx,
+  cueBall.vz
+);
+
     accumulatorRef.current += delta;
 
     while (accumulatorRef.current >= FIXED_DT) {
@@ -69,17 +75,33 @@ const aimRef = useRef({
 
     if (!hit) return;
 
+
+console.log("cueBall", cueBall);
+
     const cueX =
       toRenderX(cueBall.x);
 
     const cueZ =
-      toRenderZ(cueBall.y);
+      toRenderZ(cueBall.z);
 
     const dx =
       point.current.x - cueX;
 
     const dz =
       point.current.z - cueZ;
+
+      if (
+  Number.isNaN(dx) ||
+  Number.isNaN(dz)
+) {
+  console.log({
+    cueX,
+    cueZ,
+    pointX: point.current.x,
+    pointZ: point.current.z,
+    cueBall,
+  });
+}
 
     aimRef.current.angle =
       Math.atan2(dz, dx);
@@ -110,13 +132,13 @@ const aimRef = useRef({
       />
 
       {/* debug marker */}
-      <mesh
-        position={[
-          toRenderX(cueBall.x),
-          0.2,
-          toRenderZ(cueBall.y),
-        ]}
-      >
+<mesh
+  position={[
+    toRenderX(cueBall.x),
+    0.2,
+    toRenderZ(cueBall.z),
+  ]}
+>
         <sphereGeometry args={[0.05]} />
         <meshBasicMaterial color="red" />
       </mesh>

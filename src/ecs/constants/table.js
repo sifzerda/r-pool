@@ -3,8 +3,8 @@
 export const TABLE_W = 6.8;
 export const TABLE_H = 3.4;
 
-export const TABLE_X = TABLE_W / 2; // 3.4
-export const TABLE_Z = TABLE_H / 2; // 1.7
+export const TABLE_X = 3.4;
+export const TABLE_Z = 1.7;
 
 export const CUSHION = 0.28; // 28 cm
 

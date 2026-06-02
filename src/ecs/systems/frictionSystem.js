@@ -8,12 +8,12 @@ export function frictionSystem(world) {
 
     const speed = Math.hypot(
       ball.vx,
-      ball.vy
+      ball.vz
     );
 
     if (speed < 0.05) {
       ball.vx = 0;
-      ball.vy = 0;
+      ball.vz = 0;
       ball.sleeping = true;
       continue;
     }
@@ -21,6 +21,6 @@ export function frictionSystem(world) {
     const drag = 0.992;
 
     ball.vx *= drag;
-    ball.vy *= drag;
+    ball.vz *= drag;
   }
 }

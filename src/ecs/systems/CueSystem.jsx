@@ -3,20 +3,20 @@
 import { useEffect } from "react";
 import { BALL_R } from "../constants/table.js";
 
-const MAX_POWER = 800;
+const MAX_POWER = 18;
 
 export default function CueSystem({
   cueBall,
   aimRef,
 }) {
 
-   useEffect(() => {
+  useEffect(() => {
     let charging = false;
     let chargeStart = 0;
 
     function down() {
       if (Math.abs(cueBall.vx) > 0.05 ||
-          Math.abs(cueBall.vy) > 0.05)
+        Math.abs(cueBall.vy) > 0.05)
         return;
 
       charging = true;
@@ -31,16 +31,30 @@ export default function CueSystem({
 
       const power = aimRef.current.power;
 
-      aimRef.current.swing = 2; // strike animation
+      aimRef.current.swing = 2;
       aimRef.current.swingT = 0;
 
       cueBall.sleeping = false;
 
+console.log("SHOT", {
+  power,
+  angle: aimRef.current.angle,
+  vx: Math.cos(aimRef.current.angle) * power,
+  vz: Math.sin(aimRef.current.angle) * power,
+});
+
       cueBall.vx =
         Math.cos(aimRef.current.angle) * power;
 
-      cueBall.vy =
+      cueBall.vz =
         Math.sin(aimRef.current.angle) * power;
+
+      console.log(
+        "SHOT",
+        power,
+        cueBall.vx,
+        cueBall.vz
+      );
 
       aimRef.current.power = 0;
     }
@@ -51,11 +65,9 @@ export default function CueSystem({
     const interval = setInterval(() => {
       if (!charging) return;
 
-      const held =
-        (performance.now() - chargeStart) / 1000;
+      const held = (performance.now() - chargeStart) / 1000;
 
-      aimRef.current.power =
-        Math.min(MAX_POWER, held * 400);
+      aimRef.current.power = Math.min(MAX_POWER, held * 12);
     }, 16);
 
     return () => {

@@ -9,10 +9,13 @@ import PoolScene from "./PoolScene";
 export default function PoolGame() {
   const [cueBall, setCueBall] = useState(null);
 
-  useEffect(() => {
-    const cue = setupGame();
-    setCueBall(cue);
-  }, []);
+useEffect(() => {
+  const cue = setupGame();
+
+  console.log("NEW CUE", cue);
+
+  setCueBall(cue);
+}, []);
 
   return (
     <Canvas shadows>

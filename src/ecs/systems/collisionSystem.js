@@ -13,14 +13,14 @@ export function collisionSystem(world) {
       const b = balls[j];
 
       const dx = a.x - b.x;
-      const dy = a.y - b.y;
+      const dz = a.z - b.z;
 
       const minDist = BALL_R * 2;
 
-      if (
-        dx * dx + dy * dy <
-        minDist * minDist
-      ) {
+if (
+  dx * dx + dz * dz <
+  minDist * minDist
+) {
         a.sleeping = false;
         b.sleeping = false;
 
