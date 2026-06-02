@@ -1,26 +1,47 @@
 // src/ecs/systems/frictionSystem.js
 
-export function frictionSystem(world) {
-  const balls = world.with("ball");
+import { ballQuery } from "../world";
 
-  for (const ball of balls) {
-    if (ball.sleeping) continue;
+const ROLLING_RESISTANCE = 0.45;
 
-    const speed = Math.hypot(
-      ball.vx,
-      ball.vz
-    );
+export function frictionSystem(_, dt) {
 
-    if (speed < 0.05) {
+  for (const ball of ballQuery) {
+
+    if (ball.sleeping)
+      continue;
+
+    const speed =
+      Math.hypot(
+        ball.vx,
+        ball.vz
+      );
+
+    if (speed === 0)
+      continue;
+
+    const decel =
+      ROLLING_RESISTANCE * dt;
+
+    const newSpeed =
+      Math.max(
+        0,
+        speed - decel
+      );
+
+    if (newSpeed === 0) {
+
       ball.vx = 0;
       ball.vz = 0;
       ball.sleeping = true;
+
       continue;
     }
 
-    const drag = 0.992;
+    const scale =
+      newSpeed / speed;
 
-    ball.vx *= drag;
-    ball.vz *= drag;
+    ball.vx *= scale;
+    ball.vz *= scale;
   }
 }

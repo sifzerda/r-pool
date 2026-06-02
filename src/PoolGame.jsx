@@ -3,19 +3,14 @@ import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { setupGame } from "./ecs/setupGame";
-
 import PoolScene from "./PoolScene";
 
 export default function PoolGame() {
   const [cueBall, setCueBall] = useState(null);
 
-useEffect(() => {
-  const cue = setupGame();
-
-  console.log("NEW CUE", cue);
-
-  setCueBall(cue);
-}, []);
+  useEffect(() => {
+    setCueBall(setupGame());
+  }, []);
 
   return (
     <Canvas shadows>

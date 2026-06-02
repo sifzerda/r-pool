@@ -1,28 +1,25 @@
 // src/ecs/systems/CueSystem.jsx
 
 import { useEffect } from "react";
-import { BALL_R } from "../constants/table.js";
 
 const MAX_POWER = 18;
 
-export default function CueSystem({
-  cueBall,
-  aimRef,
-}) {
-
+export default function CueSystem({ cueBall, aimRef }) {
   useEffect(() => {
     let charging = false;
     let chargeStart = 0;
 
+    function isMoving() {
+      return Math.hypot(cueBall.vx, cueBall.vz) > 0.05;
+    }
+
     function down() {
-      if (Math.abs(cueBall.vx) > 0.05 ||
-        Math.abs(cueBall.vy) > 0.05)
-        return;
+      if (isMoving()) return;
 
       charging = true;
       chargeStart = performance.now();
 
-      aimRef.current.swing = 1; // backswing
+      aimRef.current.swing = 1;
     }
 
     function up() {
@@ -36,42 +33,36 @@ export default function CueSystem({
 
       cueBall.sleeping = false;
 
-console.log("SHOT", {
-  power,
-  angle: aimRef.current.angle,
-  vx: Math.cos(aimRef.current.angle) * power,
-  vz: Math.sin(aimRef.current.angle) * power,
-});
+      const angle = aimRef.current.angle;
 
-      cueBall.vx =
-        Math.cos(aimRef.current.angle) * power;
+      // FIXED scaling (feels like real cue impulse)
+      const strength = power * 2.2;
 
-      cueBall.vz =
-        Math.sin(aimRef.current.angle) * power;
-
-      console.log(
-        "SHOT",
+      aimRef.current.pendingShot = {
         power,
-        cueBall.vx,
-        cueBall.vz
-      );
+        angle: aimRef.current.angle,
+      };
 
       aimRef.current.power = 0;
+    }
+
+    function update() {
+      if (!charging) return;
+
+      const held = (performance.now() - chargeStart) * 0.001;
+
+      // smoother + more controllable power curve
+      const t = Math.min(1, held * 1.2);
+      aimRef.current.power = t * t * MAX_POWER;
     }
 
     window.addEventListener("mousedown", down);
     window.addEventListener("mouseup", up);
 
-    const interval = setInterval(() => {
-      if (!charging) return;
-
-      const held = (performance.now() - chargeStart) / 1000;
-
-      aimRef.current.power = Math.min(MAX_POWER, held * 12);
-    }, 16);
+    const id = setInterval(update, 16);
 
     return () => {
-      clearInterval(interval);
+      clearInterval(id);
       window.removeEventListener("mousedown", down);
       window.removeEventListener("mouseup", up);
     };

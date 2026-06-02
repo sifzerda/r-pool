@@ -8,8 +8,8 @@ export const TABLE_Z = 1.7;
 
 export const CUSHION = 0.28; // 28 cm
 
-export const PLAY_X = CUSHION;
-export const PLAY_Z = CUSHION;
+export const PLAY_X = TABLE_W / 2 - CUSHION;
+export const PLAY_Z = TABLE_H / 2 - CUSHION;
 
 export const PLAY_W = TABLE_W - CUSHION * 2;
 export const PLAY_H = TABLE_H - CUSHION * 2;

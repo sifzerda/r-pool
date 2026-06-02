@@ -3,7 +3,6 @@
 
 import { world } from "./world";
 import { BALL_R } from "./constants/table";
-import { BALL_COLORS } from "./constants/colors";
 import { buildRack } from "./utils/rack";
 
 export function setupGame() {
@@ -13,11 +12,19 @@ export function setupGame() {
     ball: true,
     cueBall: true,
 
+    mass: 0.17,
+
     x: 0,
-    z: 0,   // center of table
+    z: 0,
 
     vx: 0,
     vz: 0,
+
+    spinX: 0,
+    spinZ: 0,
+
+    sideSpin: 0,
+    topSpin: 0,
 
     radius: BALL_R,
 
@@ -30,8 +37,16 @@ export function setupGame() {
       ball: true,
       ...ball,
 
+      mass: 0.17,
+
       vx: 0,
       vz: 0,
+
+      spinX: 0,
+      spinZ: 0,
+
+      sideSpin: 0,
+      topSpin: 0,
 
       radius: BALL_R,
       sleeping: true,

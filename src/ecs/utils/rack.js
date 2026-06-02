@@ -1,4 +1,5 @@
 // src/ecs/utils/rack.js
+// ball positions geenrated here
 
 import { TABLE_W, TABLE_H, BALL_R } from "../constants/table.js";
 
@@ -12,11 +13,7 @@ export function buildRack() {
 
   for (let row = 0; row < 5; row++) {
     for (let i = 0; i <= row; i++) {
-      balls.push({
-        num: id++,
-        x: startX + row * 0.18,
-        z: i * 0.18 - row * 0.09,
-      });
+      balls.push({ num: id++, x: startX + row * 0.18, z: i * 0.18 - row * 0.09 });
     }
   }
 

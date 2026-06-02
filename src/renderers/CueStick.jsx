@@ -4,15 +4,9 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
-import {
-  toRenderX,
-  toRenderZ,
-} from "../ecs/utils/coords";
+import { toRenderX, toRenderZ } from "../ecs/utils/coords";
 
-export default function CueStick({
-  cueBall,
-  aimRef,
-}) {
+export default function CueStick({cueBall, aimRef}) {
   const ref = useRef();
 
   useFrame((_, delta) => {
@@ -21,8 +15,8 @@ export default function CueStick({
     const angle = aimRef.current.angle || 0;
     const power = aimRef.current.power || 0;
 
-    const cueX = cueBall.x;
-    const cueZ = cueBall.z;
+    const cueX = toRenderX(cueBall.x);
+    const cueZ = toRenderZ(cueBall.z);
 
     // -----------------------------
     // 🎯 SWING STATE MACHINE
@@ -35,9 +29,56 @@ export default function CueStick({
       swingOffset = -0.35 - power * 0.0006;
     }
 
-    if (aimRef.current.swing === 2) {
+    if (
+  aimRef.current.swing === 2 &&
+  aimRef.current.swingT > 0.15 &&
+  aimRef.current.pendingShot
+) {
+
+  const shot =
+    aimRef.current.pendingShot;
+
+  const strength =
+    shot.power * 2.2;
+
+  cueBall.vx =
+    Math.cos(shot.angle) *
+    strength;
+
+  cueBall.vz =
+    Math.sin(shot.angle) *
+    strength;
+
+  cueBall.sleeping = false;
+
+  aimRef.current.pendingShot = null;
+} {
       // STRIKE animation
       aimRef.current.swingT += delta * 10;
+
+      if (
+  aimRef.current.swingT > 0.15 &&
+  aimRef.current.pendingShot
+) {
+
+  const shot =
+    aimRef.current.pendingShot;
+
+  const strength =
+    shot.power * 2.2;
+
+  cueBall.vx =
+    Math.cos(shot.angle)
+    * strength;
+
+  cueBall.vz =
+    Math.sin(shot.angle)
+    * strength;
+
+  cueBall.sleeping = false;
+
+  aimRef.current.pendingShot = null;
+}
 
       swingOffset = 0.8 * Math.exp(-aimRef.current.swingT * 6);
 
@@ -57,24 +98,17 @@ export default function CueStick({
 
     const baseDistance = 0.5;
 
-    const x =
-      cueX - Math.cos(angle) * (baseDistance + swingOffset);
-
-    const z =
-      cueZ - Math.sin(angle) * (baseDistance + swingOffset);
+    const x = cueX - Math.cos(angle) * (baseDistance + swingOffset);
+    const z = cueZ - Math.sin(angle) * (baseDistance + swingOffset);
 
     ref.current.position.set(x, 0.45, z);
-
     // rotate cue
     ref.current.rotation.y = angle;
-
     // slight tilt for realism
     ref.current.rotation.x = 0.05;
   });
 
-  const moving =
-    Math.abs(cueBall.vx) > 0.05 ||
-    Math.abs(cueBall.vy) > 0.05;
+  const moving = Math.abs(cueBall.vx) > 0.05 || Math.abs(cueBall.vz) > 0.05;
 
   if (moving) return null;
 
