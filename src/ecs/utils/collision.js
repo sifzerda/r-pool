@@ -1,6 +1,4 @@
-import {
-  BALL_R,
-} from "../constants/table.js";
+import { BALL_R } from "../constants/table.js";
 
 export function dist2(a, b) {
   const dx = a.x - b.x;

@@ -1,8 +1,4 @@
-import {
-  TABLE_W,
-  TABLE_H,
-  BALL_R,
-} from "../constants/table.js";
+import { TABLE_W, TABLE_H, BALL_R } from "../constants/table.js";
 
 export function buildRack() {
   const cx = TABLE_W * 0.63;

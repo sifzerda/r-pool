@@ -1,3 +1,5 @@
+// src/main.jsx
+
 import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
@@ -11,41 +13,41 @@ import Tournaments from './pages/Tournaments.jsx';
 import Signup from './pages/Signup.jsx';
 import Login from './pages/Login.jsx';
 import Vip from './pages/Vip.jsx';
- 
+
 // subjects
- 
+
 // Define the accessible routes, and which components respond to which URL
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     errorElement: <Error />,
-children: [
-  {
-    index: true,
-    element: <Home />,
-  },
-  {
-    path: '/about',
-    element: <About />,
-  },
-  {
-    path: '/tournaments',
-    element: <Tournaments />,
-  },
-  {
-    path: '/signup',
-    element: <Signup />,
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/vip',
-    element: <Vip />,
-  },
-],
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: '/about',
+        element: <About />,
+      },
+      {
+        path: '/tournaments',
+        element: <Tournaments />,
+      },
+      {
+        path: '/signup',
+        element: <Signup />,
+      },
+      {
+        path: '/login',
+        element: <Login />,
+      },
+      {
+        path: '/vip',
+        element: <Vip />,
+      },
+    ],
   },
 ]);
 

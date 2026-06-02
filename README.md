@@ -114,3 +114,5 @@ Weapons	Modular     firing logic
 - [ ] currently using miniplex ecs, lightweight but not three.js
 - [ ] expand ecs structure to something more elaborate, game engine, physics, 3d ball on 2D table, optimization
 - [ ] possibly add zustand or jotai
+
+- [ ] create modular layout/s
