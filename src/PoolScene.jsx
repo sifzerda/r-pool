@@ -5,9 +5,9 @@ import { useFrame } from "@react-three/fiber";
 
 import { world, balls } from "./ecs/world";
 
-import PoolTable from "./ecs/components/PoolTable";
-import PoolBalls from "./ecs/components/PoolBalls";
-import CueStick from "./ecs/components/CueStick";
+import PoolTable from "./renderers/PoolTable";
+import PoolBalls from "./renderers/PoolBalls";
+//import CueStick from "./renderers/CueStick";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
@@ -46,12 +46,12 @@ export default function PoolScene({cueBall, mouse}) {
 
       <PoolBalls balls={[...balls]} />
 
-      {cueBall && (
+      {/*     {cueBall && (
         <>
-          <CueStick cueBall={cueBall} mouse={mouse} />
-          <CueSystem cueBall={cueBall} aimRef={aimRef} />
-        </>
-      )}
+            <CueStick cueBall={cueBall} mouse={mouse} />  
+       <CueSystem cueBall={cueBall} aimRef={aimRef} /> 
+        </>  
+      )}     */} 
     </>
   );
 }

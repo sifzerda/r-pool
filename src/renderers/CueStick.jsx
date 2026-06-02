@@ -1,30 +1,20 @@
 // src/ecs/components/CueStick.jsx
 
-export default function CueStick({
-  cueBall,
-  mouse,
-}) {
+export default function CueStick({ cueBall, mouse }) {
   if (!cueBall) return null;
 
-  const dx =
-    mouse.x - cueBall.x;
+  const dx = mouse.x - cueBall.x;
+  const dy = mouse.y - cueBall.y;
 
-  const dy =
-    mouse.y - cueBall.y;
-
-  const angle = Math.atan2(
-    aim.y,
-    aim.x
-  );
-
+  const angle = Math.atan2(dy, dx);
   const offset = 0.8;
 
   return (
     <mesh
       position={[
-        ballX - aim.x * offset,
+        cueBall.x - dx * offset,
         0.12,
-        ballZ - aim.y * offset
+        cueBall.y - dy * offset
       ]}
       rotation={[
         0,
