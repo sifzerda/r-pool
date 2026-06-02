@@ -3,9 +3,10 @@
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Color, Object3D, InstancedBufferAttribute } from "three";
+import { toRenderX, toRenderZ } from "../ecs/utils/coords.js";
 
 const BALL_RADIUS = 0.1;
-const Y_POS = 0.12;
+const Y_POS = 0.35;
 const dummy = new Object3D();
 const color = new Color();
 
@@ -28,11 +29,12 @@ export default function PoolBalls({ balls }) {
     for (const ball of balls) {
       if (ball.pocketed) continue;
 
-      dummy.position.set(
-        (ball.x - 340) / 100,
-        Y_POS,
-        (ball.y - 170) / 100
-      );
+dummy.position.set(
+  ball.x,
+  Y_POS,
+  ball.z
+);
+
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(visibleIndex, dummy.matrix);
 

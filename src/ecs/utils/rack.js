@@ -1,34 +1,24 @@
+// src/ecs/utils/rack.js
+
 import { TABLE_W, TABLE_H, BALL_R } from "../constants/table.js";
 
 export function buildRack() {
-  const cx = TABLE_W * 0.63;
-  const cy = TABLE_H / 2;
-
-  const dx = BALL_R * 2 * 0.87;
-  const dy = BALL_R * 2;
-
-  const rows = [
-    [1],
-    [2, 3],
-    [4, 8, 5],
-    [6, 7, 9, 10],
-    [11, 12, 13, 14, 15],
-  ];
-
   const balls = [];
 
-  rows.forEach((row, r) => {
-    row.forEach((num, c) => {
+  let id = 1;
+
+  const startX = 0.9;
+  const startZ = 0;
+
+  for (let row = 0; row < 5; row++) {
+    for (let i = 0; i <= row; i++) {
       balls.push({
-        x: cx + r * dx,
-        y:
-          cy -
-          ((row.length - 1) * dy) / 2 +
-          c * dy,
-        num,
+        num: id++,
+        x: startX + row * 0.18,
+        z: i * 0.18 - row * 0.09,
       });
-    });
-  });
+    }
+  }
 
   return balls;
 }

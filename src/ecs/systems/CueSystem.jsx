@@ -1,105 +1,69 @@
-import { useThree, useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
+// src/ecs/systems/CueSystem.jsx
 
-const plane = new THREE.Plane(
-  new THREE.Vector3(0, 1, 0),
-  0
-);
+import { useEffect } from "react";
+import { BALL_R } from "../constants/table.js";
 
-const hit = new THREE.Vector3();
+const MAX_POWER = 800;
 
 export default function CueSystem({
   cueBall,
   aimRef,
 }) {
-  const { raycaster, pointer, camera } =
-    useThree();
 
-  const dragging = useRef(false);
+   useEffect(() => {
+    let charging = false;
+    let chargeStart = 0;
 
-  useFrame(() => {
-    if (!cueBall) return;
+    function down() {
+      if (Math.abs(cueBall.vx) > 0.05 ||
+          Math.abs(cueBall.vy) > 0.05)
+        return;
 
-    raycaster.setFromCamera(
-      pointer,
-      camera
-    );
+      charging = true;
+      chargeStart = performance.now();
 
-    raycaster.ray.intersectPlane(
-      plane,
-      hit
-    );
+      aimRef.current.swing = 1; // backswing
+    }
 
-    const ballX =
-      (cueBall.x - 340) / 100;
+    function up() {
+      if (!charging) return;
+      charging = false;
 
-    const ballZ =
-      (cueBall.y - 170) / 100;
+      const power = aimRef.current.power;
 
-    const dx = ballX - hit.x;
-    const dz = ballZ - hit.z;
-
-    const len =
-      Math.hypot(dx, dz) || 1;
-
-    aimRef.current = {
-      x: dx / len,
-      y: dz / len,
-      distance: Math.min(
-        Math.hypot(dx, dz),
-        2
-      ),
-    };
-  });
-
-  useEffect(() => {
-    const down = () => {
-      dragging.current = true;
-    };
-
-    const up = () => {
-      if (!dragging.current) return;
-
-      dragging.current = false;
-
-      const aim =
-        aimRef.current;
-
-      const power =
-        aim.distance * 10;
-
-      cueBall.vx =
-        aim.x * power;
-
-      cueBall.vy =
-        aim.y * power;
+      aimRef.current.swing = 2; // strike animation
+      aimRef.current.swingT = 0;
 
       cueBall.sleeping = false;
-    };
 
-    window.addEventListener(
-      "pointerdown",
-      down
-    );
+      cueBall.vx =
+        Math.cos(aimRef.current.angle) * power;
 
-    window.addEventListener(
-      "pointerup",
-      up
-    );
+      cueBall.vy =
+        Math.sin(aimRef.current.angle) * power;
+
+      aimRef.current.power = 0;
+    }
+
+    window.addEventListener("mousedown", down);
+    window.addEventListener("mouseup", up);
+
+    const interval = setInterval(() => {
+      if (!charging) return;
+
+      const held =
+        (performance.now() - chargeStart) / 1000;
+
+      aimRef.current.power =
+        Math.min(MAX_POWER, held * 400);
+    }, 16);
 
     return () => {
-      window.removeEventListener(
-        "pointerdown",
-        down
-      );
-
-      window.removeEventListener(
-        "pointerup",
-        up
-      );
+      clearInterval(interval);
+      window.removeEventListener("mousedown", down);
+      window.removeEventListener("mouseup", up);
     };
-  }, [cueBall]);
+  }, [cueBall, aimRef]);
 
   return null;
 }

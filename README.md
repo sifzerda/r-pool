@@ -116,3 +116,17 @@ Weapons	Modular     firing logic
 - [ ] possibly add zustand or jotai
 
 - [ ] create modular layout/s
+
+- [ ] add cue stick and shooting logic
+- refine ball/shooting physics
+- [ ] add pockets
+
+- [ ] separate balls into stripes and solids
+
+- [ ] add ui: balls left, score
+
+
+LATER: 
+
+- [ ] table texture, ball textures/mesh, stick, etc
+- [ ] add screens: start, pause, highscores, settings, win, lose

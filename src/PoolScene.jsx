@@ -1,25 +1,52 @@
 // src/PoolScene.jsx
 
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 import { world, balls } from "./ecs/world";
 
 import PoolTable from "./renderers/PoolTable";
 import PoolBalls from "./renderers/PoolBalls";
-//import CueStick from "./renderers/CueStick";
+import CueStick from "./renderers/CueStick";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
 import { collisionSystem } from "./ecs/systems/collisionSystem";
 import CueSystem from "./ecs/systems/CueSystem";
 
-export default function PoolScene({cueBall, mouse}) {
-  const aimRef = useRef({x: 0, y: 0, distance: 0});
-  const FIXED_DT = 1 / 120;
+import {
+  toRenderX,
+  toRenderZ,
+} from "./ecs/utils/coords";
+
+export default function PoolScene({ cueBall }) {
+const aimRef = useRef({
+  angle: 0,
+  power: 0,
+
+  swing: 0,        // 0 = idle, 1 = pulled back, 2 = striking
+  swingT: 0,       // animation timer
+});
+
   const accumulatorRef = useRef(0);
 
-  useFrame((_, delta) => { accumulatorRef.current += delta;
+  const raycaster = useRef(new THREE.Raycaster());
+  const point = useRef(new THREE.Vector3());
+
+  const plane = useRef(
+    new THREE.Plane(
+      new THREE.Vector3(0, 1, 0),
+      0
+    )
+  );
+
+  const FIXED_DT = 1 / 120;
+
+  const { camera } = useThree();
+
+  useFrame((state, delta) => {
+    accumulatorRef.current += delta;
 
     while (accumulatorRef.current >= FIXED_DT) {
       physicsSystem(world, FIXED_DT);
@@ -28,6 +55,34 @@ export default function PoolScene({cueBall, mouse}) {
 
       accumulatorRef.current -= FIXED_DT;
     }
+
+    raycaster.current.setFromCamera(
+      state.pointer,
+      camera
+    );
+
+    const hit =
+      raycaster.current.ray.intersectPlane(
+        plane.current,
+        point.current
+      );
+
+    if (!hit) return;
+
+    const cueX =
+      toRenderX(cueBall.x);
+
+    const cueZ =
+      toRenderZ(cueBall.y);
+
+    const dx =
+      point.current.x - cueX;
+
+    const dz =
+      point.current.z - cueZ;
+
+    aimRef.current.angle =
+      Math.atan2(dz, dx);
   });
 
   return (
@@ -38,20 +93,33 @@ export default function PoolScene({cueBall, mouse}) {
         castShadow
         intensity={2}
         position={[3, 8, 3]}
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
       />
 
       <PoolTable />
 
       <PoolBalls balls={[...balls]} />
 
-      {/*     {cueBall && (
-        <>
-            <CueStick cueBall={cueBall} mouse={mouse} />  
-       <CueSystem cueBall={cueBall} aimRef={aimRef} /> 
-        </>  
-      )}     */} 
+      <CueStick
+        cueBall={cueBall}
+        aimRef={aimRef}
+      />
+
+      <CueSystem
+        cueBall={cueBall}
+        aimRef={aimRef}
+      />
+
+      {/* debug marker */}
+      <mesh
+        position={[
+          toRenderX(cueBall.x),
+          0.2,
+          toRenderZ(cueBall.y),
+        ]}
+      >
+        <sphereGeometry args={[0.05]} />
+        <meshBasicMaterial color="red" />
+      </mesh>
     </>
   );
 }
