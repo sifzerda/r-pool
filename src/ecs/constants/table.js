@@ -15,7 +15,7 @@ export const PLAY_W = TABLE_W - CUSHION * 2;
 export const PLAY_H = TABLE_H - CUSHION * 2;
 
 export const BALL_R = 0.1;
-export const BALL_Y = 0.12; // visual height above table
+export const BALL_Y = 0.35; // visual height above table
 
 export const POCKET_R = 0.14; // 14 cm
 

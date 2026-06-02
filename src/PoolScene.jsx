@@ -18,12 +18,12 @@ import CueSystem from "./ecs/systems/CueSystem";
 import { toRenderX, toRenderZ } from "./ecs/utils/coords";
 
 export default function PoolScene({ cueBall }) {
-const aimRef = useRef({
-  angle: 0,
-  power: 0,
-  swing: 0,        // 0 = idle, 1 = pulled back, 2 = striking
-  swingT: 0,       // animation timer
-});
+  const aimRef = useRef({
+    angle: 0,
+    power: 0,
+    swing: 0,        // 0 = idle, 1 = pulled back, 2 = striking
+    swingT: 0,       // animation timer
+  });
 
   const accumulatorRef = useRef(0);
 
@@ -44,13 +44,13 @@ const aimRef = useRef({
   useFrame((state, delta) => {
 
 
-console.log(
-  "cue",
-  cueBall.x,
-  cueBall.z,
-  cueBall.vx,
-  cueBall.vz
-);
+    console.log(
+      "cue",
+      cueBall.x,
+      cueBall.z,
+      cueBall.vx,
+      cueBall.vz
+    );
 
     accumulatorRef.current += delta;
 
@@ -76,7 +76,7 @@ console.log(
     if (!hit) return;
 
 
-console.log("cueBall", cueBall);
+    console.log("cueBall", cueBall);
 
     const cueX =
       toRenderX(cueBall.x);
@@ -90,21 +90,20 @@ console.log("cueBall", cueBall);
     const dz =
       point.current.z - cueZ;
 
-      if (
-  Number.isNaN(dx) ||
-  Number.isNaN(dz)
-) {
-  console.log({
-    cueX,
-    cueZ,
-    pointX: point.current.x,
-    pointZ: point.current.z,
-    cueBall,
-  });
-}
+    if (
+      Number.isNaN(dx) ||
+      Number.isNaN(dz)
+    ) {
+      console.log({
+        cueX,
+        cueZ,
+        pointX: point.current.x,
+        pointZ: point.current.z,
+        cueBall,
+      });
+    }
 
-    aimRef.current.angle =
-      Math.atan2(dz, dx);
+   aimRef.current.angle = Math.atan2(dz, dx);
   });
 
   return (
@@ -132,13 +131,13 @@ console.log("cueBall", cueBall);
       />
 
       {/* debug marker */}
-<mesh
-  position={[
-    toRenderX(cueBall.x),
-    0.2,
-    toRenderZ(cueBall.z),
-  ]}
->
+      <mesh
+        position={[
+          toRenderX(cueBall.x),
+          0.2,
+          toRenderZ(cueBall.z),
+        ]}
+      >
         <sphereGeometry args={[0.05]} />
         <meshBasicMaterial color="red" />
       </mesh>
