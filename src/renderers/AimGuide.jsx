@@ -1,7 +1,8 @@
 // src/renderers/AimGuide.jsx
 
-import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 export default function AimGuide({
   cueBall,
@@ -11,30 +12,28 @@ export default function AimGuide({
 
   useFrame(() => {
     if (!ref.current) return;
-    
 
     const angle =
-      aimRef.current.angle;
-
-      const dirX =
-  Math.cos(angle);
-
-const dirZ =
-  Math.sin(angle);
+      aimRef.current.angle || 0;
 
     const length = 8;
 
-ref.current.position.set(
-  cueBall.x + dirX * 4,
-  0.34,
-  cueBall.z + dirZ * 4
-);
+    ref.current.position.set(
+      cueBall.x +
+        Math.cos(angle) *
+        length *
+        0.5,
 
-    ref.current.rotation.set(
-      0,
-      -angle,
-      0
+      0.34,
+
+      cueBall.z +
+        Math.sin(angle) *
+        length *
+        0.5
     );
+
+    ref.current.rotation.y =
+      -angle;
   });
 
   const moving =
@@ -43,21 +42,22 @@ ref.current.position.set(
       cueBall.vz
     ) > 0.05;
 
-  if (moving) return null;
+  if (moving)
+    return null;
 
   return (
     <mesh ref={ref}>
       <boxGeometry
         args={[
           8,
-          0.005,
-          0.005,
+          0.01,
+          0.01
         ]}
       />
 
       <meshBasicMaterial
         transparent
-        opacity={0.5}
+        opacity={0.4}
       />
     </mesh>
   );
