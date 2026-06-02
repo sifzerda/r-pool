@@ -32,8 +32,6 @@ export default function HomePage() {
            <PoolGame />         
         </div>
 
-        {/* Right Side Neon 8 Ball */}
-
       </section>
     </main>
   );

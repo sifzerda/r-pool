@@ -13,7 +13,7 @@ export default function PoolGame() {
   }, []);
 
   return (
-    <Canvas shadows>
+<Canvas shadows style={{ width: '100%', height: '500px', display: 'block' }}>
       <OrthographicCamera
         makeDefault
         position={[0, 10, 0]}
