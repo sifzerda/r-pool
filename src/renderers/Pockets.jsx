@@ -9,10 +9,9 @@ export default function Pockets() {
         <mesh
           key={i}
           position={[p.x, 0.21, p.z]}
-          rotation={[-Math.PI / 1, 0, 0]}
-        >
+          rotation={[-Math.PI / 1, 0, 0]}>
           <cylinderGeometry args={[0.22, 0.22, 0.18, 32]} />
-          <meshStandardMaterial color="black" />
+          <meshStandardMaterial color="#050505" roughness={1} metalness={0} />
         </mesh>
       ))}
     </>

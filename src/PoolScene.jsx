@@ -90,7 +90,7 @@ export default function PoolScene({ cueBall }) {
 
       <Pockets />
 
-      <PoolBalls balls={[...ballQuery]} />
+      <PoolBalls balls={ballQuery.entities} />
 
       <AimGuide
         cueBall={cueBall}

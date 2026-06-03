@@ -4,7 +4,7 @@ export default function PoolTable() {
   return (
     <group>
 
-      <mesh receiveShadow>
+      <mesh receiveShadow frustumCulled>
         <boxGeometry args={[6.8, 0.4, 3.4]} />
         <meshStandardMaterial
           color="#15603a"

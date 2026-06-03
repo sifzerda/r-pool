@@ -4,47 +4,45 @@ import { ballQuery } from "../world";
 import { POCKETS } from "../constants/pockets";
 import { POCKET_R } from "../constants/table";
 
+const POCKET_R_SQ = POCKET_R * POCKET_R;
+
 export function pocketSystem() {
-  for (const ball of ballQuery) {
+    for (const ball of ballQuery) {
 
-    if (ball.pocketed)
-      continue;
+        if (ball.pocketed)
+            continue;
 
-    for (const pocket of POCKETS) {
+        for (const pocket of POCKETS) {
 
-      const dx = ball.x - pocket.x;
-      const dz = ball.z - pocket.z;
+            const dx = ball.x - pocket.x;
+            const dz = ball.z - pocket.z;
 
-      const dist =
-        Math.sqrt(
-          dx * dx +
-          dz * dz
-        );
+            const distSq = dx * dx + dz * dz;
 
-      if (dist < POCKET_R) {
+            if (distSq < POCKET_R_SQ) {
 
-        if (ball.cueBall) {
+                if (ball.cueBall) {
 
-          ball.x = 0;
-          ball.z = 0;
+                    ball.x = 0;
+                    ball.z = 0;
 
-          ball.vx = 0;
-          ball.vz = 0;
+                    ball.vx = 0;
+                    ball.vz = 0;
 
-          ball.sleeping = true;
+                    ball.sleeping = true;
 
-        } else {
+                } else {
 
-          ball.pocketed = true;
+                    ball.pocketed = true;
 
-          ball.vx = 0;
-          ball.vz = 0;
+                    ball.vx = 0;
+                    ball.vz = 0;
 
-          ball.sleeping = true;
+                    ball.sleeping = true;
+                }
+
+                break;
+            }
         }
-
-        break;
-      }
     }
-  }
 }
