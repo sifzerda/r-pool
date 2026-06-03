@@ -25,9 +25,13 @@ useEffect(() => {
 
   });
 
-  meshRef.current.instanceColor.needsUpdate = true;
+  if (meshRef.current.instanceColor) {
 
-}, []);
+    meshRef.current.instanceColor.needsUpdate = true;
+
+  }
+
+}, [balls]);
 
   useFrame(() => {
 
@@ -46,15 +50,11 @@ useEffect(() => {
       );
 
       dummy.updateMatrix();
+      ball.dirty = false;
 
       meshRef.current.setMatrixAt(
         count,
         dummy.matrix
-      );
-
-      meshRef.current.setColorAt(
-        count,
-        ball.renderColor
       );
 
       count++;

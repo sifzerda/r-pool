@@ -120,12 +120,17 @@ Renderers	        Visuals only
 - refine ball/shooting physics
 - [x] add pockets
 
-- [ ] separate balls into stripes and solids
+- [x] separate balls into stripes and solids
 - [ ] add ui: balls left, score
 - [ ] re-size, re-align rails in PoolTable.jsx
 - [ ] optimize performance and rendering aim line
 
+- [ ] number balls, track ball numbers when pocketed
+
+- [ ] optimize performance of collisionsystem() with a spatialGrid
+
 LATER: 
 
 - [ ] table texture, ball textures/mesh, stick, etc
+- 
 - [ ] add screens: start, pause, highscores, settings, win, lose

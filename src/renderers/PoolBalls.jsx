@@ -5,27 +5,37 @@ import { useFrame } from "@react-three/fiber";
 import { Color, Object3D, InstancedBufferAttribute } from "three";
 import { BALL_R } from "../ecs/constants/table";
 
+import * as THREE from "three";
+
 const dummy = new Object3D();
+
+const solidMaterial =
+  new THREE.MeshPhysicalMaterial({
+    roughness: 0.08,
+    clearcoat: 1,
+    clearcoatRoughness: 0,
+    metalness: 0
+  });
 
 export default function PoolBalls({ balls }) {
   const meshRef = useRef();
 
-useEffect(() => {
+  useEffect(() => {
 
-  if (!meshRef.current) return;
+    if (!meshRef.current) return;
 
-  balls.forEach((ball, i) => {
+    balls.forEach((ball, i) => {
 
-    meshRef.current.setColorAt(
-      i,
-      ball.renderColor
-    );
+      meshRef.current.setColorAt(
+        i,
+        ball.renderColor
+      );
 
-  });
+    });
 
-  meshRef.current.instanceColor.needsUpdate = true;
+    meshRef.current.instanceColor.needsUpdate = true;
 
-}, []);
+  }, []);
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -38,11 +48,12 @@ useEffect(() => {
 
       dummy.position.set(ball.x, 0.3, ball.z); // pockets height on table felt
       dummy.updateMatrix();
+      ball.dirty = false;
       meshRef.current.setMatrixAt(i, dummy.matrix);
 
-if (!ball.renderColor) {
-  console.log("Missing renderColor", ball);
-}
+      if (!ball.renderColor) {
+        console.log("Missing renderColor", ball);
+      }
 
       meshRef.current.setColorAt(i, ball.renderColor);
 
@@ -58,13 +69,13 @@ if (!ball.renderColor) {
   });
 
   return (
-    <instancedMesh 
-    ref={meshRef} 
-    args={[null, null, balls.length]} 
-    castShadow 
-    receiveShadow>
+    <instancedMesh
+      ref={meshRef}
+      args={[null, null, balls.length]}
+      castShadow
+      receiveShadow>
       <sphereGeometry args={[BALL_R, 12, 12]} /> { /* can make these 24 for bigger balls */}
-      <meshPhysicalMaterial roughness={0.08} clearcoat={1} clearcoatRoughness={0} metalness={0} />
+      <primitive object={solidMaterial} />
     </instancedMesh>
   );
 }

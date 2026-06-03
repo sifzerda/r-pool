@@ -18,3 +18,18 @@ export const stripeBallQuery = world
 export const eightBallQuery = world
   .with("ball")
   .where(ball => ball.type === "eight");
+
+  // helper for calculating aim line while balls moving (so not continously updating)
+  export function ballsAreMoving() {
+  for (const ball of ballQuery.entities) {
+    if (
+      !ball.pocketed &&
+      !ball.sleeping
+    ) {
+      return true;
+    }
+
+  }
+
+  return false;
+}

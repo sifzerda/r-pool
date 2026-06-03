@@ -12,6 +12,7 @@ export function setupGame() {
   const cueBall = world.add({
     ball: true,
     cueBall: true,
+    dirty: true,
 
     color: "#ffffff",
     renderColor: new Color("#ffffff"),
@@ -39,6 +40,7 @@ export function setupGame() {
   buildRack().forEach(ball => {
     world.add({
       ball: true,
+      dirty: true,
       ...ball,
 
       renderColor: new Color(ball.color),

@@ -13,6 +13,8 @@ export function physicsSystem(world, dt) {
     ball.x += ball.vx * dt;
     ball.z += ball.vz * dt;
 
+    ball.dirty = true;
+
     ball.vx += ball.sideSpin * dt;
     ball.sideSpin *= 0.99;
 
@@ -23,9 +25,7 @@ export function physicsSystem(world, dt) {
     const top = -PLAY_Z;
     const bottom = PLAY_Z;
 
-    const leftPocketOpening =
-      Math.abs(ball.z + PLAY_Z) < 0.25 ||
-      Math.abs(ball.z - PLAY_Z) < 0.25;
+    const leftPocketOpening = Math.abs(ball.z + PLAY_Z) < 0.25 || Math.abs(ball.z - PLAY_Z) < 0.25;
 
     if (
       ball.x - r < left &&
@@ -36,17 +36,9 @@ export function physicsSystem(world, dt) {
       const nx = 1;
       const nz = 0;
 
-      const dot =
-        ball.vx * nx +
-        ball.vz * nz;
-
-      ball.vx =
-        ball.vx -
-        2 * dot * nx;
-
-      ball.vz =
-        ball.vz -
-        2 * dot * nz;
+      const dot = ball.vx * nx + ball.vz * nz;
+      ball.vx = ball.vx - 2 * dot * nx;
+      ball.vz = ball.vz - 2 * dot * nz;
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
@@ -65,26 +57,15 @@ export function physicsSystem(world, dt) {
       const nx = -1;
       const nz = 0;
 
-      const dot =
-        ball.vx * nx +
-        ball.vz * nz;
-
-      ball.vx =
-        ball.vx -
-        2 * dot * nx;
-
-      ball.vz =
-        ball.vz -
-        2 * dot * nz;
+      const dot = ball.vx * nx + ball.vz * nz;
+      ball.vx = ball.vx - 2 * dot * nx;
+      ball.vz = ball.vz - 2 * dot * nz;
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
     }
 
-    const topPocketOpening =
-      Math.abs(ball.x + PLAY_X) < 0.25 ||
-      Math.abs(ball.x) < 0.25 ||
-      Math.abs(ball.x - PLAY_X) < 0.25;
+    const topPocketOpening = Math.abs(ball.x + PLAY_X) < 0.25 || Math.abs(ball.x) < 0.25 || Math.abs(ball.x - PLAY_X) < 0.25;
 
     if (
       ball.z - r < top &&
@@ -95,26 +76,15 @@ export function physicsSystem(world, dt) {
       const nx = 0;
       const nz = 1;
 
-      const dot =
-        ball.vx * nx +
-        ball.vz * nz;
-
-      ball.vx =
-        ball.vx -
-        2 * dot * nx;
-
-      ball.vz =
-        ball.vz -
-        2 * dot * nz;
+      const dot = ball.vx * nx + ball.vz * nz;
+      ball.vx = ball.vx - 2 * dot * nx;
+      ball.vz = ball.vz - 2 * dot * nz;
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
     }
 
-    const bottomPocketOpening =
-      Math.abs(ball.x + PLAY_X) < 0.25 ||
-      Math.abs(ball.x) < 0.25 ||
-      Math.abs(ball.x - PLAY_X) < 0.25;
+    const bottomPocketOpening = Math.abs(ball.x + PLAY_X) < 0.25 || Math.abs(ball.x) < 0.25 || Math.abs(ball.x - PLAY_X) < 0.25;
 
     if (
       ball.z + r > bottom &&
@@ -125,17 +95,9 @@ export function physicsSystem(world, dt) {
       const nx = 0;
       const nz = -1;
 
-      const dot =
-        ball.vx * nx +
-        ball.vz * nz;
-
-      ball.vx =
-        ball.vx -
-        2 * dot * nx;
-
-      ball.vz =
-        ball.vz -
-        2 * dot * nz;
+      const dot = ball.vx * nx + ball.vz * nz;
+      ball.vx = ball.vx - 2 * dot * nx;
+      ball.vz = ball.vz - 2 * dot * nz;
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;

@@ -14,18 +14,25 @@ export default function PoolStripes({ balls }) {
   const stripeMeshRef = useRef();
 
   useEffect(() => {
-
-  if (!stripeMeshRef.current) return;
-
-  stripeMeshRef.current.instanceColor =
-    new InstancedBufferAttribute(
-      new Float32Array(
-        balls.length * 3
-      ),
-      3
-    );
-
-}, [balls.length]);
+  
+    if (!stripeMeshRef.current) return;
+  
+    balls.forEach((ball, i) => {
+  
+      stripeMeshRef.current.setColorAt(
+        i,
+        ball.renderColor
+      );
+  
+    });
+  
+    if (stripeMeshRef.current.instanceColor) {
+  
+      stripeMeshRef.current.instanceColor.needsUpdate = true;
+  
+    }
+  
+  }, [balls]);
 
   useFrame(() => {
 
@@ -41,13 +48,8 @@ export default function PoolStripes({ balls }) {
         ball.z
       );
 
-      dummy.rotation.set(
-  Math.PI / 2,
-  0,
-  0
-);
-
       dummy.updateMatrix();
+      ball.dirty = false;
 
       whiteMeshRef.current.setMatrixAt(
         count,
@@ -57,11 +59,6 @@ export default function PoolStripes({ balls }) {
       stripeMeshRef.current.setMatrixAt(
         count,
         dummy.matrix
-      );
-
-      stripeMeshRef.current.setColorAt(
-        count,
-        ball.renderColor
       );
 
       count++;

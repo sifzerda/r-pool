@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-import { ballQuery } from "../ecs/world";
+import { ballQuery, ballsAreMoving } from "../ecs/world";
 import { BALL_R } from "../ecs/constants/table";
 
 const GUIDE_Y = 0.45;
@@ -23,21 +23,53 @@ function GuideLine({ color, lineRef }) {
   );
 }
 
-function setLinePoints(geoRef, p1, p2) {
+function setLinePoints(
+  geoRef,
+  p1,
+  p2
+) {
+
   const geo = geoRef.current;
+
   if (!geo) return;
-  const positions = new Float32Array([
-    p1[0], p1[1], p1[2],
-    p2[0], p2[1], p2[2],
-  ]);
-  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  geo.computeBoundingSphere();
+
+  let positions =
+    geo.attributes.position?.array;
+
+  if (!positions) {
+
+    positions = new Float32Array(6);
+
+    geo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(
+        positions,
+        3
+      )
+    );
+  }
+
+  positions[0] = p1[0];
+  positions[1] = p1[1];
+  positions[2] = p1[2];
+
+  positions[3] = p2[0];
+  positions[4] = p2[1];
+  positions[5] = p2[2];
+
+  geo.attributes.position.needsUpdate = true;
 }
 
 function clearLine(geoRef) {
+
   const geo = geoRef.current;
+
   if (!geo) return;
-  geo.deleteAttribute("position");
+
+  geo.setDrawRange(
+    0,
+    0
+  );
 }
 
 export default function AimGuide({ cueBall, aimRef }) {
@@ -46,18 +78,12 @@ export default function AimGuide({ cueBall, aimRef }) {
   const deflectGeoRef = useRef();
 
   useFrame(() => {
-    let moving = false;
-    for (const ball of ballQuery) {
-      if (Math.abs(ball.vx) > 0.01 || Math.abs(ball.vz) > 0.01) {
-        moving = true;
-        break;
-      }
-    }
+    if (ballsAreMoving()) {
 
-    if (moving) {
       clearLine(cueGeoRef);
       clearLine(objectGeoRef);
       clearLine(deflectGeoRef);
+
       return;
     }
 
@@ -89,10 +115,12 @@ export default function AimGuide({ cueBall, aimRef }) {
     if (!nearestBall) {
       setLinePoints(cueGeoRef,
         [cueBall.x, GUIDE_Y, cueBall.z],
-        [cueBall.x + dirX * 5, GUIDE_Y, cueBall.z + dirZ * 5]
+        [cueBall.x + dirX * 5, GUIDE_Y, cueBall.z + dirZ * 5],
       );
       clearLine(objectGeoRef);
       clearLine(deflectGeoRef);
+
+      geo.setDrawRange(0, 2);
       return;
     }
 

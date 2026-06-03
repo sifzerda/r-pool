@@ -14,14 +14,13 @@ export default function PoolGame() {
 
   return (
 
-    <div style={{ width: '100%', height: '500px', position: 'relative' }}>
+    <div style={{ 
+      width: '100%', 
+      height: '500px', 
+      position: 'relative' 
+      }}>
 
-      <Canvas
-        shadows={{
-          enabled: true
-        }}
-        dpr={[1, 1.5]}
-      >
+      <Canvas shadows={{enabled: true}} dpr={[1, 1.5]}>
         <OrthographicCamera
           makeDefault
           position={[0, 10, 0]}
