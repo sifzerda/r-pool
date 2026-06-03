@@ -42,24 +42,13 @@ export default function PoolStripes({ balls }) {
 
       if (ball.pocketed) continue;
 
-      dummy.position.set(
-        ball.x,
-        0.3,
-        ball.z
-      );
+      dummy.position.set(ball.x, 0.3, ball.z);
 
       dummy.updateMatrix();
       //ball.dirty = false;
 
-      whiteMeshRef.current.setMatrixAt(
-        count,
-        dummy.matrix
-      );
-
-      stripeMeshRef.current.setMatrixAt(
-        count,
-        dummy.matrix
-      );
+      whiteMeshRef.current.setMatrixAt(count, dummy.matrix);
+      stripeMeshRef.current.setMatrixAt(count, dummy.matrix);
 
       count++;
     }
