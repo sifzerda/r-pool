@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+import { Line } from "@react-three/drei";
+
 import { world, ballQuery } from "./ecs/world";
 
 import PoolTable from "./renderers/PoolTable";
@@ -29,13 +31,12 @@ export default function PoolScene({ cueBall }) {
   });
 
   const accumulatorRef = useRef(0);
-
   const raycaster = useRef(new THREE.Raycaster());
   const point = useRef(new THREE.Vector3());
   const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
 
-  const FIXED_DT = 1 / 240;
-  const SUBSTEPS = 4;
+  const FIXED_DT = 1 / 120;
+  const SUBSTEPS = 2;
 
   const { camera } = useThree();
 
@@ -102,6 +103,8 @@ export default function PoolScene({ cueBall }) {
         cueBall={cueBall}
         aimRef={aimRef}
       />
+
+      
 
       <CueStick cueBall={cueBall} aimRef={aimRef} />
       <CueSystem cueBall={cueBall} aimRef={aimRef} />

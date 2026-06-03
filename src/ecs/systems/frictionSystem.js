@@ -8,26 +8,14 @@ export function frictionSystem(_, dt) {
 
   for (const ball of ballQuery) {
 
-    if (ball.sleeping)
-      continue;
+    if (ball.sleeping) continue;
 
-    const speed =
-      Math.hypot(
-        ball.vx,
-        ball.vz
-      );
+    const speed = Math.hypot(ball.vx, ball.vz);
 
-    if (speed === 0)
-      continue;
+    if (speed === 0) continue;
 
-    const decel =
-      ROLLING_RESISTANCE * dt;
-
-    const newSpeed =
-      Math.max(
-        0,
-        speed - decel
-      );
+    const decel = ROLLING_RESISTANCE * dt;
+    const newSpeed = Math.max(0, speed - decel);
 
     if (newSpeed === 0) {
 
@@ -38,8 +26,7 @@ export function frictionSystem(_, dt) {
       continue;
     }
 
-    const scale =
-      newSpeed / speed;
+    const scale = newSpeed / speed;
 
     ball.vx *= scale;
     ball.vz *= scale;

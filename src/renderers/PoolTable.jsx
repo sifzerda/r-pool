@@ -7,7 +7,6 @@ export default function PoolTable() {
 
   const railHeight = 0.28;
   const railY = 0.34;
-
   const pocketRadius = 0.24;
 
   return (
@@ -69,41 +68,17 @@ export default function PoolTable() {
         [PLAY_X, PLAY_Z],
       ].map(([x, z], i) => (
         <mesh key={i} position={[x, 0.12, z]} receiveShadow>
-          <cylinderGeometry
-            args={[
-              pocketRadius, pocketRadius,
-              0.2,
-              24
-            ]}
-          />
-          <meshStandardMaterial
-            color="#050505" roughness={1} metalness={0}
-          />
+          <cylinderGeometry args={[pocketRadius, pocketRadius, 0.2, 24]} />
+          <meshStandardMaterial color="#050505" roughness={1} metalness={0} />
         </mesh>
       ))}
 
       {/* cushion diamonds */}
-      {[
-        -2,
-        -1,
-        1,
-        2
-      ].map((n, i) => (
-        <mesh
-          key={`diamond-${i}`}
-          position={[
-            n * 0.9,
-            0.48,
-            -1.68
-          ]}
-          rotation={[0, Math.PI / 4, 0]}
-        >
-          <boxGeometry
-            args={[0.05, 0.02, 0.05]}
-          />
-          <meshStandardMaterial
-            color="#f0d080"
-          />
+      {[-2, -1, 1, 2].map((n, i) => (
+        <mesh key={`diamond-${i}`} position={[n * 0.9, 0.48, -1.68]}
+          rotation={[0, Math.PI / 4, 0]}>
+          <boxGeometry args={[0.05, 0.02, 0.05]} />
+          <meshStandardMaterial color="#f0d080" />
         </mesh>
       ))}
 

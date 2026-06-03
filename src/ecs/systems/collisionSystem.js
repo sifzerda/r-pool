@@ -5,7 +5,14 @@ import { resolveCollision } from "../utils/collision";
 import { ballQuery } from "../world";
 
 export function collisionSystem() {
-  const balls = [...ballQuery].filter(b => !b.pocketed);
+  const balls = [];
+
+  for (const ball of ballQuery) {
+
+    if (!ball.pocketed)
+      balls.push(ball);
+
+  }
 
   for (let i = 0; i < balls.length; i++) {
     const a = balls[i];
