@@ -117,9 +117,9 @@ Weapons	Modular     firing logic
 
 - [ ] create modular layout/s
 
-- [ ] add cue stick and shooting logic
+- [x] add cue stick and shooting logic
 - refine ball/shooting physics
-- [ ] add pockets
+- [x] add pockets
 
 - [ ] separate balls into stripes and solids
 
@@ -127,6 +127,7 @@ Weapons	Modular     firing logic
 
 - [ ] re-size, re-align rails in PoolTable.jsx
 
+- [ ] optimize performance and rendering aim line
 
 LATER: 
 
