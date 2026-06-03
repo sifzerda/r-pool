@@ -49,7 +49,7 @@ export default function PoolStripes({ balls }) {
       );
 
       dummy.updateMatrix();
-      ball.dirty = false;
+      //ball.dirty = false;
 
       whiteMeshRef.current.setMatrixAt(
         count,

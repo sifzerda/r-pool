@@ -13,7 +13,7 @@ export function physicsSystem(world, dt) {
     ball.x += ball.vx * dt;
     ball.z += ball.vz * dt;
 
-    ball.dirty = true;
+    //ball.dirty = true;
 
     ball.vx += ball.sideSpin * dt;
     ball.sideSpin *= 0.99;

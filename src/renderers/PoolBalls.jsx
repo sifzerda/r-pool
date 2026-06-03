@@ -48,7 +48,7 @@ export default function PoolBalls({ balls }) {
 
       dummy.position.set(ball.x, 0.3, ball.z); // pockets height on table felt
       dummy.updateMatrix();
-      ball.dirty = false;
+      //ball.dirty = false;
       meshRef.current.setMatrixAt(i, dummy.matrix);
 
       if (!ball.renderColor) {

@@ -50,7 +50,7 @@ useEffect(() => {
       );
 
       dummy.updateMatrix();
-      ball.dirty = false;
+      //ball.dirty = false;
 
       meshRef.current.setMatrixAt(
         count,

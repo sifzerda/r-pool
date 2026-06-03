@@ -29,7 +29,7 @@ export default function PoolEightBall({ balls }) {
       );
 
       dummy.updateMatrix();
-      ball.dirty = false;
+      //ball.dirty = false;
 
       meshRef.current.setMatrixAt(
         count,
