@@ -19,10 +19,7 @@ export default function PoolStripes({ balls }) {
   
     balls.forEach((ball, i) => {
   
-      stripeMeshRef.current.setColorAt(
-        i,
-        ball.renderColor
-      );
+      stripeMeshRef.current.setColorAt(i, ball.renderColor);
   
     });
   
@@ -68,46 +65,21 @@ export default function PoolStripes({ balls }) {
 
       {/* White base ball */}
 
-      <instancedMesh
-        ref={whiteMeshRef}
-        args={[null, null, balls.length]}
-        castShadow
-      >
+      <instancedMesh ref={whiteMeshRef} args={[null, null, balls.length]} castShadow>
 
-        <sphereGeometry
-          args={[BALL_R, 12, 12]}
-        />
+        <sphereGeometry args={[BALL_R, 12, 12]} />
 
-        <meshPhysicalMaterial
-          color="white"
-          roughness={0.08}
-          clearcoat={1}
-        />
+        <meshPhysicalMaterial color="white" roughness={0.08} clearcoat={1} />
 
       </instancedMesh>
 
       {/* Stripe */}
 
-      <instancedMesh
-        ref={stripeMeshRef}
-        args={[null, null, balls.length]}
-      >
+      <instancedMesh ref={stripeMeshRef} args={[null, null, balls.length]}>
 
-        <cylinderGeometry
-          args={[
-            BALL_R * 1.02,
-            BALL_R * 1.02,
-            BALL_R * 0.9,
-            24,
-            1,
-            true
-          ]}
-        />
+        <cylinderGeometry args={[BALL_R * 1.02, BALL_R * 1.02, BALL_R * 0.9, 24, 1, true]} />
 
-        <meshPhysicalMaterial
-          roughness={0.08}
-          clearcoat={1}
-        />
+        <meshPhysicalMaterial roughness={0.08} clearcoat={1} />
 
       </instancedMesh>
 

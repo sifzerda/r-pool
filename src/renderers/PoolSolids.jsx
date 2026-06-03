@@ -18,10 +18,7 @@ useEffect(() => {
 
   balls.forEach((ball, i) => {
 
-    meshRef.current.setColorAt(
-      i,
-      ball.renderColor
-    );
+    meshRef.current.setColorAt(i, ball.renderColor);
 
   });
 
@@ -43,19 +40,12 @@ useEffect(() => {
 
       if (ball.pocketed) continue;
 
-      dummy.position.set(
-        ball.x,
-        0.3,
-        ball.z
-      );
+      dummy.position.set(ball.x, 0.3, ball.z);
 
       dummy.updateMatrix();
       //ball.dirty = false;
 
-      meshRef.current.setMatrixAt(
-        count,
-        dummy.matrix
-      );
+      meshRef.current.setMatrixAt(count, dummy.matrix);
 
       count++;
     }
