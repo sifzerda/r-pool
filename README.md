@@ -114,7 +114,6 @@ Weapons	Modular     firing logic
 - [ ] currently using miniplex ecs, lightweight but not three.js
 - [ ] expand ecs structure to something more elaborate, game engine, physics, 3d ball on 2D table, optimization
 - [ ] possibly add zustand or jotai
-
 - [ ] create modular layout/s
 
 - [x] add cue stick and shooting logic
@@ -122,11 +121,8 @@ Weapons	Modular     firing logic
 - [x] add pockets
 
 - [ ] separate balls into stripes and solids
-
 - [ ] add ui: balls left, score
-
 - [ ] re-size, re-align rails in PoolTable.jsx
-
 - [ ] optimize performance and rendering aim line
 
 LATER: 
