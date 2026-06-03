@@ -6,12 +6,21 @@ import * as THREE from "three";
 
 import { Line } from "@react-three/drei";
 
-import { world, ballQuery } from "./ecs/world";
+import {
+  world,
+  ballQuery,
+  cueBallQuery,
+  solidBallQuery,
+  stripeBallQuery,
+  eightBallQuery
+} from "./ecs/world";
 
 import PoolTable from "./renderers/PoolTable";
 import PoolBalls from "./renderers/PoolBalls";
 import CueStick from "./renderers/CueStick";
-//import Pockets from "./renderers/Pockets";
+import PoolSolids from "./renderers/PoolSolids";
+import PoolStripes from "./renderers/PoolStripes";
+import PoolEightBall from "./renderers/PoolEightBall";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
@@ -35,7 +44,7 @@ export default function PoolScene({ cueBall }) {
   const point = useRef(new THREE.Vector3());
   const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
 
-  const FIXED_DT = 1 / 120;
+  const FIXED_DT = 1 / 90;
   const SUBSTEPS = 2;
 
   const { camera } = useThree();
@@ -52,11 +61,8 @@ export default function PoolScene({ cueBall }) {
       for (let i = 0; i < SUBSTEPS; i++) {
 
         physicsSystem(world, subDt);
-
         collisionSystem(world);
-
         pocketSystem();
-
         frictionSystem(world, subDt);
       }
 
@@ -84,7 +90,8 @@ export default function PoolScene({ cueBall }) {
 
   return (
     <>
-      <ambientLight intensity={0.8} />
+      <ambientLight intensity={0.45} />
+
       <directionalLight
         castShadow
         intensity={2}
@@ -93,18 +100,30 @@ export default function PoolScene({ cueBall }) {
         shadow-mapSize-height={1024}
       />
 
+      <hemisphereLight intensity={0.4} />
+
       <PoolTable />
 
       {/* <Pockets /> */}
 
       <PoolBalls balls={ballQuery.entities} />
 
+      <PoolSolids
+        balls={solidBallQuery.entities}
+      />
+
+      <PoolStripes
+        balls={stripeBallQuery.entities}
+      />
+
+      <PoolEightBall
+        balls={eightBallQuery.entities}
+      />
+
       <AimGuide
         cueBall={cueBall}
         aimRef={aimRef}
       />
-
-      
 
       <CueStick cueBall={cueBall} aimRef={aimRef} />
       <CueSystem cueBall={cueBall} aimRef={aimRef} />

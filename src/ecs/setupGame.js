@@ -4,6 +4,7 @@
 import { world } from "./world";
 import { BALL_R } from "./constants/table";
 import { buildRack } from "./utils/rack";
+import { Color } from "three";
 
 export function setupGame() {
   world.clear();
@@ -11,6 +12,9 @@ export function setupGame() {
   const cueBall = world.add({
     ball: true,
     cueBall: true,
+
+    color: "#ffffff",
+    renderColor: new Color("#ffffff"),
 
     mass: 0.17,
 
@@ -37,6 +41,8 @@ export function setupGame() {
       ball: true,
       ...ball,
 
+      renderColor: new Color(ball.color),
+
       mass: 0.17,
 
       vx: 0,
@@ -50,6 +56,7 @@ export function setupGame() {
 
       radius: BALL_R,
       sleeping: true,
+      sleepTimer: 0,
       pocketed: false,
     });
   });

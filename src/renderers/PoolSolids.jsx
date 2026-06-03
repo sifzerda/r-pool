@@ -1,13 +1,15 @@
-// src/renderers/PoolBalls.jsx
+// src/renderers/PoolSolids.jsx
 
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Color, Object3D, InstancedBufferAttribute } from "three";
+import { Object3D, InstancedBufferAttribute } from "three";
+
 import { BALL_R } from "../ecs/constants/table";
 
 const dummy = new Object3D();
 
-export default function PoolBalls({ balls }) {
+export default function PoolSolids({ balls }) {
+
   const meshRef = useRef();
 
 useEffect(() => {
@@ -28,43 +30,66 @@ useEffect(() => {
 }, []);
 
   useFrame(() => {
+
     if (!meshRef.current) return;
 
-    let i = 0;
+    let count = 0;
 
     for (const ball of balls) {
 
       if (ball.pocketed) continue;
 
-      dummy.position.set(ball.x, 0.3, ball.z); // pockets height on table felt
+      dummy.position.set(
+        ball.x,
+        0.3,
+        ball.z
+      );
+
       dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
 
-if (!ball.renderColor) {
-  console.log("Missing renderColor", ball);
-}
+      meshRef.current.setMatrixAt(
+        count,
+        dummy.matrix
+      );
 
-      meshRef.current.setColorAt(i, ball.renderColor);
+      meshRef.current.setColorAt(
+        count,
+        ball.renderColor
+      );
 
-      i++;
+      count++;
     }
 
-    meshRef.current.count = i;
+    meshRef.current.count = count;
+
     meshRef.current.instanceMatrix.needsUpdate = true;
 
     if (meshRef.current.instanceColor) {
       meshRef.current.instanceColor.needsUpdate = true;
     }
+
   });
 
   return (
-    <instancedMesh 
-    ref={meshRef} 
-    args={[null, null, balls.length]} 
-    castShadow 
-    receiveShadow>
-      <sphereGeometry args={[BALL_R, 12, 12]} /> { /* can make these 24 for bigger balls */}
-      <meshPhysicalMaterial roughness={0.08} clearcoat={1} clearcoatRoughness={0} metalness={0} />
+
+    <instancedMesh
+      ref={meshRef}
+      args={[null, null, balls.length]}
+      castShadow
+      receiveShadow
+    >
+
+      <sphereGeometry
+        args={[BALL_R, 12, 12]}
+      />
+
+      <meshPhysicalMaterial
+        roughness={0.08}
+        clearcoat={1}
+        clearcoatRoughness={0}
+      />
+
     </instancedMesh>
+
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 const MAX_POWER = 18;
+const MAX_PULL = 80;
 
 export default function CueSystem({ cueBall, aimRef }) {
   useEffect(() => {

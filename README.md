@@ -103,16 +103,16 @@ This project is incomplete and requires further development. Currently the highs
 
 Layer	            Responsibility
 ...................................
-Components	        Data only
+Constants	        Data
+utils	            Utility logic
 Systems	            Behavior
-Factories       	Create entities
+~~Factories       	Create entities~~
 Renderers	        Visuals only
-Weapons	Modular     firing logic
 
 ## Tasks
 
-- [ ] currently using miniplex ecs, lightweight but not three.js
-- [ ] expand ecs structure to something more elaborate, game engine, physics, 3d ball on 2D table, optimization
+- [x] get game working in lightweight miniplex ecs, then add in three.js
+- [x] expand ecs structure to something more elaborate, game engine, physics, 3d ball on 2D table, optimization
 - [ ] possibly add zustand or jotai
 - [ ] create modular layout/s
 
