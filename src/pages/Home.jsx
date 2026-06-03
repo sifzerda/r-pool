@@ -2,10 +2,10 @@
 
 import PoolGame from "../PoolGame.jsx";
 
- 
+
 export default function HomePage() {
   return (
-    <main className="relative overflow-hidden bg-[#020308] text-white">
+    <main className="relative overflow-hidden bg-[#020308] text-white h-screen flex flex-col">
       {/* Background Layers */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(217,70,239,0.12),transparent_35%),radial-gradient(circle_at_left,rgba(59,130,246,0.1),transparent_30%)]" />
 
@@ -23,13 +23,13 @@ export default function HomePage() {
       <div className="pointer-events-none absolute inset-4 rounded-[36px] border border-cyan-400/20 shadow-[0_0_40px_rgba(34,211,238,0.08),inset_0_0_60px_rgba(34,211,238,0.04)]" />
 
       {/* Main Content */}
-      <section className="relative z-10 px-6 py-4">
+      <section className="relative z-10 px-6 py-4 flex-1 flex flex-col min-h-0">
 
         {/* Main Card */}
-        <div className="mx-auto relative w-full max-w-3xl overflow-hidden rounded-[36px] border border-cyan-400/15 bg-black/40 p-6 backdrop-blur-2xl shadow-[0_0_60px_rgba(34,211,238,0.08)]">
+        <div className="mx-auto relative w-full flex-1 flex flex-col min-h-0 rounded-[36px] border border-cyan-400/15 bg-black/40 p-6 backdrop-blur-2xl shadow-[0_0_60px_rgba(34,211,238,0.08)]">
           <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-transparent via-cyan-400 to-transparent" />
 
-           <PoolGame />         
+          <PoolGame />
         </div>
 
       </section>

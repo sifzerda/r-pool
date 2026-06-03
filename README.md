@@ -125,6 +125,8 @@ Weapons	Modular     firing logic
 
 - [ ] add ui: balls left, score
 
+- [ ] re-size, re-align rails in PoolTable.jsx
+
 
 LATER: 
 

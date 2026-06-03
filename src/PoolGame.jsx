@@ -14,18 +14,23 @@ export default function PoolGame() {
 
   return (
 
-<div style={{ width: '100%', height: '500px', position: 'relative' }}>
+    <div style={{ width: '100%', height: '500px', position: 'relative' }}>
 
-    <Canvas shadows>
-      <OrthographicCamera
-        makeDefault
-        position={[0, 10, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        zoom={80}
-      />
+      <Canvas
+        shadows={{
+          enabled: true
+        }}
+        dpr={[1, 1.5]}
+      >
+        <OrthographicCamera
+          makeDefault
+          position={[0, 10, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          zoom={80}
+        />
 
-      {cueBall && (<PoolScene cueBall={cueBall} />)}
-    </Canvas>
+        {cueBall && (<PoolScene cueBall={cueBall} />)}
+      </Canvas>
 
     </div>
   );

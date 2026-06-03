@@ -9,7 +9,7 @@ import { world, ballQuery } from "./ecs/world";
 import PoolTable from "./renderers/PoolTable";
 import PoolBalls from "./renderers/PoolBalls";
 import CueStick from "./renderers/CueStick";
-import Pockets from "./renderers/Pockets";
+//import Pockets from "./renderers/Pockets";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
@@ -84,11 +84,17 @@ export default function PoolScene({ cueBall }) {
   return (
     <>
       <ambientLight intensity={0.8} />
-      <directionalLight castShadow intensity={2} position={[3, 8, 3]} />
+      <directionalLight
+        castShadow
+        intensity={2}
+        position={[3, 8, 3]}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
 
       <PoolTable />
 
-      <Pockets />
+      {/* <Pockets /> */}
 
       <PoolBalls balls={ballQuery.entities} />
 

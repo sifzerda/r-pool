@@ -1,4 +1,4 @@
-// src/ecs/components/PoolBalls.jsx
+// src/renderers/PoolBalls.jsx
 
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -26,7 +26,7 @@ export default function PoolBalls({ balls }) {
 
       if (ball.pocketed) continue;
 
-      dummy.position.set(ball.x, 0.3, ball.z);
+      dummy.position.set(ball.x, 0.3, ball.z); // pockets height on table felt
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
       color.set(ball.color || "#ffffff");
