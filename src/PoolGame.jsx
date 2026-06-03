@@ -13,7 +13,10 @@ export default function PoolGame() {
   }, []);
 
   return (
-<Canvas shadows style={{ width: '100%', height: '500px', display: 'block' }}>
+
+<div style={{ width: '100%', height: '500px', position: 'relative' }}>
+
+    <Canvas shadows>
       <OrthographicCamera
         makeDefault
         position={[0, 10, 0]}
@@ -23,5 +26,7 @@ export default function PoolGame() {
 
       {cueBall && (<PoolScene cueBall={cueBall} />)}
     </Canvas>
+
+    </div>
   );
 }

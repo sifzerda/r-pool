@@ -25,19 +25,34 @@ export default function PoolBalls({ balls }) {
 
     let i = 0;
 
-    for (const ball of balls) {
-      if (ball.pocketed) continue;
+for (const ball of balls) {
 
-      dummy.position.set(ball.x, 0.35, ball.z);
-      dummy.updateMatrix();
+  if (ball.pocketed) continue;
 
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+  dummy.position.set(
+    ball.x,
+    0.35,
+    ball.z
+  );
 
-      color.set(ball.color || "#ffffff");
-      meshRef.current.setColorAt(i, color);
+  dummy.updateMatrix();
 
-      i++;
-    }
+  meshRef.current.setMatrixAt(
+    i,
+    dummy.matrix
+  );
+
+  color.set(
+    ball.color || "#ffffff"
+  );
+
+  meshRef.current.setColorAt(
+    i,
+    color
+  );
+
+  i++;
+}
 
     meshRef.current.count = i;
     meshRef.current.instanceMatrix.needsUpdate = true;

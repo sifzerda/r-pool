@@ -1,5 +1,5 @@
 // src/ecs/utils/rack.js
-// ball positions geenrated here
+// ball positions generated here
 
 import { TABLE_W, TABLE_H, BALL_R } from "../constants/table.js";
 

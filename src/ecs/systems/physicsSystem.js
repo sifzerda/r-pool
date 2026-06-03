@@ -7,6 +7,7 @@ const CUSHION_RESTITUTION = 0.92;
 
 export function physicsSystem(world, dt) {
   for (const ball of ballQuery) {
+    if (ball.pocketed) continue;
     if (ball.sleeping) continue;
 
     ball.x += ball.vx * dt;
@@ -22,7 +23,14 @@ export function physicsSystem(world, dt) {
     const top = -PLAY_Z;
     const bottom = PLAY_Z;
 
-    if (ball.x - r < left) {
+    const leftPocketOpening =
+      Math.abs(ball.z + PLAY_Z) < 0.25 ||
+      Math.abs(ball.z - PLAY_Z) < 0.25;
+
+    if (
+      ball.x - r < left &&
+      !leftPocketOpening
+    ) {
       ball.x = left + r;
 
       const nx = 1;
@@ -44,7 +52,14 @@ export function physicsSystem(world, dt) {
       ball.vz *= CUSHION_RESTITUTION;
     }
 
-    if (ball.x + r > right) {
+    const rightPocketOpening =
+      Math.abs(ball.z + PLAY_Z) < 0.25 ||
+      Math.abs(ball.z - PLAY_Z) < 0.25;
+
+    if (
+      ball.x + r > right &&
+      !rightPocketOpening
+    ) {
       ball.x = right - r;
 
       const nx = -1;
@@ -66,7 +81,15 @@ export function physicsSystem(world, dt) {
       ball.vz *= CUSHION_RESTITUTION;
     }
 
-    if (ball.z - r < top) {
+    const topPocketOpening =
+      Math.abs(ball.x + PLAY_X) < 0.25 ||
+      Math.abs(ball.x) < 0.25 ||
+      Math.abs(ball.x - PLAY_X) < 0.25;
+
+    if (
+      ball.z - r < top &&
+      !topPocketOpening
+    ) {
       ball.z = top + r;
 
       const nx = 0;
@@ -88,7 +111,15 @@ export function physicsSystem(world, dt) {
       ball.vz *= CUSHION_RESTITUTION;
     }
 
-    if (ball.z + r > bottom) {
+    const bottomPocketOpening =
+      Math.abs(ball.x + PLAY_X) < 0.25 ||
+      Math.abs(ball.x) < 0.25 ||
+      Math.abs(ball.x - PLAY_X) < 0.25;
+
+    if (
+      ball.z + r > bottom &&
+      !bottomPocketOpening
+    ) {
       ball.z = bottom - r;
 
       const nx = 0;

@@ -6,13 +6,14 @@ import { ballQuery } from "../world";
 
 export function collisionSystem() {
   const balls = [...ballQuery].filter(b => !b.pocketed);
-  const len = balls.length;
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < balls.length; i++) {
     const a = balls[i];
 
-    for (let j = i + 1; j < len; j++) {
+    for (let j = i + 1; j < balls.length; j++) {
       const b = balls[j];
+
+      if (a.pocketed || b.pocketed) continue;
 
       const dx = a.x - b.x;
       const dz = a.z - b.z;

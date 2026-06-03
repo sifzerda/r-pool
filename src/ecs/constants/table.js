@@ -17,7 +17,7 @@ export const PLAY_H = TABLE_H - CUSHION * 2;
 export const BALL_R = 0.1;
 export const BALL_Y = 0.35; // visual height above table
 
-export const POCKET_R = 0.14; // 14 cm
+export const POCKET_R = 0.30; // 14 cm
 
 export const FRICTION = 0.988;
 export const MIN_SPEED = 0.18;

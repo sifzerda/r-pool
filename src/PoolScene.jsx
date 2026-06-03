@@ -9,10 +9,12 @@ import { world, ballQuery } from "./ecs/world";
 import PoolTable from "./renderers/PoolTable";
 import PoolBalls from "./renderers/PoolBalls";
 import CueStick from "./renderers/CueStick";
+import Pockets from "./renderers/Pockets";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
 import { collisionSystem } from "./ecs/systems/collisionSystem";
+import { pocketSystem } from "./ecs/systems/pocketSystem";
 import CueSystem from "./ecs/systems/CueSystem";
 import AimGuide from "./renderers/AimGuide";
 
@@ -52,6 +54,8 @@ export default function PoolScene({ cueBall }) {
 
         collisionSystem(world);
 
+        pocketSystem();
+
         frictionSystem(world, subDt);
       }
 
@@ -83,6 +87,8 @@ export default function PoolScene({ cueBall }) {
       <directionalLight castShadow intensity={2} position={[3, 8, 3]} />
 
       <PoolTable />
+
+      <Pockets />
 
       <PoolBalls balls={[...ballQuery]} />
 
