@@ -11,15 +11,18 @@ import {
 } from "./ecs/world";
 
 import PoolTable from "./renderers/PoolTable";
-import PoolBalls from "./renderers/PoolBalls";
+//import PoolBalls from "./renderers/PoolBalls";
 import CueStick from "./renderers/CueStick";
-import PoolSolids from "./renderers/PoolSolids";
-import PoolStripes from "./renderers/PoolStripes";
-import PoolEightBall from "./renderers/PoolEightBall";
+//import PoolSolids from "./renderers/PoolSolids";
+//import PoolStripes from "./renderers/PoolStripes";
+//import PoolEightBall from "./renderers/PoolEightBall";
+
+import BallRenderer from "./renderers/BallRenderer";
+
 import AimGuide from "./renderers/AimGuide";
 
 import CueSystem from "./ecs/systems/CueSystem";
-import InputSystem  from "./ecs/InputSystem";
+import InputSystem from "./ecs/InputSystem";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
 
@@ -64,10 +67,7 @@ export default function PoolScene({ cueBall }) {
 
       {/* <Pockets /> */}
 
-      <PoolBalls balls={ballQuery.entities} />
-      <PoolSolids balls={solidBallQuery.entities} />
-      <PoolStripes balls={stripeBallQuery.entities} />
-      <PoolEightBall balls={eightBallQuery.entities} />
+      <BallRenderer balls={ballQuery.entities} />
 
       <AimGuide cueBall={cueBall} aimRef={aimRef} />
       <CueStick cueBall={cueBall} aimRef={aimRef} />
