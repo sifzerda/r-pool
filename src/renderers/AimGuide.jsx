@@ -2,54 +2,28 @@
 
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-
-import {
-  ballQuery,
-  activeBalls,
-} from "../ecs/world";
-
+import {ballQuery, activeBalls} from "../ecs/world";
 import { BALL_R } from "../ecs/constants/table";
+
+import * as THREE from "three";
 
 const GUIDE_Y = 0.45;
 
 function initGeometry(geo) {
   if (!geo) return;
 
-  geo.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-      new Float32Array(6),
-      3
-    )
-  );
-
+  geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
   geo.setDrawRange(0, 2);
 }
 
-function setLinePoints(
-  geo,
-  x1,
-  y1,
-  z1,
-  x2,
-  y2,
-  z2
-) {
+function setLinePoints(geo, x1, y1, z1, x2, y2, z2) {
   if (!geo) return;
 
   if (!geo.attributes.position) {
-    geo.setAttribute(
-      "position",
-      new THREE.BufferAttribute(
-        new Float32Array(6),
-        3
-      )
-    );
+    geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
   }
 
-  const positions =
-    geo.attributes.position.array;
+  const positions = geo.attributes.position.array;
 
   positions[0] = x1;
   positions[1] = y1;
@@ -60,7 +34,6 @@ function setLinePoints(
   positions[5] = z2;
 
   geo.attributes.position.needsUpdate = true;
-
   geo.setDrawRange(0, 2);
 }
 
@@ -71,10 +44,7 @@ function clearLine(geo) {
   geo.setDrawRange(0, 0);
 }
 
-export default function AimGuide({
-  cueBall,
-  aimRef,
-}) {
+export default function AimGuide({ cueBall, aimRef }) {
   const cueGeoRef = useRef();
   const objectGeoRef = useRef();
   const deflectGeoRef = useRef();
@@ -82,9 +52,7 @@ export default function AimGuide({
 
   useFrame(() => {
 
-    if (
-      !cueGeoRef.current || !objectGeoRef.current || !deflectGeoRef.current
-    ) {
+    if (!cueGeoRef.current || !objectGeoRef.current || !deflectGeoRef.current) {
       return;
     }
 
@@ -101,13 +69,7 @@ export default function AimGuide({
     const angle = aimRef.current.angle;
 
     // Skip work if aim hasn't changed
-    if (
-      lastAngleRef.current !== null &&
-      Math.abs(
-        angle -
-        lastAngleRef.current
-      ) < 0.0001
-    ) {
+    if (lastAngleRef.current !== null && Math.abs(angle - lastAngleRef.current) < 0.0001) {
       return;
     }
 
@@ -120,53 +82,29 @@ export default function AimGuide({
     let nearestT = Infinity;
 
     const hitRadius = BALL_R * 2;
-    const hitRadiusSq =
-      hitRadius * hitRadius;
+    const hitRadiusSq = hitRadius * hitRadius;
 
     for (const ball of ballQuery) {
 
-      if (
-        ball === cueBall ||
-        ball.pocketed
-      ) {
+      if (ball === cueBall || ball.pocketed) {
         continue;
       }
 
-      const relX =
-        ball.x - cueBall.x;
-
-      const relZ =
-        ball.z - cueBall.z;
-
-      const t =
-        relX * dirX +
-        relZ * dirZ;
+      const relX = ball.x - cueBall.x;
+      const relZ = ball.z - cueBall.z;
+      const t = relX * dirX + relZ * dirZ;
 
       if (t <= 0) continue;
 
-      const closestX =
-        cueBall.x +
-        dirX * t;
+      const closestX = cueBall.x + dirX * t;
+      const closestZ = cueBall.z + dirZ * t;
 
-      const closestZ =
-        cueBall.z +
-        dirZ * t;
+      const dx = ball.x - closestX;
+      const dz = ball.z - closestZ;
 
-      const dx =
-        ball.x - closestX;
+      const distSq = dx * dx + dz * dz;
 
-      const dz =
-        ball.z - closestZ;
-
-      const distSq =
-        dx * dx +
-        dz * dz;
-
-      if (
-        distSq <
-        hitRadiusSq &&
-        t < nearestT
-      ) {
+      if (distSq < hitRadiusSq && t < nearestT) {
         nearestBall = ball;
         nearestT = t;
       }
@@ -175,44 +113,20 @@ export default function AimGuide({
     // No collision predicted
     if (!nearestBall) {
 
-      setLinePoints(
-        cueGeoRef.current,
-        cueBall.x,
-        GUIDE_Y,
-        cueBall.z,
-
-        cueBall.x + dirX * 5,
-        GUIDE_Y,
-        cueBall.z + dirZ * 5
-      );
-
-      clearLine(
-        objectGeoRef.current
-      );
-
-      clearLine(
-        deflectGeoRef.current
-      );
+      setLinePoints(cueGeoRef.current, cueBall.x, GUIDE_Y, cueBall.z, cueBall.x + dirX * 5, GUIDE_Y, cueBall.z + dirZ * 5);
+      clearLine(objectGeoRef.current);
+      clearLine(deflectGeoRef.current);
 
       return;
     }
 
-    const hitX =
-      cueBall.x +
-      dirX * nearestT;
+    const hitX = cueBall.x + dirX * nearestT;
+    const hitZ = cueBall.z + dirZ * nearestT;
 
-    const hitZ =
-      cueBall.z +
-      dirZ * nearestT;
+    const nx = nearestBall.x - hitX;
+    const nz = nearestBall.z - hitZ;
 
-    const nx =
-      nearestBall.x - hitX;
-
-    const nz =
-      nearestBall.z - hitZ;
-
-    const len =
-      Math.hypot(nx, nz);
+    const len = Math.hypot(nx, nz);
 
     if (len < 0.0001) return;
 
@@ -220,125 +134,46 @@ export default function AimGuide({
     const normalZ = nz / len;
 
     // Cue ball path
-
-    setLinePoints(
-      cueGeoRef.current,
-
-      cueBall.x,
-      GUIDE_Y,
-      cueBall.z,
-
-      hitX,
-      GUIDE_Y,
-      hitZ
-    );
+    setLinePoints(cueGeoRef.current, cueBall.x, GUIDE_Y, cueBall.z, hitX, GUIDE_Y, hitZ);
 
     // Object ball path
-
-    setLinePoints(
-      objectGeoRef.current,
-
-      nearestBall.x,
-      GUIDE_Y,
-      nearestBall.z,
-
-      nearestBall.x +
-      normalX * 2,
-
-      GUIDE_Y,
-
-      nearestBall.z +
-      normalZ * 2
-    );
+    setLinePoints(objectGeoRef.current, nearestBall.x, GUIDE_Y, nearestBall.z, nearestBall.x + normalX * 2, GUIDE_Y, nearestBall.z + normalZ * 2);
 
     // Cue ball deflection
+    const tx = dirX - normalX;
+    const tz = dirZ - normalZ;
 
-    const tx =
-      dirX - normalX;
-
-    const tz =
-      dirZ - normalZ;
-
-    const tLen =
-      Math.hypot(tx, tz);
+    const tLen = Math.hypot(tx, tz);
 
     if (tLen > 0.001) {
 
-      setLinePoints(
-        deflectGeoRef.current,
-
-        hitX,
-        GUIDE_Y,
-        hitZ,
-
-        hitX +
-        (tx / tLen) * 1.5,
-
-        GUIDE_Y,
-
-        hitZ +
-        (tz / tLen) * 1.5
-      );
+      setLinePoints(deflectGeoRef.current, hitX, GUIDE_Y, hitZ, hitX + (tx / tLen) * 1.5, GUIDE_Y, hitZ + (tz / tLen) * 1.5);
 
     } else {
 
-      clearLine(
-        deflectGeoRef.current
-      );
+      clearLine(deflectGeoRef.current);
     }
   });
 
   return (
     <>
       <line
-        renderOrder={999}
-        ref={(obj) => {
-          if (obj)
-            cueGeoRef.current =
-              obj.geometry;
-        }}
-      >
+        renderOrder={999} ref={(obj) => { if (obj) cueGeoRef.current = obj.geometry;
+        }}>
         <bufferGeometry />
-        <lineBasicMaterial
-          color="white"
-          depthTest={false}
-          transparent
-          opacity={0.85}
-        />
+        <lineBasicMaterial color="white" depthTest={false} transparent opacity={0.85} />
       </line>
 
-      <line
-        renderOrder={999}
-        ref={(obj) => {
-          if (obj)
-            objectGeoRef.current =
-              obj.geometry;
-        }}
-      >
+      <line renderOrder={999} ref={(obj) => { if (obj) objectGeoRef.current = obj.geometry;
+        }}>
         <bufferGeometry />
-        <lineBasicMaterial
-          color="yellow"
-          depthTest={false}
-          transparent
-          opacity={0.85}
-        />
+        <lineBasicMaterial color="yellow" depthTest={false} transparent opacity={0.85} />
       </line>
 
-      <line
-        renderOrder={999}
-        ref={(obj) => {
-          if (obj)
-            deflectGeoRef.current =
-              obj.geometry;
-        }}
-      >
+      <line renderOrder={999} ref={(obj) => { if (obj) deflectGeoRef.current = obj.geometry;
+        }}>
         <bufferGeometry />
-        <lineBasicMaterial
-          color="cyan"
-          depthTest={false}
-          transparent
-          opacity={0.85}
-        />
+        <lineBasicMaterial color="cyan" depthTest={false} transparent opacity={0.85} />
       </line>
     </>
   );
