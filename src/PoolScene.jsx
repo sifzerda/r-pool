@@ -5,22 +5,16 @@ import { useFrame } from "@react-three/fiber";
 
 import { ballQuery, solidBallQuery, stripeBallQuery, eightBallQuery } from "./ecs/world";
 
-import PoolTable from "./renderers/PoolTable";
-import CueStick from "./renderers/CueStick";
+import PoolTableRenderer from "./renderers/PoolTableRenderer";
+import CueStickRenderer from "./renderers/CueStickRenderer";
 import BallRenderer from "./renderers/BallRenderer";
-import AimGuide from "./renderers/AimGuide";
+import AimGuideRenderer from "./renderers/AimGuideRenderer";
 import CueSystem from "./ecs/systems/CueSystem";
 import InputSystem from "./ecs/InputSystem";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
 export default function PoolScene({ cueBall }) {
-  const aimRef = useRef({
-    angle: 0,
-    power: 0,
-    swing: 0,
-    swingT: 0,
-    pendingShot: null,
-  });
+  const aimRef = useRef({angle: 0, power: 0, swing: 0, swingT: 0, pendingShot: null});
 
   const engineRef = useRef();
 
@@ -46,11 +40,11 @@ export default function PoolScene({ cueBall }) {
 
       <hemisphereLight intensity={0.4} />
 
-      <PoolTable />
+      <PoolTableRenderer />
       <BallRenderer balls={ballQuery.entities} />
 
-      <AimGuide cueBall={cueBall} aimRef={aimRef} />
-      <CueStick cueBall={cueBall} aimRef={aimRef} />
+      <AimGuideRenderer cueBall={cueBall} aimRef={aimRef} />
+      <CueStickRenderer cueBall={cueBall} aimRef={aimRef} />
       <InputSystem cueBall={cueBall} aimRef={aimRef} />
       <CueSystem cueBall={cueBall} aimRef={aimRef} />
     </>

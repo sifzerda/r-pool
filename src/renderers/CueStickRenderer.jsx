@@ -1,4 +1,4 @@
-// src/ecs/components/CueStick.jsx
+// src/ecs/components/CueStickRenderer.jsx
 
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 import { toRenderX, toRenderZ } from "../ecs/utils/coords";
 
-export default function CueStick({ cueBall, aimRef }) {
+export default function CueStickRenderer({ cueBall, aimRef }) {
   const ref = useRef();
 
   useFrame((_, delta) => {

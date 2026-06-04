@@ -125,12 +125,20 @@ Renderers	        Visuals only
 - [ ] re-size, re-align rails in PoolTable.jsx
 - [ ] optimize performance and rendering aim line
 
-- [ ] number balls, track ball numbers when pocketed
+- [x] number balls, track ball numbers when pocketed
 
-- [ ] optimize performance of collisionsystem() with a spatialGrid
+- [x] optimize performance of collisionsystem() with a spatialGrid
 
 LATER: 
 
 - [ ] table texture, ball textures/mesh, stick, etc
 - 
 - [ ] add screens: start, pause, highscores, settings, win, lose
+
+- [ ] upgrade into full 8-ball rules engine (i.e. turns, fouls, win detection) using current ECS structure and optimizing performance
+
+- [ ] 3d revolving balls
+
+- [ ] numbered balls
+
+- [ ] AimGuide not appearing since combining ball renderers

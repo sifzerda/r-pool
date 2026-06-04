@@ -1,9 +1,9 @@
-// src/ecs/components/PoolTable.jsx
+// src/ecs/components/PoolTableRenderer.jsx
 // table contains pockets
 
 import { TABLE_W, TABLE_H, CUSHION, PLAY_W, PLAY_H, PLAY_X, PLAY_Z } from "../ecs/constants/table.js";
 
-export default function PoolTable() {
+export default function PoolTableRenderer() {
 
   const railHeight = 0.28;
   const railY = 0.34;

@@ -1,4 +1,4 @@
-// src/renderers/AimGuide.jsx
+// src/renderers/AimGuideRenderer.jsx
 
 import { useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -44,7 +44,7 @@ function clearLine(geo) {
   geo.setDrawRange(0, 0);
 }
 
-export default function AimGuide({ cueBall, aimRef }) {
+export default function AimGuideRenderer({ cueBall, aimRef }) {
   const cueGeoRef = useRef();
   const objectGeoRef = useRef();
   const deflectGeoRef = useRef();

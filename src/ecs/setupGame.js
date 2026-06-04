@@ -14,6 +14,9 @@ export function setupGame() {
   const cueBall = world.add({
     ball: true,
     cueBall: true,
+    type: "cue",
+    group: "cue",
+
     dirty: true,
     id: 0,
     instanceId: nextInstanceId++,
