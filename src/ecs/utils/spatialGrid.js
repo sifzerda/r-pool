@@ -1,7 +1,5 @@
 // src/ecs/utils/spatialGrid.js
 
-// currently unused
-
 import { BALL_R } from "../constants/table";
 
 const CELL_SIZE = BALL_R * 4;

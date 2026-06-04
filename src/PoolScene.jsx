@@ -21,13 +21,15 @@ import CueStick from "./renderers/CueStick";
 import PoolSolids from "./renderers/PoolSolids";
 import PoolStripes from "./renderers/PoolStripes";
 import PoolEightBall from "./renderers/PoolEightBall";
+import AimGuide from "./renderers/AimGuide";
 
 import { physicsSystem } from "./ecs/systems/physicsSystem";
 import { frictionSystem } from "./ecs/systems/frictionSystem";
 import { collisionSystem } from "./ecs/systems/collisionSystem";
 import { pocketSystem } from "./ecs/systems/pocketSystem";
 import CueSystem from "./ecs/systems/CueSystem";
-import AimGuide from "./renderers/AimGuide";
+import { shotSystem } from "./ecs/systems/shotSystem";
+
 
 import { toRenderX, toRenderZ } from "./ecs/utils/coords";
 
@@ -37,6 +39,7 @@ export default function PoolScene({ cueBall }) {
     power: 0,
     swing: 0,
     swingT: 0,
+    pendingShot: null,
   });
 
   const accumulatorRef = useRef(0);
@@ -59,6 +62,8 @@ export default function PoolScene({ cueBall }) {
       const subDt = FIXED_DT / SUBSTEPS;
 
       for (let i = 0; i < SUBSTEPS; i++) {
+
+        shotSystem(cueBall, aimRef);
 
         physicsSystem(world, subDt);
         collisionSystem(world);

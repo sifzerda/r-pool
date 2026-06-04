@@ -1,6 +1,7 @@
 // src/ecs/systems/CueSystem.jsx
 
 import { useEffect } from "react";
+import { activeBall } from "../world.js";
 
 const MAX_POWER = 18;
 const MAX_PULL = 80;
@@ -19,7 +20,6 @@ export default function CueSystem({ cueBall, aimRef }) {
 
       charging = true;
       chargeStart = performance.now();
-
       aimRef.current.swing = 1;
     }
 
@@ -31,13 +31,6 @@ export default function CueSystem({ cueBall, aimRef }) {
 
       aimRef.current.swing = 2;
       aimRef.current.swingT = 0;
-
-      cueBall.sleeping = false;
-
-      const angle = aimRef.current.angle;
-
-      // FIXED scaling (feels like real cue impulse)
-      const strength = power * 2.2;
 
       aimRef.current.pendingShot = {
         power,

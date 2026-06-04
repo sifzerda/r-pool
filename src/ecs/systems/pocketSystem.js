@@ -1,16 +1,19 @@
 // src/ecs/systems/pocketSystem.js
 
-import { ballQuery } from "../world";
+import { ballQuery, activeBalls, deactiveBall } from "../world";
 import { POCKETS } from "../constants/pockets";
 import { POCKET_R } from "../constants/table";
 
 const POCKET_R_SQ = POCKET_R * POCKET_R;
 
 export function pocketSystem() {
-    for (const ball of ballQuery) {
+    for (const ball of activeBalls) {
 
-        if (ball.pocketed)
-            continue;
+if (ball.pocketed) continue;
+
+if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
+  continue;
+}
 
         for (const pocket of POCKETS) {
 
@@ -30,6 +33,8 @@ export function pocketSystem() {
                     ball.vz = 0;
 
                     ball.sleeping = true;
+                    ball.dirty = true;
+                    deactiveBall(ball);
 
                 } else {
 
@@ -38,7 +43,9 @@ export function pocketSystem() {
                     ball.vx = 0;
                     ball.vz = 0;
 
-                    ball.sleeping = true;
+                    ball.sleeping = true
+                    ball.dirty = true;
+                    deactiveBall(ball);
                 }
 
                 break;

@@ -1,19 +1,26 @@
 // src/ecs/systems/physicsSystem.js
 
 import { PLAY_X, PLAY_Z, BALL_R } from "../constants/table";
-import { ballQuery } from "../world";
+import { ballQuery, activeBalls, deactiveBall } from "../world";
 
 const CUSHION_RESTITUTION = 0.92;
 
 export function physicsSystem(world, dt) {
-  for (const ball of ballQuery) {
+  for (const ball of activeBalls) {
     if (ball.pocketed) continue;
+
+if (
+  ball.sleeping &&
+  Math.abs(ball.vx) < 0.001 &&
+  Math.abs(ball.vz) < 0.001
+) {
+  continue;
+}
     if (ball.sleeping) continue;
 
     ball.x += ball.vx * dt;
     ball.z += ball.vz * dt;
-
-    //ball.dirty = true;
+    ball.dirty = true;
 
     ball.vx += ball.sideSpin * dt;
     ball.sideSpin *= 0.99;
@@ -109,6 +116,8 @@ export function physicsSystem(world, dt) {
       ball.vx = 0;
       ball.vz = 0;
       ball.sleeping = true;
+      ball.dirty = true;
+      deactiveBall(ball);
     }
   }
 }

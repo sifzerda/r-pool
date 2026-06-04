@@ -9,10 +9,14 @@ import { Color } from "three";
 export function setupGame() {
   world.clear();
 
+  let nextInstanceId = 0;
+
   const cueBall = world.add({
     ball: true,
     cueBall: true,
-    //dirty: true,
+    dirty: true,
+    id: 0,
+    instanceId: nextInstanceId++,
 
     color: "#ffffff",
     renderColor: new Color("#ffffff"),
@@ -33,14 +37,18 @@ export function setupGame() {
 
     radius: BALL_R,
 
+    active: false,
     sleeping: true,
     pocketed: false,
   });
 
-  buildRack().forEach(ball => {
+  buildRack().forEach((ball, i) => {
     world.add({
       ball: true,
-      //dirty: true,
+      id: i + 1,
+      dirty: true,
+      instanceId: nextInstanceId++,
+      
       ...ball,
 
       renderColor: new Color(ball.color),
@@ -57,6 +65,7 @@ export function setupGame() {
       topSpin: 0,
 
       radius: BALL_R,
+      active: false,
       sleeping: true,
       sleepTimer: 0,
       pocketed: false,

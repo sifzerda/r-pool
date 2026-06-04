@@ -50,6 +50,7 @@ export default function CueStick({ cueBall, aimRef }) {
         strength;
 
       cueBall.sleeping = false;
+      cueBall.dirty = true;
 
       aimRef.current.pendingShot = null;
     } {
