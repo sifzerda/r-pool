@@ -5,7 +5,7 @@ import { ballQuery, activeBalls, deactiveBall } from "../world";
 
 const CUSHION_RESTITUTION = 0.92;
 
-export function physicsSystem(world, dt) {
+export function physicsSystem(dt) {
   for (const ball of activeBalls) {
     if (ball.pocketed) continue;
 

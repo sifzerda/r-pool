@@ -1,10 +1,7 @@
 // src/PoolScene.jsx
 
 import { useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
-
-import { Line } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 
 import {
   world,
@@ -23,15 +20,10 @@ import PoolStripes from "./renderers/PoolStripes";
 import PoolEightBall from "./renderers/PoolEightBall";
 import AimGuide from "./renderers/AimGuide";
 
-import { physicsSystem } from "./ecs/systems/physicsSystem";
-import { frictionSystem } from "./ecs/systems/frictionSystem";
-import { collisionSystem } from "./ecs/systems/collisionSystem";
-import { pocketSystem } from "./ecs/systems/pocketSystem";
 import CueSystem from "./ecs/systems/CueSystem";
-import { shotSystem } from "./ecs/systems/shotSystem";
 
-
-import { toRenderX, toRenderZ } from "./ecs/utils/coords";
+import { PhysicsEngine } from "./ecs/PhysicsEngine";
+import InputSystem  from "./ecs/InputSystem";
 
 export default function PoolScene({ cueBall }) {
   const aimRef = useRef({
@@ -42,55 +34,18 @@ export default function PoolScene({ cueBall }) {
     pendingShot: null,
   });
 
-  const accumulatorRef = useRef(0);
-  const raycaster = useRef(new THREE.Raycaster());
-  const point = useRef(new THREE.Vector3());
-  const plane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const engineRef = useRef();
 
-  const FIXED_DT = 1 / 90;
-  const SUBSTEPS = 2;
+  if (!engineRef.current) {
+    engineRef.current =
+      new PhysicsEngine(
+        cueBall,
+        aimRef
+      );
+  }
 
-  const { camera } = useThree();
-
-  useFrame((state, delta) => {
-    accumulatorRef.current += delta;
-
-    const SUBSTEPS = 4;
-
-    while (accumulatorRef.current >= FIXED_DT) {
-
-      const subDt = FIXED_DT / SUBSTEPS;
-
-      for (let i = 0; i < SUBSTEPS; i++) {
-
-        shotSystem(cueBall, aimRef);
-
-        physicsSystem(world, subDt);
-        collisionSystem(world);
-        pocketSystem();
-        frictionSystem(world, subDt);
-      }
-
-      accumulatorRef.current -= FIXED_DT;
-    }
-
-    raycaster.current.setFromCamera(state.pointer, camera);
-
-    const hit = raycaster.current.ray.intersectPlane(
-      plane.current,
-      point.current
-    );
-
-    if (!hit) return;
-
-    const cueX = toRenderX(cueBall.x);
-    const cueZ = toRenderZ(cueBall.z);
-
-    // FIXED DIRECTION (mouse → cue)
-    const dx = cueX - point.current.x;
-    const dz = cueZ - point.current.z;
-
-    aimRef.current.angle = Math.atan2(dz, dx);
+  useFrame((_, delta) => {
+    engineRef.current.update(delta);
   });
 
   return (
@@ -131,6 +86,12 @@ export default function PoolScene({ cueBall }) {
       />
 
       <CueStick cueBall={cueBall} aimRef={aimRef} />
+
+      <InputSystem
+        cueBall={cueBall}
+        aimRef={aimRef}
+      />
+
       <CueSystem cueBall={cueBall} aimRef={aimRef} />
     </>
   );

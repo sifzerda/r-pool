@@ -7,7 +7,7 @@ import {
 
 const ROLLING_RESISTANCE = 0.45;
 
-export function frictionSystem(_, dt) {
+export function frictionSystem(dt) {
   const sleepingBalls = [];
 
   for (const ball of activeBalls) {
