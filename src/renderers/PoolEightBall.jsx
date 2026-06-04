@@ -22,19 +22,9 @@ export default function PoolEightBall({ balls }) {
 
       if (ball.pocketed) continue;
 
-      dummy.position.set(
-        ball.x,
-        0.3,
-        ball.z
-      );
-
+      dummy.position.set(ball.x, 0.3, ball.z);
       dummy.updateMatrix();
-      //ball.dirty = false;
-
-      meshRef.current.setMatrixAt(
-        count,
-        dummy.matrix
-      );
+      meshRef.current.setMatrixAt(count, dummy.matrix);
 
       count++;
     }
@@ -46,23 +36,9 @@ export default function PoolEightBall({ balls }) {
 
   return (
 
-    <instancedMesh
-      ref={meshRef}
-      args={[null, null, balls.length]}
-      castShadow
-      receiveShadow
-    >
-
-      <sphereGeometry
-        args={[BALL_R, 12, 12]}
-      />
-
-      <meshPhysicalMaterial
-        color="#111111"
-        roughness={0.08}
-        clearcoat={1}
-      />
-
+    <instancedMesh ref={meshRef} args={[null, null, balls.length]} castShadow receiveShadow>
+      <sphereGeometry args={[BALL_R, 12, 12]} />
+      <meshPhysicalMaterial color="#111111" roughness={0.08} clearcoat={1} />
     </instancedMesh>
 
   );

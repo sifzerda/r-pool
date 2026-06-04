@@ -19,10 +19,7 @@ export default function PoolStripes({ balls }) {
     if (!stripeMesh) return;
 
     balls.forEach((ball, i) => {
-      stripeMesh.setColorAt(
-        i,
-        ball.renderColor
-      );
+      stripeMesh.setColorAt(i, ball.renderColor);
     });
 
     if (stripeMesh.instanceColor) {
@@ -41,23 +38,12 @@ export default function PoolStripes({ balls }) {
     for (const ball of balls) {
       if (ball.pocketed) continue;
 
-      dummy.position.set(
-        ball.x,
-        0.3,
-        ball.z
-      );
+      dummy.position.set(ball.x, 0.3, ball.z);
 
       dummy.updateMatrix();
 
-      whiteMesh.setMatrixAt(
-        count,
-        dummy.matrix
-      );
-
-      stripeMesh.setMatrixAt(
-        count,
-        dummy.matrix
-      );
+      whiteMesh.setMatrixAt(count, dummy.matrix);
+      stripeMesh.setMatrixAt(count, dummy.matrix);
 
       count++;
     }
@@ -78,43 +64,17 @@ export default function PoolStripes({ balls }) {
     <>
       {/* White base ball */}
 
-      <instancedMesh
-        ref={whiteMeshRef}
-        args={[null, null, balls.length]}
-        castShadow
-      >
-        <sphereGeometry
-          args={[BALL_R, 12, 12]}
-        />
+      <instancedMesh ref={whiteMeshRef} args={[null, null, balls.length]} castShadow={false} receiveShadow={false}>
+        <sphereGeometry args={[BALL_R, 12, 12]} />
 
-        <meshPhysicalMaterial
-          color="white"
-          roughness={0.08}
-          clearcoat={1}
-        />
+        <meshPhysicalMaterial color="white" roughness={0.08} clearcoat={1} />
       </instancedMesh>
 
       {/* Colored stripe */}
 
-      <instancedMesh
-        ref={stripeMeshRef}
-        args={[null, null, balls.length]}
-      >
-        <cylinderGeometry
-          args={[
-            BALL_R * 1.02,
-            BALL_R * 1.02,
-            BALL_R * 0.9,
-            24,
-            1,
-            true,
-          ]}
-        />
-
-        <meshPhysicalMaterial
-          roughness={0.08}
-          clearcoat={1}
-        />
+      <instancedMesh ref={stripeMeshRef} args={[null, null, balls.length]}>
+        <cylinderGeometry args={[BALL_R * 1.02, BALL_R * 1.02, BALL_R * 0.9, 24, 1, true]} />
+        <meshPhysicalMaterial roughness={0.08} clearcoat={1} />
       </instancedMesh>
     </>
   );

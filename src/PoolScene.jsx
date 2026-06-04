@@ -101,8 +101,8 @@ export default function PoolScene({ cueBall }) {
         castShadow
         intensity={2}
         position={[3, 8, 3]}
-        shadow-mapSize-width={512}
-        shadow-mapSize-height={512}
+        shadow-mapSize-width={256}
+        shadow-mapSize-height={256}
       />
 
       <hemisphereLight intensity={0.4} />
