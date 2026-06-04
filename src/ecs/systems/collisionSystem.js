@@ -30,10 +30,7 @@ export function collisionSystem() {
     for (const b of nearby) {
       if (a === b) continue;
 
-      const id =
-        a.id < b.id
-          ? `${a.id}-${b.id}`
-          : `${b.id}-${a.id}`;
+      const id = a.id < b.id ? `${a.id}-${b.id}` : `${b.id}-${a.id}`;
 
       if (checked.has(id)) continue;
 
@@ -43,8 +40,7 @@ export function collisionSystem() {
       const dz = a.z - b.z;
 
       if (
-        dx * dx + dz * dz <
-        minDistSq
+        dx * dx + dz * dz < minDistSq
       ) {
         resolveCollision(a, b);
 
