@@ -39,9 +39,7 @@ export function collisionSystem() {
       const dx = a.x - b.x;
       const dz = a.z - b.z;
 
-      if (
-        dx * dx + dz * dz < minDistSq
-      ) {
+      if (dx * dx + dz * dz < minDistSq) {
         resolveCollision(a, b);
 
         activeBall(a);
