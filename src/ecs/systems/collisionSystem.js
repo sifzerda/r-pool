@@ -14,7 +14,7 @@ export function collisionSystem() {
 
   for (const ball of ballQuery) {
     if (ball.pocketed) continue;
-    //if (ball.sleeping) continue;
+
     grid.insert(ball);
     balls.push(ball);
   }
