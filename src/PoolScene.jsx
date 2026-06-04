@@ -4,9 +4,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 
 import {
-  world,
   ballQuery,
-  cueBallQuery,
   solidBallQuery,
   stripeBallQuery,
   eightBallQuery
@@ -21,9 +19,9 @@ import PoolEightBall from "./renderers/PoolEightBall";
 import AimGuide from "./renderers/AimGuide";
 
 import CueSystem from "./ecs/systems/CueSystem";
-
-import { PhysicsEngine } from "./ecs/PhysicsEngine";
 import InputSystem  from "./ecs/InputSystem";
+import { PhysicsEngine } from "./ecs/PhysicsEngine";
+
 
 export default function PoolScene({ cueBall }) {
   const aimRef = useRef({
@@ -67,31 +65,13 @@ export default function PoolScene({ cueBall }) {
       {/* <Pockets /> */}
 
       <PoolBalls balls={ballQuery.entities} />
+      <PoolSolids balls={solidBallQuery.entities} />
+      <PoolStripes balls={stripeBallQuery.entities} />
+      <PoolEightBall balls={eightBallQuery.entities} />
 
-      <PoolSolids
-        balls={solidBallQuery.entities}
-      />
-
-      <PoolStripes
-        balls={stripeBallQuery.entities}
-      />
-
-      <PoolEightBall
-        balls={eightBallQuery.entities}
-      />
-
-      <AimGuide
-        cueBall={cueBall}
-        aimRef={aimRef}
-      />
-
+      <AimGuide cueBall={cueBall} aimRef={aimRef} />
       <CueStick cueBall={cueBall} aimRef={aimRef} />
-
-      <InputSystem
-        cueBall={cueBall}
-        aimRef={aimRef}
-      />
-
+      <InputSystem cueBall={cueBall} aimRef={aimRef} />
       <CueSystem cueBall={cueBall} aimRef={aimRef} />
     </>
   );
