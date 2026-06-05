@@ -21,13 +21,10 @@ export default function BallRenderer({ balls }) {
     for (const ball of balls) {
       if (ball.type === "stripe") {
         stripeBaseRef.current.setColorAt(stripeIndex, new Color("#ffffff"));
-
         stripeBandRef.current.setColorAt(stripeIndex, ball.renderColor);
-
         stripeIndex++;
       } else {
         solidRef.current.setColorAt(solidIndex, ball.renderColor);
-
         solidIndex++;
       }
     }
@@ -43,7 +40,6 @@ export default function BallRenderer({ balls }) {
 
     let solidIndex = 0;
     let stripeIndex = 0;
-
     let changed = false;
 
     for (const ball of balls) {
@@ -51,9 +47,7 @@ export default function BallRenderer({ balls }) {
 
       if (ball.dirty) changed = true;
 
-      dummy.position.set(ball.x, 0.3, ball.z
-      );
-
+      dummy.position.set(ball.x, 0.3, ball.z);
       dummy.rotation.set(0, 0, 0);
 
       dummy.updateMatrix();
