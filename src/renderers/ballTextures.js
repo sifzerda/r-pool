@@ -13,14 +13,7 @@ ballTextures.set(5, createBallTexture(5, "#E05C00", false));
 ballTextures.set(6, createBallTexture(6, "#1A7A1A", false));
 ballTextures.set(7, createBallTexture(7, "#8B1A1A", false));
 
-ballTextures.set(
-    8,
-    createBallTexture(
-        8,
-        "#000000",
-        false
-    )
-);
+ballTextures.set(8, createBallTexture(8, "#000000", false));
 
 ballTextures.set(9, createBallTexture(9, "#F5C518", true));
 ballTextures.set(10, createBallTexture(10, "#1B4FD8", true));

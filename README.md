@@ -142,3 +142,5 @@ LATER:
 - [ ] numbered balls
 
 - [ ] AimGuide not appearing since combining ball renderers
+
+- [ ] put neonlayout on global app level so all pages inherit it
