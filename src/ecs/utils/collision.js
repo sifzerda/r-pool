@@ -46,19 +46,10 @@ export function resolveCollision(a, b) {
   const massA = a.mass || 0.17;
   const massB = b.mass || 0.17;
 
-  const impulseMagnitude =
-    -(1 + restitution) *
-    velocityAlongNormal /
-    (
-      (1 / massA) +
-      (1 / massB)
-    );
+  const impulseMagnitude = -(1 + restitution) * velocityAlongNormal / ((1 / massA) + (1 / massB));
 
-  const impulseX =
-    impulseMagnitude * nx;
-
-  const impulseZ =
-    impulseMagnitude * ny;
+  const impulseX = impulseMagnitude * nx;
+  const impulseZ = impulseMagnitude * ny;
 
   a.vx -= impulseX / massA;
   a.vz -= impulseZ / massA;

@@ -24,6 +24,8 @@ if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
 
             if (distSq < POCKET_R_SQ) {
 
+                console.log("POCKETED", ball.id);
+
                 if (ball.cueBall) {
 
                     ball.x = 0;
@@ -38,7 +40,7 @@ if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
 
                 } else {
 
-                    ball.pocketed = true;
+                    ball.falling = true;
 
                     ball.vx = 0;
                     ball.vz = 0;

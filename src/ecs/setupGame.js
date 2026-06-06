@@ -35,6 +35,7 @@ export function setupGame() {
     rotX: 0,
     rotY: 0,
     rotZ: 0,
+    y: 0.3,
 
     spinX: 0,
     spinZ: 0,
@@ -68,6 +69,7 @@ export function setupGame() {
       rotX: 0,
       rotY: 0,
       rotZ: 0,
+      y: 0.3,
 
       spinX: 0,
       spinZ: 0,
