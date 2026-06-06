@@ -9,7 +9,6 @@ import Error from './pages/Error.jsx';
 import About from './pages/About.jsx';
 import Home from './pages/Home.jsx';
 
-import Tournaments from './pages/Tournaments.jsx';
 import Signup from './pages/Signup.jsx';
 import Login from './pages/Login.jsx';
 import Vip from './pages/Vip.jsx';
@@ -30,10 +29,6 @@ const router = createBrowserRouter([
       {
         path: '/about',
         element: <About />,
-      },
-      {
-        path: '/tournaments',
-        element: <Tournaments />,
       },
       {
         path: '/signup',

@@ -13,7 +13,6 @@ export default function Header() {
   const links = [
     { label: "PLAY", href: "/" },
     { label: "ABOUT", href: "/about" },
-    { label: "TOURNAMENTS", href: "/tournaments" },
     { label: "SIGNUP", href: "/signup" },
     { label: "LOGIN", href: "/login" },
     { label: "VIP", href: "/vip" },
