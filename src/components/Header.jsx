@@ -20,13 +20,13 @@ export default function Header() {
   ];
 
   return (
-    <header className="relative z-10 px-4 pt-4">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[36px] border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
+    <header className="relative z-10">
+      <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
 
         {/* Top Light Strip */}
         <div className="h-0.5 w-full bg-linear-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
 
-        <div className="relative px-8 py-6 md:px-14">
+        <div className="relative px-8 py-2 md:px-14">
 
           {/* Corner accents (UNCHANGED) */}
           <div className="absolute left-6 top-6 h-12 w-12 border-l border-t border-cyan-400/40" />
@@ -40,7 +40,7 @@ export default function Header() {
             <div className="relative text-center">
               <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
 
-              <p className="mb-2 text-[10px] uppercase tracking-[0.9em] text-cyan-400">Open 24/7</p>
+              <p className="text-[10px] uppercase tracking-[0.9em] text-cyan-400">Open 24/7</p>
 
               <h1 className="relative text-4xl tracking-[0.25em] text-cyan-100"
                 style={{

@@ -2,10 +2,10 @@ import { FaGithub } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="relative z-10 px-4 pb-4">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[36px] border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
+    <footer className="relative z-10">
+      <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
         {/* Top Light Strip */}
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
+        <div className="h-0.5 w-full bg-linear-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
 
         <div className="relative px-4 py-4 md:px-14">
           {/* Corner accents */}
