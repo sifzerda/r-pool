@@ -14,13 +14,13 @@ import InputSystem from "./ecs/InputSystem";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
 export default function PoolScene({ cueBall }) {
-  const aimRef = useRef({angle: 0, power: 0, swing: 0, swingT: 0, pendingShot: null});
+  const aimRef = useRef({ angle: 0, power: 0, swing: 0, swingT: 0, pendingShot: null });
 
   const engineRef = useRef();
 
   if (!engineRef.current) {
     engineRef.current = new PhysicsEngine(cueBall, aimRef);
-}
+  }
 
   useFrame((_, delta) => {
     engineRef.current.update(delta);
@@ -32,10 +32,10 @@ export default function PoolScene({ cueBall }) {
 
       <directionalLight
         castShadow
-        intensity={2}
-        position={[3, 8, 3]}
-        shadow-mapSize-width={256}
-        shadow-mapSize-height={256}
+        intensity={2.5}
+        position={[4, 8, 2]}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
       />
 
       <hemisphereLight intensity={0.4} />

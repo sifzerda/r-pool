@@ -137,7 +137,7 @@ LATER:
 
 - [ ] upgrade into full 8-ball rules engine (i.e. turns, fouls, win detection) using current ECS structure and optimizing performance
 
-- [ ] 3d revolving balls
+- [x] 3d revolving balls
 
 - [ ] numbered balls
 
