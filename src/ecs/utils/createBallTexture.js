@@ -1,25 +1,24 @@
 // src/ecs/utils/createBallTexture.js
 
-import {
-  CanvasTexture,
-} from "three";
+import { CanvasTexture, SRGBColorSpace } from "three";
 
 export function createBallTexture(number, color, stripe = false) {
-  const size = 512;
-
+  const size = 1024;
   const canvas = document.createElement("canvas");
-
   canvas.width = size;
   canvas.height = size;
-
   const ctx = canvas.getContext("2d");
 
-  // white base
+  // ------------------------
+  // base
+  // ------------------------
 
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, size, size);
 
-  // stripe or solid
+  // ------------------------
+  // stripe / solid
+  // ------------------------
 
   ctx.fillStyle = color;
 
@@ -29,25 +28,44 @@ export function createBallTexture(number, color, stripe = false) {
     ctx.fillRect(0, 0, size, size);
   }
 
-  // number circle
+  // ------------------------
+  // draw number circles
+  // ------------------------
 
-  ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size * 0.12, 0, Math.PI * 2);
+  const positions = [
+    size * 0.25,
+    size * 0.75,
+  ];
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fill();
+  for (const x of positions) {
 
-  ctx.fillStyle = "#000000";
+    ctx.beginPath();
 
-  ctx.font = "bold 64px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+    ctx.arc(x, size / 2, size * 0.12, 0, Math.PI * 2);
 
-  ctx.fillText(String(number), size / 2, size / 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "#dddddd";
+    ctx.stroke();
+
+    if (number !== "") {
+
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 250px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText(String(number), x, size / 2);
+    }
+  }
 
   const texture = new CanvasTexture(canvas);
-
+  texture.anisotropy = 16;
   texture.needsUpdate = true;
+  texture.colorSpace = SRGBColorSpace;
 
   return texture;
 }
+
