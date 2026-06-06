@@ -9,7 +9,8 @@ const OPENING = POCKET_R + BALL_R;
 
 export function physicsSystem(dt) {
   for (const ball of activeBalls) {
-    if (ball.pocketed) continue;
+    if (ball.pocketed || ball.falling) 
+      continue;
 
     if (
       ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001

@@ -13,7 +13,7 @@ export function collisionSystem() {
   const balls = [];
 
   for (const ball of ballQuery) {
-    if (ball.pocketed) continue;
+    if (ball.pocketed || ball.falling) continue;
 
     grid.insert(ball);
     balls.push(ball);

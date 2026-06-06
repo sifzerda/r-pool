@@ -9,11 +9,11 @@ const POCKET_R_SQ = POCKET_R * POCKET_R;
 export function pocketSystem() {
     for (const ball of activeBalls) {
 
-if (ball.pocketed) continue;
+        if (ball.pocketed) continue;
 
-if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
-  continue;
-}
+        if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
+            continue;
+        }
 
         for (const pocket of POCKETS) {
 
@@ -40,13 +40,19 @@ if (ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001) {
 
                 } else {
 
+
+                    ball.pocketX = pocket.x;
+                    ball.pocketZ = pocket.z;
+
                     ball.falling = true;
+                    ball.fallSpeed = 0;
 
-                    ball.vx = 0;
-                    ball.vz = 0;
+                    ball.vx *= 0.2;
+                    ball.vz *= 0.2;
 
-                    ball.sleeping = true
+                    ball.sleeping = false;
                     ball.dirty = true;
+                    
                     deactiveBall(ball);
                 }
 
