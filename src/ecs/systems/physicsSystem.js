@@ -4,22 +4,26 @@ import { PLAY_X, PLAY_Z, BALL_R } from "../constants/table";
 import { ballQuery, activeBalls, deactiveBall } from "../world";
 
 const CUSHION_RESTITUTION = 0.92;
+const INV_R = 1 / BALL_R;
 
 export function physicsSystem(dt) {
   for (const ball of activeBalls) {
     if (ball.pocketed) continue;
 
-if (
-  ball.sleeping &&
-  Math.abs(ball.vx) < 0.001 &&
-  Math.abs(ball.vz) < 0.001
-) {
-  continue;
-}
+    if (
+      ball.sleeping &&
+      Math.abs(ball.vx) < 0.001 &&
+      Math.abs(ball.vz) < 0.001
+    ) {
+      continue;
+    }
     if (ball.sleeping) continue;
 
     ball.x += ball.vx * dt;
     ball.z += ball.vz * dt;
+    ball.rotX += (ball.vz * INV_R) * dt;
+    ball.rotZ -= (ball.vx * INV_R) * dt;
+
     ball.dirty = true;
 
     ball.vx += ball.sideSpin * dt;

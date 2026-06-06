@@ -23,6 +23,7 @@ export default function BallRenderer({ balls }) {
         stripeBaseRef.current.setColorAt(stripeIndex, new Color("#ffffff"));
         stripeBandRef.current.setColorAt(stripeIndex, ball.renderColor);
         stripeIndex++;
+
       } else {
         solidRef.current.setColorAt(solidIndex, ball.renderColor);
         solidIndex++;
@@ -32,6 +33,7 @@ export default function BallRenderer({ balls }) {
     solidRef.current.instanceColor.needsUpdate = true;
     stripeBaseRef.current.instanceColor.needsUpdate = true;
     stripeBandRef.current.instanceColor.needsUpdate = true;
+
   }, [balls]);
 
   useFrame(() => {
@@ -48,18 +50,31 @@ export default function BallRenderer({ balls }) {
       if (ball.dirty) changed = true;
 
       dummy.position.set(ball.x, 0.3, ball.z);
-      dummy.rotation.set(0, 0, 0);
-
+      dummy.rotation.set(
+        ball.rotX,
+        ball.rotY,
+        ball.rotZ
+      );
       dummy.updateMatrix();
 
       if (ball.type === "stripe") {
-        stripeBaseRef.current.setMatrixAt(stripeIndex, dummy.matrix);
+        stripeBaseRef.current.setMatrixAt(
+          stripeIndex,
+          dummy.matrix
+        );
 
-        dummy.rotation.z = Math.PI / 2;
+        dummy.rotation.set(
+          ball.rotX,
+          ball.rotY,
+          ball.rotZ + Math.PI / 2
+        );
 
         dummy.updateMatrix();
 
-        stripeBandRef.current.setMatrixAt(stripeIndex, dummy.matrix);
+        stripeBandRef.current.setMatrixAt(
+          stripeIndex,
+          dummy.matrix
+        );
 
         stripeIndex++;
       } else {

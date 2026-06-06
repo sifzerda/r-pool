@@ -41,28 +41,31 @@ export function resolveCollision(a, b) {
   if (velocityAlongNormal >= 0) return;
 
   // Equal-mass elastic collision
-const restitution = 0.96;
+  const restitution = 0.96;
 
-const massA = a.mass || 0.17;
-const massB = b.mass || 0.17;
+  const massA = a.mass || 0.17;
+  const massB = b.mass || 0.17;
 
-const impulseMagnitude =
-  -(1 + restitution) *
-  velocityAlongNormal /
-  (
-    (1 / massA) +
-    (1 / massB)
-  );
+  const impulseMagnitude =
+    -(1 + restitution) *
+    velocityAlongNormal /
+    (
+      (1 / massA) +
+      (1 / massB)
+    );
 
-const impulseX =
-  impulseMagnitude * nx;
+  const impulseX =
+    impulseMagnitude * nx;
 
-const impulseZ =
-  impulseMagnitude * ny;
+  const impulseZ =
+    impulseMagnitude * ny;
 
-a.vx -= impulseX / massA;
-a.vz -= impulseZ / massA;
+  a.vx -= impulseX / massA;
+  a.vz -= impulseZ / massA;
 
-b.vx += impulseX / massB;
-b.vz += impulseZ / massB;
+  b.vx += impulseX / massB;
+  b.vz += impulseZ / massB;
+
+  a.rotY += impulseMagnitude * 0.05;
+  b.rotY -= impulseMagnitude * 0.05;
 }

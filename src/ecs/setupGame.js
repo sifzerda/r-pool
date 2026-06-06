@@ -32,6 +32,10 @@ export function setupGame() {
     vx: 0,
     vz: 0,
 
+    rotX: 0,
+    rotY: 0,
+    rotZ: 0,
+
     spinX: 0,
     spinZ: 0,
 
@@ -51,7 +55,7 @@ export function setupGame() {
       id: i + 1,
       dirty: true,
       instanceId: nextInstanceId++,
-      
+
       ...ball,
 
       renderColor: new Color(ball.color),
@@ -60,6 +64,10 @@ export function setupGame() {
 
       vx: 0,
       vz: 0,
+
+      rotX: 0,
+      rotY: 0,
+      rotZ: 0,
 
       spinX: 0,
       spinZ: 0,
