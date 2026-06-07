@@ -143,11 +143,11 @@ export default function CueStickRenderer({ cueBall, aimRef }) {
   // 5 meshes → 5 draw calls (was 8)
   return (
     <group ref={ref}>
-      <mesh geometry={geoTip}     material={matTip} />
+      <mesh geometry={geoTip} material={matTip} />
       <mesh geometry={geoFerrule} material={matFerrule} />
-      <mesh geometry={geoMaple}   material={matMaple} />
-      <mesh geometry={geoRings}   material={matRings} />
-      <mesh geometry={geoDark}    material={matDark} />
+      <mesh geometry={geoMaple} material={matMaple} />
+      <mesh geometry={geoRings} material={matRings} />
+      <mesh geometry={geoDark} material={matDark} />
     </group>
   );
 }
