@@ -14,7 +14,7 @@ export const eightBallQuery = world.with("ball").where(ball => ball.type === "ei
 export const activeBalls = new Set();
 export const dirtyBalls = new Set();
 
-  // helper for calculating aim line while balls moving (so not continously updating)
+// helper for calculating aim line while balls moving (so not continously updating)
 export function ballsAreMoving() {
   return activeBalls.size > 0;
 }
