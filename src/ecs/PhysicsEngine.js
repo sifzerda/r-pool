@@ -21,8 +21,7 @@ export class PhysicsEngine {
     this.accumulator += delta;
 
     while (this.accumulator >= this.FIXED_DT) {
-      const subDt =
-        this.FIXED_DT / this.SUBSTEPS;
+      const subDt = this.FIXED_DT / this.SUBSTEPS;
 
       for (
         let i = 0;
@@ -35,16 +34,12 @@ export class PhysicsEngine {
         );
 
         physicsSystem(subDt);
-
         collisionSystem();
-
         pocketSystem();
-
         frictionSystem(null, subDt);
       }
 
-      this.accumulator -=
-        this.FIXED_DT;
+      this.accumulator -= this.FIXED_DT;
     }
   }
 }

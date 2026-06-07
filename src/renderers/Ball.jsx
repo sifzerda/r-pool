@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BALL_R } from "../ecs/constants/table";
+import { markDirty } from "../ecs/world";
 
 export default function Ball({
   ball,
@@ -12,6 +13,10 @@ export default function Ball({
 
   useFrame((_, delta) => {
     if (!meshRef.current) return;
+
+    if (ball.sleeping && !ball.dirty && !ball.falling) {
+      return;
+    }
 
     if (ball.falling) {
 
@@ -24,12 +29,9 @@ export default function Ball({
       ball.fallSpeed += 12 * delta;
       ball.y -= ball.fallSpeed * delta;
 
-      meshRef.current.position.set(
-        ball.x,
-        ball.y,
-        ball.z
-      );
+      markDirty(ball);
 
+      meshRef.current.position.set(ball.x, ball.y, ball.z);
       meshRef.current.rotation.x += delta * 8;
       meshRef.current.rotation.z += delta * 8;
 
@@ -41,18 +43,13 @@ export default function Ball({
     }
 
     if (ball.pocketed) return;
+    if (!ball.dirty) return;
 
-    meshRef.current.position.set(
-      ball.x,
-      ball.y,
-      ball.z
-    );
+    meshRef.current.position.set(ball.x, ball.y, ball.z);
+    meshRef.current.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
 
-    meshRef.current.rotation.set(
-      ball.rotX,
-      ball.rotY,
-      ball.rotZ
-    );
+    ball.dirty = false;
+
   });
 
   if (ball.pocketed) return null;

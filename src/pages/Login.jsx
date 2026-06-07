@@ -34,12 +34,12 @@ export default function Login() {
           </button>
         </form>
 
-          <p className="mt-6 text-center text-sm text-zinc-400">
-            Already have an account?{" "}
-            <a href="/login" className="text-cyan-400 underline hover:cursor-pointer">
-              Login
-            </a>
-          </p>
+        <p className="mt-6 text-center text-sm text-zinc-400">
+          Already have an account?{" "}
+          <a href="/login" className="text-cyan-400 underline hover:cursor-pointer">
+            Login
+          </a>
+        </p>
 
       </div>
     </section>

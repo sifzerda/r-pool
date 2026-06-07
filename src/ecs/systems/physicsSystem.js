@@ -1,7 +1,7 @@
 // src/ecs/systems/physicsSystem.js
 
 import { PLAY_X, PLAY_Z, BALL_R, POCKET_R } from "../constants/table";
-import { ballQuery, activeBalls, deactiveBall } from "../world";
+import { ballQuery, activeBalls, deactiveBall, markDirty } from "../world";
 
 const CUSHION_RESTITUTION = 0.92;
 const INV_R = 1 / BALL_R;
@@ -9,7 +9,7 @@ const OPENING = POCKET_R + BALL_R;
 
 export function physicsSystem(dt) {
   for (const ball of activeBalls) {
-    if (ball.pocketed || ball.falling) 
+    if (ball.pocketed || ball.falling)
       continue;
 
     if (
@@ -24,7 +24,7 @@ export function physicsSystem(dt) {
     ball.rotX += (ball.vz * INV_R) * dt;
     ball.rotZ -= (ball.vx * INV_R) * dt;
 
-    ball.dirty = true;
+    markDirty(ball);
 
     ball.vx += ball.sideSpin * dt;
     ball.sideSpin *= 0.99;
@@ -53,6 +53,8 @@ export function physicsSystem(dt) {
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
+
+      markDirty(ball);
     }
 
     if (
@@ -69,6 +71,8 @@ export function physicsSystem(dt) {
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
+
+      markDirty(ball);
     }
 
     // top / bottom pockets (z fixed, vary x)
@@ -88,6 +92,8 @@ export function physicsSystem(dt) {
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
+
+      markDirty(ball);
     }
 
     if (
@@ -104,6 +110,8 @@ export function physicsSystem(dt) {
 
       ball.vx *= CUSHION_RESTITUTION;
       ball.vz *= CUSHION_RESTITUTION;
+
+      markDirty(ball);
     }
 
     const speed = Math.hypot(ball.vx, ball.vz);
@@ -112,7 +120,7 @@ export function physicsSystem(dt) {
       ball.vx = 0;
       ball.vz = 0;
       ball.sleeping = true;
-      ball.dirty = true;
+      markDirty(ball);
       deactiveBall(ball);
     }
   }

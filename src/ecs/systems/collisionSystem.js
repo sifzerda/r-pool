@@ -2,7 +2,7 @@
 
 import { BALL_R } from "../constants/table";
 import { resolveCollision } from "../utils/collision";
-import { ballQuery, activeBall } from "../world";
+import { ballQuery, activeBall, markDirty } from "../world";
 import { SpatialGrid } from "../utils/spatialGrid";
 
 const grid = new SpatialGrid();
@@ -48,8 +48,8 @@ export function collisionSystem() {
         a.sleeping = false;
         b.sleeping = false;
 
-        a.dirty = true;
-        b.dirty = true;
+        markDirty(a);
+        markDirty(b);
       }
     }
   }

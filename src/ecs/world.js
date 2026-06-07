@@ -12,6 +12,7 @@ export const stripeBallQuery = world.with("ball").where(ball => ball.type === "s
 export const eightBallQuery = world.with("ball").where(ball => ball.type === "eight");
 
 export const activeBalls = new Set();
+export const dirtyBalls = new Set();
 
   // helper for calculating aim line while balls moving (so not continously updating)
 export function ballsAreMoving() {
@@ -21,14 +22,18 @@ export function ballsAreMoving() {
 //helpers for tracking only moving balls
 export function activeBall(ball) {
   if (ball.active) return;
-
   ball.active = true;
   activeBalls.add(ball);
 }
 
 export function deactiveBall(ball) {
   if (!ball.active) return;
-
   ball.active = false;
   activeBalls.delete(ball);
+}
+
+export function markDirty(ball) {
+  if (ball.dirty) return;
+  ball.dirty = true;
+  dirtyBalls.add(ball);
 }

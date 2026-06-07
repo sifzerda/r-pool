@@ -3,6 +3,7 @@
 import {
   activeBalls,
   deactiveBall,
+  markDirty,
 } from "../world";
 
 const ROLLING_RESISTANCE = 0.45;
@@ -28,7 +29,7 @@ export function frictionSystem(dt) {
       ball.vz = 0;
 
       ball.sleeping = true;
-      ball.dirty = true;
+      markDirty(ball);
 
       sleepingBalls.push(ball);
 
