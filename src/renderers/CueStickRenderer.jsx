@@ -48,20 +48,31 @@ const geoDark = mergeGeometries([
 // ─────────────────────────────────────────
 
 const matTip = new THREE.MeshStandardMaterial({
-  color: "#5c3317", roughness: 0.9, metalness: 0.0,
+  color: "#5c3317", 
+  roughness: 0.9, 
+  metalness: 0.0,
 });
 const matFerrule = new THREE.MeshStandardMaterial({
-  color: "#f0ede8", roughness: 0.3, metalness: 0.1,
+  color: "#f0ede8", 
+  roughness: 0.3, 
+  metalness: 0.1,
 });
 const matMaple = new THREE.MeshStandardMaterial({
-  color: "#d4a84b", roughness: 0.25, metalness: 0.05,
+  color: "#d4a84b", 
+  roughness: 0.25, 
+  metalness: 0.05,
 });
 const matRings = new THREE.MeshStandardMaterial({
-  color: "#c8a030", roughness: 0.2, metalness: 0.6,
-  emissive: "#4a3800", emissiveIntensity: 0.3,
+  color: "#c8a030", 
+  roughness: 0.2, 
+  metalness: 0.6,
+  emissive: "#4a3800", 
+  emissiveIntensity: 0.3,
 });
 const matDark = new THREE.MeshStandardMaterial({
-  color: "#1a0e06", roughness: 0.95, metalness: 0.0,
+  color: "#1a0e06", 
+  roughness: 0.95, 
+  metalness: 0.0,
 });
 
 export default function CueStickRenderer({ cueBall, aimRef }) {
