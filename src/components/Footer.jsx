@@ -30,7 +30,7 @@ export default function Footer() {
 
             {/* GitHub Link */}
             <a href="https://github.com/sifzerda/r-pool" target="_blank" rel="noopener noreferrer"
-              className="mt-2 flex items-center gap-2 text-cyan-400/70 transition-all duration-300 hover:text-cyan-300 hover:drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
+              className="flex items-center gap-2 text-cyan-400/70 transition-all duration-300 hover:text-cyan-300 hover:drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
               <FaGithub className="h-5 w-5" />
               <span className="text-[10px] uppercase tracking-[0.4em]">GitHub</span>
             </a>

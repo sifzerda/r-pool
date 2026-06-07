@@ -1,7 +1,5 @@
 // src/pages/Vip.jsx
 
-import NeonLayout from "../components/NeonLayout.jsx";
-
 export default function Vip() {
     const vipPerks = [
         { title: "Exclusive Cues", description: "Access legendary pool cues.", color: "cyan" },
@@ -15,7 +13,7 @@ export default function Vip() {
     const exclusiveRewards = 8;
 
     return (
-        <NeonLayout>
+        <>
             {/* Main Content */}
             <section className="relative z-10 px-6 py-12">
                 <div className="mx-auto max-w-7xl">
@@ -40,8 +38,8 @@ export default function Vip() {
                             <div
                                 key={label}
                                 className={`rounded-3xl border p-5 backdrop-blur-md ${color === "cyan"
-                                    ? "border-cyan-400/15 bg-cyan-500/[0.04]"
-                                    : "border-fuchsia-400/15 bg-fuchsia-500/[0.04]"
+                                    ? "border-cyan-400/15 bg-cyan-500/4"
+                                    : "border-fuchsia-400/15 bg-fuchsia-500/4"
                                     }`}>
                                 <p
                                     className={`text-[10px] uppercase tracking-[0.35em] ${color === "cyan" ? "text-cyan-500" : "text-fuchsia-400"
@@ -89,8 +87,8 @@ export default function Vip() {
         }
       `}</style>
 
+        </>
 
-        </NeonLayout>
 
     );
 }

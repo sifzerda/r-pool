@@ -1,13 +1,9 @@
 // src/pages/Signup.jsx
 
-import NeonLayout from "../components/NeonLayout.jsx";
-
 export default function Signup() {
   return (
 
-    <NeonLayout>
-
-
+    <>
 
       {/* Main Form */}
       <section className="relative z-10 flex items-center justify-center py-8 px-6">
@@ -40,23 +36,22 @@ export default function Signup() {
             />
             <button
               type="submit"
-              className="group relative overflow-hidden rounded-3xl border border-fuchsia-400/30 bg-fuchsia-500/10 px-6 py-4 text-sm font-bold text-fuchsia-100 transition-all duration-300 hover:-translate-y-1 hover:border-fuchsia-300 hover:shadow-[0_0_40px_rgba(217,70,239,0.35)]">
+              className="group relative overflow-hidden rounded-3xl border border-fuchsia-400/30 bg-fuchsia-500/10 px-6 py-4 text-sm font-bold text-fuchsia-100 transition-all duration-300 hover:-translate-y-1 hover:border-fuchsia-300 hover:shadow-[0_0_40px_rgba(217,70,239,0.35)] hover:cursor-pointer">
               <span className="relative z-10">SIGN UP</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-fuchsia-300/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-fuchsia-300/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-zinc-400">
             Already have an account?{" "}
-            <a href="/login" className="text-fuchsia-400 underline">
+            <a href="/login" className="text-fuchsia-400 underline hover:cursor-pointer">
               Login
             </a>
           </p>
         </div>
       </section>
 
+    </>
 
-
-    </NeonLayout>
   );
 }

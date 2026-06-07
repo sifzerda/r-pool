@@ -139,7 +139,7 @@ LATER:
 
 - [x] 3d revolving balls
 
-- [ ] numbered balls
+- [x] numbered balls
 
 - [ ] AimGuide not appearing since combining ball renderers
 

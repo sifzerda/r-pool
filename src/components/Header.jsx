@@ -27,7 +27,7 @@ export default function Header() {
 
         <div className="relative px-8 py-2 md:px-14">
 
-          {/* Corner accents (UNCHANGED) */}
+          {/* Corner accents */}
           <div className="absolute left-6 top-6 h-12 w-12 border-l border-t border-cyan-400/40" />
           <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-fuchsia-400/40" />
           <div className="absolute bottom-6 left-6 h-12 w-12 border-b border-l border-fuchsia-400/20" />
@@ -35,7 +35,7 @@ export default function Header() {
 
           <div className="flex flex-col items-center gap-5">
 
-            {/* Main Title (UNCHANGED) */}
+            {/* Main Title */}
             <div className="relative text-center">
               <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
 
@@ -58,7 +58,7 @@ export default function Header() {
               </div>
             </div>
 
-            {/* DESKTOP NAV (UNCHANGED) */}
+            {/* DESKTOP NAV */}
             <nav className="hidden md:flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.35em] text-cyan-500/70">
               {links.map((item) => (
                 <Link to={item.href}

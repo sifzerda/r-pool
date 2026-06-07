@@ -1,23 +1,26 @@
 // App.jsx
 
-import './App.css';
-import { Outlet } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import { Outlet } from "react-router-dom";
+
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import NeonLayout from "./components/NeonLayout";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="header">
-        <Header />
-      </header>
+    <NeonLayout>
+      <div className="min-h-screen flex flex-col">
+        <header>
+          <Header />
+        </header>
 
-      <main className="flex-1 mx-3">
-        <Outlet />
-      </main>
+        <main className="flex-1 mx-3">
+          <Outlet />
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </NeonLayout>
   );
 }
 
