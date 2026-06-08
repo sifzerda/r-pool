@@ -1,15 +1,9 @@
 // src/ecs/components/PoolTableRenderer.jsx
 // table contains pockets
 
-import {
-  TABLE_W,
-  TABLE_H,
-  CUSHION,
-  PLAY_W,
-  PLAY_H,
-  PLAY_X,
-  PLAY_Z,
-} from "../ecs/constants/table";
+import { TABLE_W, TABLE_H, CUSHION, PLAY_W, PLAY_H, PLAY_X, PLAY_Z } from "../ecs/constants/table";
+import { useTexture } from '@react-three/drei'
+import * as THREE from 'three'
 
 export default function PoolTableRenderer() {
   const railHeight = 0.28;
@@ -22,6 +16,11 @@ export default function PoolTableRenderer() {
   const cornerGap = CORNER_POCKET_R * 1.8;
 
   const topRailLength = (PLAY_W - sideGap) / 2 - cornerGap;
+
+  // For bg felt
+  const pixelTexture = useTexture('/pool-table.png')
+  pixelTexture.wrapS = pixelTexture.wrapT = THREE.RepeatWrapping
+  pixelTexture.repeat.set(PLAY_W / 1.7, PLAY_H / 1.7)
 
   return (
     <group>
@@ -62,16 +61,20 @@ export default function PoolTableRenderer() {
       {/* FELT */}
       {/* ========================================= */}
 
-      <mesh
-        receiveShadow
-        position={[0, 0.21, 0]}
-      >
-        <boxGeometry
-          args={[PLAY_W, 0.02, PLAY_H]}
-        />
-        <meshStandardMaterial
-          color="#0b6a3a"
-          roughness={0.95}
+      <mesh receiveShadow position={[0, 0.21, 0]}>
+        <boxGeometry args={[PLAY_W, 0.02, PLAY_H]} />
+        <meshStandardMaterial color="#008000" roughness={0.95} />
+      </mesh>
+
+      {/* cream-pixels texture overlay — screen blend, 35% opacity */}
+      <mesh position={[0, 0.221, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[PLAY_W, PLAY_H]} />
+        <meshBasicMaterial
+          map={pixelTexture}
+          transparent
+          blending={THREE.AdditiveBlending}
+          opacity={1.0}
+          depthWrite={false}
         />
       </mesh>
 
@@ -313,28 +316,28 @@ export default function PoolTableRenderer() {
           r: CORNER_POCKET_R,
         },
       ].map((pocket, i) => (
-<mesh
-  key={i}
-  position={[
-    pocket.x,
-    0.35,
-    pocket.z,
-  ]}
-  receiveShadow
->
-  <cylinderGeometry
-    args={[
-      pocket.r,
-      pocket.r * 0.9,
-      0.22,
-      32,
-    ]}
-  />
-  <meshStandardMaterial
-    color="#120c08"
-    roughness={1}
-  />
-</mesh>
+        <mesh
+          key={i}
+          position={[
+            pocket.x,
+            0.35,
+            pocket.z,
+          ]}
+          receiveShadow
+        >
+          <cylinderGeometry
+            args={[
+              pocket.r,
+              pocket.r * 0.9,
+              0.22,
+              32,
+            ]}
+          />
+          <meshStandardMaterial
+            color="#120c08"
+            roughness={1}
+          />
+        </mesh>
       ))}
 
       {/* ========================================= */}

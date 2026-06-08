@@ -3,7 +3,6 @@ import { activeBalls, deactiveBall, markDirty } from "../world";
 
 const VISCOUS_DAMP  = 1.5;  // decay rate — higher = stops sooner
 const SLEEP_SPEED   = 0.09;
-
 export function frictionSystem(dt) {
   const toSleep = [];
   const damping = Math.exp(-VISCOUS_DAMP * dt);  // smooth decay factor
