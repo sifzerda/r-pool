@@ -1,46 +1,34 @@
 // src/ecs/systems/frictionSystem.js
+import { activeBalls, deactiveBall, markDirty } from "../world";
 
-import {
-  activeBalls,
-  deactiveBall,
-  markDirty,
-} from "../world";
-
-const ROLLING_RESISTANCE = 0.45;
-const SLEEP_SPEED = 0.02;
+const VISCOUS_DAMP  = 1.5;  // decay rate — higher = stops sooner
+const SLEEP_SPEED   = 0.09;
 
 export function frictionSystem(dt) {
-  const sleepingBalls = [];
+  const toSleep = [];
+  const damping = Math.exp(-VISCOUS_DAMP * dt);  // smooth decay factor
 
   for (const ball of activeBalls) {
     if (ball.sleeping) continue;
 
-    const speed = Math.hypot(
-      ball.vx,
-      ball.vz
-    );
+    const speed = Math.hypot(ball.vx, ball.vz);
+    if (speed === 0) continue;
 
-    if (speed <= SLEEP_SPEED) {
+    const newSpeed = speed * damping;
+
+    if (newSpeed <= SLEEP_SPEED) {
       ball.vx = 0;
       ball.vz = 0;
-
       ball.sleeping = true;
       markDirty(ball);
-
-      sleepingBalls.push(ball);
-
+      toSleep.push(ball);
       continue;
     }
 
-    const decel = ROLLING_RESISTANCE * dt;
-    const newSpeed = Math.max(0, speed - decel);
     const scale = newSpeed / speed;
-
     ball.vx *= scale;
     ball.vz *= scale;
   }
 
-  for (const ball of sleepingBalls) {
-    deactiveBall(ball);
-  }
+  for (const ball of toSleep) deactiveBall(ball);
 }

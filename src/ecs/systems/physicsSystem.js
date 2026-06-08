@@ -1,117 +1,42 @@
 // src/ecs/systems/physicsSystem.js
-
 import { PLAY_X, PLAY_Z, BALL_R, POCKET_R } from "../constants/table";
 import { activeBalls, markDirty } from "../world";
 
-const CUSHION_RESTITUTION = 0.92;
-const INV_R = 1 / BALL_R;
+const CUSHION_RESTITUTION = 0.75;  // lowered — real cushions lose more energy
 const OPENING = POCKET_R + BALL_R;
+const INV_R   = 1 / BALL_R;
+
+function reflect(vel, normal) {
+  const dot = vel.vx * normal.x + vel.vz * normal.z;
+  vel.vx = (vel.vx - 2 * dot * normal.x) * CUSHION_RESTITUTION;
+  vel.vz = (vel.vz - 2 * dot * normal.z) * CUSHION_RESTITUTION;
+}
 
 export function physicsSystem(dt) {
+  const left   = -PLAY_X, right  = PLAY_X;
+  const top    = -PLAY_Z, bottom = PLAY_Z;
+
   for (const ball of activeBalls) {
-    if (ball.pocketed || ball.falling)
-      continue;
+    if (ball.pocketed || ball.falling || ball.sleeping) continue;
 
-    if (
-      ball.sleeping && Math.abs(ball.vx) < 0.001 && Math.abs(ball.vz) < 0.001
-    ) {
-      continue;
-    }
-    if (ball.sleeping) continue;
-
-    ball.x += ball.vx * dt;
-    ball.z += ball.vz * dt;
+    ball.x    += ball.vx * dt;
+    ball.z    += ball.vz * dt;
     ball.rotX += (ball.vz * INV_R) * dt;
     ball.rotZ -= (ball.vx * INV_R) * dt;
 
+    const pocketOpenLR = Math.abs(ball.z + PLAY_Z) < OPENING
+                      || Math.abs(ball.z)           < OPENING
+                      || Math.abs(ball.z - PLAY_Z)  < OPENING;
+
+    const pocketOpenTB = Math.abs(ball.x + PLAY_X) < OPENING
+                      || Math.abs(ball.x)           < OPENING
+                      || Math.abs(ball.x - PLAY_X)  < OPENING;
+
+    if (ball.x - BALL_R < left  && !pocketOpenLR) { ball.x =  left  + BALL_R; reflect(ball, { x:  1, z: 0 }); }
+    if (ball.x + BALL_R > right && !pocketOpenLR) { ball.x =  right - BALL_R; reflect(ball, { x: -1, z: 0 }); }
+    if (ball.z - BALL_R < top   && !pocketOpenTB) { ball.z =  top   + BALL_R; reflect(ball, { x: 0, z:  1 }); }
+    if (ball.z + BALL_R > bottom && !pocketOpenTB) { ball.z = bottom - BALL_R; reflect(ball, { x: 0, z: -1 }); }
+
     markDirty(ball);
-
-    ball.vx += ball.sideSpin * dt;
-    ball.sideSpin *= 0.99;
-
-    const r = BALL_R;
-
-    const left = -PLAY_X;
-    const right = PLAY_X;
-    const top = -PLAY_Z;
-    const bottom = PLAY_Z;
-
-    // left / right pockets (x fixed, vary z)
-    const leftRightOpening = Math.abs(ball.z + PLAY_Z) < OPENING || Math.abs(ball.z) < OPENING || Math.abs(ball.z - PLAY_Z) < OPENING;
-
-    if (
-      ball.x - r < left && !leftRightOpening
-    ) {
-      ball.x = left + r;
-
-      const nx = 1;
-      const nz = 0;
-
-      const dot = ball.vx * nx + ball.vz * nz;
-      ball.vx = ball.vx - 2 * dot * nx;
-      ball.vz = ball.vz - 2 * dot * nz;
-
-      ball.vx *= CUSHION_RESTITUTION;
-      ball.vz *= CUSHION_RESTITUTION;
-
-      markDirty(ball);
-    }
-
-    if (
-      ball.x + r > right && !leftRightOpening
-    ) {
-      ball.x = right - r;
-
-      const nx = -1;
-      const nz = 0;
-
-      const dot = ball.vx * nx + ball.vz * nz;
-      ball.vx = ball.vx - 2 * dot * nx;
-      ball.vz = ball.vz - 2 * dot * nz;
-
-      ball.vx *= CUSHION_RESTITUTION;
-      ball.vz *= CUSHION_RESTITUTION;
-
-      markDirty(ball);
-    }
-
-    // top / bottom pockets (z fixed, vary x)
-    const topBottomOpening = Math.abs(ball.x + PLAY_X) < OPENING || Math.abs(ball.x) < OPENING || Math.abs(ball.x - PLAY_X) < OPENING;
-
-    if (
-      ball.z - r < top && !topBottomOpening
-    ) {
-      ball.z = top + r;
-
-      const nx = 0;
-      const nz = 1;
-
-      const dot = ball.vx * nx + ball.vz * nz;
-      ball.vx = ball.vx - 2 * dot * nx;
-      ball.vz = ball.vz - 2 * dot * nz;
-
-      ball.vx *= CUSHION_RESTITUTION;
-      ball.vz *= CUSHION_RESTITUTION;
-
-      markDirty(ball);
-    }
-
-    if (
-      ball.z + r > bottom && !topBottomOpening
-    ) {
-      ball.z = bottom - r;
-
-      const nx = 0;
-      const nz = -1;
-
-      const dot = ball.vx * nx + ball.vz * nz;
-      ball.vx = ball.vx - 2 * dot * nx;
-      ball.vz = ball.vz - 2 * dot * nz;
-
-      ball.vx *= CUSHION_RESTITUTION;
-      ball.vz *= CUSHION_RESTITUTION;
-
-      markDirty(ball);
-    }
   }
 }
