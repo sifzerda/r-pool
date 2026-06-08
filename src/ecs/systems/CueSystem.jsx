@@ -33,8 +33,10 @@ export default function CueSystem({ cueBall, aimRef }) {
       aimRef.current.swingT = 0;
 
       aimRef.current.pendingShot = {
-        power,
         angle: aimRef.current.angle,
+        cos: aimRef.current.cos,
+        sin: aimRef.current.sin,
+        power,
       };
 
       aimRef.current.power = 0;

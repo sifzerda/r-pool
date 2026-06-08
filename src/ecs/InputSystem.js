@@ -6,17 +6,38 @@ import * as THREE from "three";
 
 import { toRenderX, toRenderZ } from "./utils/coords";
 
-export default function InputSystem({ cueBall, aimRef }) {
+export default function InputSystem({
+  cueBall,
+  aimRef,
+}) {
   const { camera } = useThree();
 
-  const raycaster = useRef(new THREE.Raycaster());
-  const point = useRef(new THREE.Vector3());
-  const plane = useRef(new THREE.Plane( new THREE.Vector3(0, 1, 0), 0));
+  const raycaster = useRef(
+    new THREE.Raycaster()
+  );
+
+  const point = useRef(
+    new THREE.Vector3()
+  );
+
+  const plane = useRef(
+    new THREE.Plane(
+      new THREE.Vector3(0, 1, 0),
+      0
+    )
+  );
 
   useFrame((state) => {
-    raycaster.current.setFromCamera(state.pointer, camera);
+    raycaster.current.setFromCamera(
+      state.pointer,
+      camera
+    );
 
-    const hit = raycaster.current.ray.intersectPlane(plane.current, point.current);
+    const hit =
+      raycaster.current.ray.intersectPlane(
+        plane.current,
+        point.current
+      );
 
     if (!hit) return;
 
@@ -26,7 +47,13 @@ export default function InputSystem({ cueBall, aimRef }) {
     const dx = cueX - point.current.x;
     const dz = cueZ - point.current.z;
 
-    aimRef.current.angle = Math.atan2(dz, dx);
+    const angle = Math.atan2(dz, dx);
+
+    aimRef.current.angle = angle;
+
+    // cache trig values
+    aimRef.current.cos = Math.cos(angle);
+    aimRef.current.sin = Math.sin(angle);
   });
 
   return null;

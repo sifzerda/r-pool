@@ -1,5 +1,7 @@
 // src/ecs/PhysicsEngine.js
 
+// src/ecs/PhysicsEngine.js
+
 import { physicsSystem } from "./systems/physicsSystem";
 import { frictionSystem } from "./systems/frictionSystem";
 import { collisionSystem } from "./systems/collisionSystem";
@@ -7,7 +9,10 @@ import { pocketSystem } from "./systems/pocketSystem";
 import { shotSystem } from "./systems/shotSystem";
 
 export class PhysicsEngine {
-  constructor(cueBall, aimRef) {
+  constructor(
+    cueBall,
+    aimRef
+  ) {
     this.cueBall = cueBall;
     this.aimRef = aimRef;
 
@@ -20,8 +25,13 @@ export class PhysicsEngine {
   update(delta) {
     this.accumulator += delta;
 
-    while (this.accumulator >= this.FIXED_DT) {
-      const subDt = this.FIXED_DT / this.SUBSTEPS;
+    while (
+      this.accumulator >=
+      this.FIXED_DT
+    ) {
+      const subDt =
+        this.FIXED_DT /
+        this.SUBSTEPS;
 
       for (
         let i = 0;
@@ -36,10 +46,14 @@ export class PhysicsEngine {
         physicsSystem(subDt);
         collisionSystem();
         pocketSystem();
-        frictionSystem(null, subDt);
+        frictionSystem(
+          null,
+          subDt
+        );
       }
 
-      this.accumulator -= this.FIXED_DT;
+      this.accumulator -=
+        this.FIXED_DT;
     }
   }
 }
