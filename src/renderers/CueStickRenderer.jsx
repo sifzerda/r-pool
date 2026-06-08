@@ -5,6 +5,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { toRenderX, toRenderZ } from "../ecs/utils/coords";
+import { ballsAreMoving, activeBalls } from "../ecs/world.js";
 
 // ─────────────────────────────────────────
 // Geometry creation (once)
@@ -24,14 +25,14 @@ const geoFerrule = makeCylinder(0.028, 0.032, 0.18, 8, 0.23);
 
 const geoMaple = mergeGeometries([
   makeCylinder(0.032, 0.052, 2.20, 12, 1.42),
-  makeCylinder( 0.060, 0.070, 0.82, 12, 3.65),
+  makeCylinder(0.060, 0.070, 0.82, 12, 3.65),
 ]);
 
 const geoRings = mergeGeometries([
   makeCylinder(0.056, 0.056, 0.024, 8, 2.530),
   makeCylinder(0.056, 0.056, 0.016, 8, 2.566),
   makeCylinder(0.062, 0.062, 0.024, 8, 3.210),
-  makeCylinder( 0.062, 0.062, 0.016, 8, 3.246),
+  makeCylinder(0.062, 0.062, 0.016, 8, 3.246),
 ]);
 
 const geoDark = mergeGeometries([
@@ -91,13 +92,8 @@ export default function CueStickRenderer({
 
     if (!group) return;
 
-     const moving =
-    Math.abs(cueBall.vx) > 0.05 ||
-    Math.abs(cueBall.vz) > 0.05;
-
-  group.visible = !moving;
-
-  if (moving) return;
+    group.visible = activeBalls.size === 0;
+    if (activeBalls.size > 0) return;
 
     const angle = aimRef.current.angle ?? 0;
     const cos = aimRef.current.cos ?? Math.cos(angle);
@@ -137,36 +133,36 @@ export default function CueStickRenderer({
   const moving = Math.abs(cueBall.vx) > 0.05 || Math.abs(cueBall.vz) > 0.05;
 
   return (
-  <group ref={ref}>
-    <mesh
-      geometry={geoTip}
-      material={matTip}
-      castShadow
-    />
+    <group ref={ref}>
+      <mesh
+        geometry={geoTip}
+        material={matTip}
+        castShadow
+      />
 
-    <mesh
-      geometry={geoFerrule}
-      material={matFerrule}
-      castShadow
-    />
+      <mesh
+        geometry={geoFerrule}
+        material={matFerrule}
+        castShadow
+      />
 
-    <mesh
-      geometry={geoMaple}
-      material={matMaple}
-      castShadow
-    />
+      <mesh
+        geometry={geoMaple}
+        material={matMaple}
+        castShadow
+      />
 
-    <mesh
-      geometry={geoRings}
-      material={matRings}
-      castShadow
-    />
+      <mesh
+        geometry={geoRings}
+        material={matRings}
+        castShadow
+      />
 
-    <mesh
-      geometry={geoDark}
-      material={matDark}
-      castShadow
-    />
-  </group>
-);
+      <mesh
+        geometry={geoDark}
+        material={matDark}
+        castShadow
+      />
+    </group>
+  );
 }

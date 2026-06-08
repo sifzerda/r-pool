@@ -19,6 +19,7 @@ export function ballsAreMoving() {
   return activeBalls.size > 0;
 }
 
+
 //helpers for tracking only moving balls
 export function activeBall(ball) {
   if (ball.active) return;

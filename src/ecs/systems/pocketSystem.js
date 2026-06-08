@@ -1,6 +1,6 @@
 // src/ecs/systems/pocketSystem.js
 
-import { ballQuery, activeBalls, deactiveBall, markDirty } from "../world";
+import { activeBalls, markDirty } from "../world";
 import { POCKETS } from "../constants/pockets";
 import { POCKET_R } from "../constants/table";
 
@@ -36,10 +36,8 @@ export function pocketSystem() {
 
                     ball.sleeping = true;
                     markDirty(ball);
-                    deactiveBall(ball);
 
                 } else {
-
 
                     ball.pocketX = pocket.x;
                     ball.pocketZ = pocket.z;
@@ -50,9 +48,8 @@ export function pocketSystem() {
                     ball.vx *= 0.2;
                     ball.vz *= 0.2;
 
-                    ball.sleeping = false;
-                    markDirty(ball);
-                    deactiveBall(ball);
+                    ball.sleeping = true;
+                    ball.v
                 }
 
                 break;

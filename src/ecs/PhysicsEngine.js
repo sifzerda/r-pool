@@ -1,7 +1,5 @@
 // src/ecs/PhysicsEngine.js
 
-// src/ecs/PhysicsEngine.js
-
 import { physicsSystem } from "./systems/physicsSystem";
 import { frictionSystem } from "./systems/frictionSystem";
 import { collisionSystem } from "./systems/collisionSystem";

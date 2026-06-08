@@ -1,7 +1,7 @@
 // src/ecs/systems/physicsSystem.js
 
 import { PLAY_X, PLAY_Z, BALL_R, POCKET_R } from "../constants/table";
-import { ballQuery, activeBalls, deactiveBall, markDirty } from "../world";
+import { activeBalls, markDirty } from "../world";
 
 const CUSHION_RESTITUTION = 0.92;
 const INV_R = 1 / BALL_R;
@@ -112,16 +112,6 @@ export function physicsSystem(dt) {
       ball.vz *= CUSHION_RESTITUTION;
 
       markDirty(ball);
-    }
-
-    const speed = Math.hypot(ball.vx, ball.vz);
-
-    if (speed < 0.02) {
-      ball.vx = 0;
-      ball.vz = 0;
-      ball.sleeping = true;
-      markDirty(ball);
-      deactiveBall(ball);
     }
   }
 }

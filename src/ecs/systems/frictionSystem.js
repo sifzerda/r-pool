@@ -7,24 +7,20 @@ import {
 } from "../world";
 
 const ROLLING_RESISTANCE = 0.45;
+const SLEEP_SPEED = 0.02;
 
 export function frictionSystem(dt) {
   const sleepingBalls = [];
 
   for (const ball of activeBalls) {
-
     if (ball.sleeping) continue;
 
-    const speed = Math.hypot(ball.vx, ball.vz);
+    const speed = Math.hypot(
+      ball.vx,
+      ball.vz
+    );
 
-    if (speed === 0) continue;
-
-    const decel = ROLLING_RESISTANCE * dt;
-
-    const newSpeed = Math.max(0, speed - decel);
-
-    if (newSpeed === 0) {
-
+    if (speed <= SLEEP_SPEED) {
       ball.vx = 0;
       ball.vz = 0;
 
@@ -36,6 +32,8 @@ export function frictionSystem(dt) {
       continue;
     }
 
+    const decel = ROLLING_RESISTANCE * dt;
+    const newSpeed = Math.max(0, speed - decel);
     const scale = newSpeed / speed;
 
     ball.vx *= scale;
