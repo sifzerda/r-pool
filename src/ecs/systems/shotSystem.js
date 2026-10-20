@@ -15,8 +15,8 @@ export function shotSystem(
 
   const strength = shot.power * 2.2;
 
-  cueBall.vx = -cos * strength;
-  cueBall.vz = -sin * strength;
+  cueBall.vx = cos * strength;
+  cueBall.vz = sin * strength;
 
   cueBall.sleeping = false;
   cueBall.dirty = true;

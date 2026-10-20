@@ -1,64 +1,66 @@
 // src/ecs/systems/CueSystem.jsx
 
 import { useEffect } from "react";
-import { activeBall } from "../world.js";
-
-const MAX_POWER = 18;
-const MAX_PULL = 80;
+import { activeBalls } from "../world.js";
 
 export default function CueSystem({ cueBall, aimRef }) {
   useEffect(() => {
-    let charging = false;
-    let chargeStart = 0;
+    function down(event) {
+      // Only use the left mouse button.
+      if (event.button !== 0) return;
 
-    function isMoving() {
-      return Math.hypot(cueBall.vx, cueBall.vz) > 0.05;
+      if (activeBalls.size > 0) return;
+      if (cueBall.pocketed || cueBall.falling) return;
+
+      const aim = aimRef.current;
+
+      if (aim.charging) return;
+
+      aim.charging = true;
+      aim.pullBack = 0;
+      aim.power = 0;
+
+      // Lock the current aim direction.
+      aim.lockedAngle = aim.angle;
+      aim.lockedCos = aim.cos;
+      aim.lockedSin = aim.sin;
+
+      // Record where the mouse was when clicked.
+      aim.dragStartX = aim.pointerX;
+      aim.dragStartZ = aim.pointerZ;
+
+      aim.swing = 1;
     }
 
-    function down() {
-      if (isMoving()) return;
+    function up(event) {
+      if (event.button !== 0) return;
 
-      charging = true;
-      chargeStart = performance.now();
-      aimRef.current.swing = 1;
-    }
+      const aim = aimRef.current;
 
-    function up() {
-      if (!charging) return;
-      charging = false;
+      if (!aim.charging) return;
 
-      const power = aimRef.current.power;
+      aim.charging = false;
 
-      aimRef.current.swing = 2;
-      aimRef.current.swingT = 0;
+      const power = aim.power;
 
-      aimRef.current.pendingShot = {
-        angle: aimRef.current.angle,
-        cos: aimRef.current.cos,
-        sin: aimRef.current.sin,
+      aim.pendingShot = {
+        angle: aim.lockedAngle,
+        cos: aim.lockedCos,
+        sin: aim.lockedSin,
         power,
       };
 
-      aimRef.current.power = 0;
-    }
+      aim.swing = 2;
+      aim.swingT = 0;
 
-    function update() {
-      if (!charging) return;
-
-      const held = (performance.now() - chargeStart) * 0.001;
-
-      // smoother + more controllable power curve
-      const t = Math.min(1, held * 1.2);
-      aimRef.current.power = t * t * MAX_POWER;
+      aim.power = 0;
+      aim.pullBack = 0;
     }
 
     window.addEventListener("mousedown", down);
     window.addEventListener("mouseup", up);
 
-    const id = setInterval(update, 16);
-
     return () => {
-      clearInterval(id);
       window.removeEventListener("mousedown", down);
       window.removeEventListener("mouseup", up);
     };

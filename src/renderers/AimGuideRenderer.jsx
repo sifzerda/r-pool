@@ -44,13 +44,11 @@ export default function AimGuideRenderer({ cueBall, aimRef }) {
 
     if (!cueGeo || !objectGeo || !deflectGeo) return;
 
-    // Hide guides while balls move.
-    if (activeBalls.size > 0) {
+    if (activeBalls.size > 0 || cueBall.pocketed || cueBall.falling) {
       clearLine(cueGeo);
       clearLine(objectGeo);
       clearLine(deflectGeo);
 
-      // Force recalculation when the balls stop.
       lastAngleRef.current = null;
       return;
     }
@@ -66,6 +64,7 @@ export default function AimGuideRenderer({ cueBall, aimRef }) {
 
     lastAngleRef.current = angle;
 
+    // Match shotSystem, which fires using -cos and -sin.
     const dirX = cos ?? Math.cos(angle);
     const dirZ = sin ?? Math.sin(angle);
 

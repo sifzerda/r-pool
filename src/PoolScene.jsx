@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 
-import { ballQuery } from "./ecs/world";
+import { ballQuery, activeBalls } from "./ecs/world";
 
 import PoolTableRenderer from "./renderers/PoolTableRenderer";
 import CueStickRenderer from "./renderers/CueStickRenderer";
@@ -14,15 +14,31 @@ import InputSystem from "./ecs/InputSystem";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
 export default function PoolScene({ cueBall }) {
-const aimRef = useRef({
-  angle: 0,
-  cos: 1,
-  sin: 0,
-  power: 0,
-  swing: 0,
-  swingT: 0,
-  pendingShot: null,
-});
+  const aimRef = useRef({
+    angle: 0,
+    cos: 1,
+    sin: 0,
+
+    power: 0,
+    pullBack: 0,
+
+    charging: false,
+
+    pointerX: 0,
+    pointerZ: 0,
+
+    dragStartX: 0,
+    dragStartZ: 0,
+
+    lockedAngle: 0,
+    lockedCos: 1,
+    lockedSin: 0,
+
+    swing: 0,
+    swingT: 0,
+
+    pendingShot: null,
+  });
 
   const engineRef = useRef();
 

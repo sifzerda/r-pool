@@ -1,15 +1,18 @@
 // src/ecs/utils/rack.js
-// ball positions generated here
+// Generates a triangular 15-ball rack.
+
+import { BALL_R } from "../constants/table.js";
+
+const DIAMETER = BALL_R * 2;
+const ROW_SPACING = DIAMETER * Math.sqrt(3) / 2;
 
 export function buildRack() {
-
   const balls = [];
 
   const startX = 0.9;
   const startZ = 0;
 
   const ballDefs = [
-
     { num: 1, type: "solid", group: "object" },
     { num: 2, type: "solid", group: "object" },
     { num: 3, type: "solid", group: "object" },
@@ -32,18 +35,13 @@ export function buildRack() {
   let index = 0;
 
   for (let row = 0; row < 5; row++) {
-
     for (let i = 0; i <= row; i++) {
-
       const ball = ballDefs[index++];
 
       balls.push({
-
         ...ball,
-
-        x: startX + row * 0.18,
-        z: i * 0.18 - row * 0.09,
-
+        x: startX + row * ROW_SPACING,
+        z: startZ + (i - row / 2) * DIAMETER,
       });
     }
   }
