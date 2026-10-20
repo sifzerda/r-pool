@@ -7,50 +7,42 @@ import { SpatialGrid } from "../utils/spatialGrid";
 
 const grid = new SpatialGrid();
 
+const MIN_DIST = BALL_R * 2;
+const MIN_DIST_SQ = MIN_DIST * MIN_DIST;
+
 export function collisionSystem() {
   grid.clear();
 
-  const balls = [];
-
+  // Build the spatial grid.
   for (const ball of ballQuery) {
     if (ball.pocketed || ball.falling) continue;
-
     grid.insert(ball);
-    balls.push(ball);
   }
 
-  const checked = new Set();
+  // Check nearby pairs.
+  for (const a of ballQuery) {
+    if (a.pocketed || a.falling) continue;
 
-  const minDist = BALL_R * 2;
-  const minDistSq = minDist * minDist;
-
-  for (const a of balls) {
-    const nearby = grid.getNearby(a);
-
-    for (const b of nearby) {
-      if (a === b) continue;
-
-      const id = a.id < b.id ? `${a.id}-${b.id}` : `${b.id}-${a.id}`;
-
-      if (checked.has(id)) continue;
-
-      checked.add(id);
+    grid.forEachNearby(a, (b) => {
+      // Each pair is processed exactly once.
+      if (a.id >= b.id) return;
+      if (b.pocketed || b.falling) return;
 
       const dx = a.x - b.x;
       const dz = a.z - b.z;
 
-      if (dx * dx + dz * dz < minDistSq) {
-        resolveCollision(a, b);
+      if (dx * dx + dz * dz >= MIN_DIST_SQ) return;
 
-        activeBall(a);
-        activeBall(b);
+      resolveCollision(a, b);
 
-        a.sleeping = false;
-        b.sleeping = false;
+      activeBall(a);
+      activeBall(b);
 
-        markDirty(a);
-        markDirty(b);
-      }
-    }
+      a.sleeping = false;
+      b.sleeping = false;
+
+      markDirty(a);
+      markDirty(b);
+    });
   }
 }

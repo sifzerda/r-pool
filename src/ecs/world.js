@@ -34,7 +34,11 @@ export function deactiveBall(ball) {
 }
 
 export function markDirty(ball) {
-  if (ball.dirty) return;
   ball.dirty = true;
   dirtyBalls.add(ball);
+}
+
+export function clearDirty(ball) {
+  ball.dirty = false;
+  dirtyBalls.delete(ball);
 }

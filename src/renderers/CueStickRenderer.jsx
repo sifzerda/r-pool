@@ -5,7 +5,7 @@ import { useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { toRenderX, toRenderZ } from "../ecs/utils/coords";
-import { ballsAreMoving, activeBalls } from "../ecs/world.js";
+import { activeBalls } from "../ecs/world.js";
 
 // ─────────────────────────────────────────
 // Geometry creation (once)
@@ -129,8 +129,6 @@ export default function CueStickRenderer({
     group.position.set(cueX - cos * distance, 0.45, cueZ - sin * distance);
     group.rotation.set(0.05, -angle + Math.PI, 0);
   });
-
-  const moving = Math.abs(cueBall.vx) > 0.05 || Math.abs(cueBall.vz) > 0.05;
 
   return (
     <group ref={ref}>

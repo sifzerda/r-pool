@@ -44,8 +44,8 @@ export default function InputSystem({
     const cueX = toRenderX(cueBall.x);
     const cueZ = toRenderZ(cueBall.z);
 
-    const dx = cueX - point.current.x;
-    const dz = cueZ - point.current.z;
+    const dx = point.current.x - cueX;
+    const dz = point.current.z - cueZ;
 
     const angle = Math.atan2(dz, dx);
 

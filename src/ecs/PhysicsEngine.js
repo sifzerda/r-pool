@@ -1,36 +1,37 @@
 // src/ecs/PhysicsEngine.js
 
-import { physicsSystem   } from "./systems/physicsSystem";
-import { frictionSystem  } from "./systems/frictionSystem";
-import { collisionSystem } from "./systems/collisionSystem";
-import { pocketSystem    } from "./systems/pocketSystem";
-import { shotSystem      } from "./systems/shotSystem";
+import { physicsSystem, frictionSystem } from "./systems/physics.js";
+import { collisionSystem } from "./systems/collisionSystem.js";
+import { pocketSystem } from "./systems/pocketSystem.js";
+import { shotSystem } from "./systems/shotSystem.js";
+
+const FIXED_DT = 1 / 120;
+const SUBSTEPS = 3;
+const SUB_DT = FIXED_DT / SUBSTEPS;
+const MAX_FRAME_DT = 0.05;
 
 export class PhysicsEngine {
   constructor(cueBall, aimRef) {
     this.cueBall = cueBall;
-    this.aimRef  = aimRef;
+    this.aimRef = aimRef;
     this.accumulator = 0;
-    this.FIXED_DT  = 1 / 120;  // bumped to 120Hz for smoother collisions
-    this.SUBSTEPS  = 3;
   }
 
   update(delta) {
-    this.accumulator += delta;
+    this.accumulator += Math.min(delta, MAX_FRAME_DT);
 
-    while (this.accumulator >= this.FIXED_DT) {
-      const subDt = this.FIXED_DT / this.SUBSTEPS;
+    while (this.accumulator >= FIXED_DT) {
+      shotSystem(this.cueBall, this.aimRef);
 
-      shotSystem(this.cueBall, this.aimRef);  // once per fixed step, not per substep
-
-      for (let i = 0; i < this.SUBSTEPS; i++) {
-        physicsSystem(subDt);
+      for (let i = 0; i < SUBSTEPS; i++) {
+        physicsSystem(SUB_DT);
         collisionSystem();
         pocketSystem();
       }
-       frictionSystem(subDt);  // fixed: was frictionSystem(null, subDt)
 
-      this.accumulator -= this.FIXED_DT;
+      frictionSystem(FIXED_DT);
+
+      this.accumulator -= FIXED_DT;
     }
   }
 }
