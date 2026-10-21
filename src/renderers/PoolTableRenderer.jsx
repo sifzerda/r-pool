@@ -4,17 +4,13 @@
 import { TABLE_W, TABLE_H, CUSHION, PLAY_W, PLAY_H, PLAY_X, PLAY_Z } from "../ecs/constants/table";
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
-
 export default function PoolTableRenderer() {
   const railHeight = 0.28;
   const railY = 0.34;
-
   const CORNER_POCKET_R = 0.28;
   const SIDE_POCKET_R = 0.22;
-
   const sideGap = SIDE_POCKET_R * 2.2;
   const cornerGap = CORNER_POCKET_R * 1.8;
-
   const topRailLength = (PLAY_W - sideGap) / 2 - cornerGap;
 
   // For bg felt
@@ -30,17 +26,8 @@ export default function PoolTableRenderer() {
       {/* ========================================= */}
 
       <mesh receiveShadow position={[0, -0.05, 0]}>
-        <boxGeometry
-          args={[
-            TABLE_W + 0.4,
-            0.5,
-            TABLE_H + 0.4,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#3a1f0f"
-          roughness={0.8}
-        />
+        <boxGeometry args={[TABLE_W + 0.4, 0.5, TABLE_H + 0.4]} />
+        <meshStandardMaterial color="#3a1f0f" roughness={0.8} />
       </mesh>
 
       {/* ========================================= */}
@@ -48,13 +35,8 @@ export default function PoolTableRenderer() {
       {/* ========================================= */}
 
       <mesh receiveShadow>
-        <boxGeometry
-          args={[TABLE_W, 0.4, TABLE_H]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-          roughness={0.7}
-        />
+        <boxGeometry args={[TABLE_W, 0.4, TABLE_H]} />
+        <meshStandardMaterial color="#5b3418" roughness={0.7} />
       </mesh>
 
       {/* ========================================= */}
@@ -69,57 +51,21 @@ export default function PoolTableRenderer() {
       {/* cream-pixels texture overlay — screen blend, 35% opacity */}
       <mesh position={[0, 0.221, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[PLAY_W, PLAY_H]} />
-        <meshBasicMaterial
-          map={pixelTexture}
-          transparent
-          blending={THREE.AdditiveBlending}
-          opacity={1.0}
-          depthWrite={false}
-        />
+        <meshBasicMaterial map={pixelTexture} transparent blending={THREE.AdditiveBlending} opacity={1.0} depthWrite={false} />
       </mesh>
 
       {/* ========================================= */}
       {/* TOP RAILS */}
       {/* ========================================= */}
 
-      <mesh
-        position={[
-          -(PLAY_W / 4 + sideGap / 4),
-          railY,
-          -PLAY_Z,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            topRailLength,
-            railHeight,
-            CUSHION,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[-(PLAY_W / 4 + sideGap / 4), railY, -PLAY_Z]} castShadow>
+        <boxGeometry args={[topRailLength, railHeight, CUSHION]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
-      <mesh
-        position={[
-          PLAY_W / 4 + sideGap / 4,
-          railY,
-          -PLAY_Z,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            topRailLength,
-            railHeight,
-            CUSHION,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[PLAY_W / 4 + sideGap / 4, railY, -PLAY_Z,]} castShadow>
+        <boxGeometry args={[ topRailLength, railHeight, CUSHION ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
       {/* ========================================= */}

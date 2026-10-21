@@ -1,6 +1,5 @@
 // src/ecs/systems/pocketSystem.js
 
-
 import {
   activeBalls,
   markDirty,
@@ -34,6 +33,7 @@ export function pocketSystem() {
 
         markDirty(ball);
         deactiveBall(ball);
+
       } else {
         // Start pocket animation.
         ball.pocketX = pocket.x;

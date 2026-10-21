@@ -1,25 +1,125 @@
-// src/renderers/Ball.jsx
+// src/renderers/balls/ballTextures.js
 
-import { createBallTexture } from "../ecs/utils/createBallTexture";
+import { CanvasTexture, SRGBColorSpace } from "three";
 
-export const ballTextures = new Map();
+// --------------------------------------------------
+// BALL DEFINITIONS
+// --------------------------------------------------
 
-ballTextures.set(0, createBallTexture("", "#ffffff", false));
-ballTextures.set(1, createBallTexture(1, "#F5C518", false));
-ballTextures.set(2, createBallTexture(2, "#1B4FD8", false));
-ballTextures.set(3, createBallTexture(3, "#D92B2B", false));
-ballTextures.set(4, createBallTexture(4, "#7B2FBE", false));
-ballTextures.set(5, createBallTexture(5, "#E05C00", false));
-ballTextures.set(6, createBallTexture(6, "#1A7A1A", false));
-ballTextures.set(7, createBallTexture(7, "#8B1A1A", false));
+const BALL_DEFINITIONS = [
+    { id: 0, color: "#ffffff", type: "cue" },
 
-ballTextures.set(8, createBallTexture(8, "#000000", false));
+    { id: 1, color: "#F5C518", type: "solid" },
+    { id: 2, color: "#1B4FD8", type: "solid" },
+    { id: 3, color: "#D92B2B", type: "solid" },
+    { id: 4, color: "#7B2FBE", type: "solid" },
+    { id: 5, color: "#E05C00", type: "solid" },
+    { id: 6, color: "#1A7A1A", type: "solid" },
+    { id: 7, color: "#8B1A1A", type: "solid" },
 
-ballTextures.set(9, createBallTexture(9, "#F5C518", true));
-ballTextures.set(10, createBallTexture(10, "#1B4FD8", true));
-ballTextures.set(11, createBallTexture(11, "#D92B2B", true));
-ballTextures.set(12, createBallTexture(12, "#7B2FBE", true));
-ballTextures.set(13, createBallTexture(13, "#E05C00", true));
-ballTextures.set(14, createBallTexture(14, "#1A7A1A", true));
-ballTextures.set(15, createBallTexture(15, "#8B1A1A", true));
+    { id: 8, color: "#000000", type: "eight" },
 
+    { id: 9, color: "#F5C518", type: "stripe" },
+    { id: 10, color: "#1B4FD8", type: "stripe" },
+    { id: 11, color: "#D92B2B", type: "stripe" },
+    { id: 12, color: "#7B2FBE", type: "stripe" },
+    { id: 13, color: "#E05C00", type: "stripe" },
+    { id: 14, color: "#1A7A1A", type: "stripe" },
+    { id: 15, color: "#8B1A1A", type: "stripe" },
+];
+
+// --------------------------------------------------
+// TEXTURE GENERATOR
+// --------------------------------------------------
+
+function createBallTexture(number, color, type) {
+    const size = 1024;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+
+    // Base colour
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, size, size);
+
+    // Cue ball: plain white
+    if (type === "cue") {
+        const texture = new CanvasTexture(canvas);
+        texture.colorSpace = SRGBColorSpace;
+        texture.anisotropy = 16;
+        texture.needsUpdate = true;
+
+        return texture;
+    }
+
+    // Solid and eight balls
+    if (type === "solid" || type === "eight") {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, size, size);
+    }
+
+    // Striped balls
+    if (type === "stripe") {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, size * 0.33, size, size * 0.34);
+    }
+
+    // Number circles
+    const positions = [
+        size * 0.25,
+        size * 0.75,
+    ];
+
+    for (const x of positions) {
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            size / 2,
+            size * 0.12,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = "#dddddd";
+        ctx.stroke();
+
+        // Number
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 250px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(String(number), x, size / 2);
+    }
+
+    const texture = new CanvasTexture(canvas);
+
+    texture.colorSpace = SRGBColorSpace;
+    texture.anisotropy = 16;
+    texture.needsUpdate = true;
+
+    return texture;
+}
+
+// --------------------------------------------------
+// CREATE ALL BALL TEXTURES
+// --------------------------------------------------
+
+export const ballTextures = new Map(
+    BALL_DEFINITIONS.map(ball => [
+        ball.id,
+        createBallTexture(
+            ball.id,
+            ball.color,
+            ball.type
+        ),
+    ])
+);
