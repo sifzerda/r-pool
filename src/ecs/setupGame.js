@@ -2,7 +2,7 @@
 
 import { world, activeBalls, fallingBalls, dirtyBalls, markDirty } from "./world";
 import { BALL_R } from "./constants/table";
-import { buildRack } from "./utils/rack";
+import { buildRack } from "../ecs/constants/rack";
 
 const BALL_Y = 0.3;
 
