@@ -2,7 +2,8 @@
 
 import { world, activeBalls, fallingBalls, dirtyBalls, markDirty } from "./world";
 import { BALL_R } from "./constants/table";
-import { buildRack } from "../ecs/constants/rack";
+import { buildRack } from "./constants/rack";
+import { resetPotted } from "../store/pottedStore";
 
 const BALL_Y = 0.3;
 
@@ -37,6 +38,7 @@ export function setupGame() {
   activeBalls.clear();
   fallingBalls.clear();
   dirtyBalls.clear();
+  resetPotted();
 
   const cueBall = world.add(
     createBall({

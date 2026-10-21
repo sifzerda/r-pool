@@ -3,6 +3,7 @@
 import { activeBalls, fallingBalls, markDirty, deactiveBall } from "../world.js";
 import { POCKETS } from "../constants/pockets.js";
 import { POCKET_R } from "../constants/table.js";
+import { markPotted } from "../../store/pottedStore.js";
 
 const POCKET_R_SQ = POCKET_R * POCKET_R;
 
@@ -36,6 +37,7 @@ function detectPockets() {
         ball.falling = true;
         ball.fallSpeed = 0;
         fallingBalls.add(ball);
+        markPotted(ball.id);
       }
 
       markDirty(ball);
