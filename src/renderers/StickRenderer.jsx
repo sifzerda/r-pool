@@ -1,10 +1,9 @@
-// src/ecs/components/CueStickRenderer.jsx
+// src/ecs/components/StickRenderer.jsx
 
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-
 import { toRenderX, toRenderZ } from "../ecs/utils/coords.js";
 import { activeBalls } from "../ecs/world.js";
 
@@ -43,48 +42,19 @@ const geoDark = mergeGeometries([
 // Materials
 // ─────────────────────────────────────────
 
-const matTip = new THREE.MeshStandardMaterial({
-  color: "#5c3317",
-  roughness: 0.9,
-});
-
-const matFerrule = new THREE.MeshStandardMaterial({
-  color: "#f0ede8",
-  roughness: 0.3,
-  metalness: 0.1,
-});
-
-const matMaple = new THREE.MeshStandardMaterial({
-  color: "#d4a84b",
-  roughness: 0.25,
-  metalness: 0.05,
-});
-
-const matRings = new THREE.MeshStandardMaterial({
-  color: "#c8a030",
-  roughness: 0.2,
-  metalness: 0.6,
-  emissive: "#4a3800",
-  emissiveIntensity: 0.3,
-});
-
-const matDark = new THREE.MeshStandardMaterial({
-  color: "#1a0e06",
-  roughness: 0.95,
-});
+const matTip = new THREE.MeshStandardMaterial({ color: "#5c3317", roughness: 0.9 });
+const matFerrule = new THREE.MeshStandardMaterial({ color: "#f0ede8", roughness: 0.3, metalness: 0.1 });
+const matMaple = new THREE.MeshStandardMaterial({ color: "#d4a84b", roughness: 0.25, metalness: 0.05 });
+const matRings = new THREE.MeshStandardMaterial({ color: "#c8a030", roughness: 0.2, metalness: 0.6, emissive: "#4a3800", emissiveIntensity: 0.3 });
+const matDark = new THREE.MeshStandardMaterial({ color: "#1a0e06", roughness: 0.95 });
 
 // Power meter materials
-const meterBackground = new THREE.MeshBasicMaterial({
-  color: "#151515",
-});
-
-const meterFill = new THREE.MeshBasicMaterial({
-  color: "#00e5ff",
-});
+const meterBackground = new THREE.MeshBasicMaterial({ color: "#151515" });
+const meterFill = new THREE.MeshBasicMaterial({ color: "#00e5ff" });
 
 // ─────────────────────────────────────────
 
-export default function CueStickRenderer({ cueBall, aimRef }) {
+export default function StickRenderer({ cueBall, aimRef }) {
   const ref = useRef();
   const meterRef = useRef();
   const fillRef = useRef();
@@ -96,11 +66,7 @@ export default function CueStickRenderer({ cueBall, aimRef }) {
 
     if (!group) return;
 
-    const canAim =
-      activeBalls.size === 0 &&
-      !cueBall.pocketed &&
-      !cueBall.falling;
-
+    const canAim = activeBalls.size === 0 && !cueBall.pocketed && !cueBall.falling;
     group.visible = canAim;
 
     if (meter) {
@@ -111,21 +77,10 @@ export default function CueStickRenderer({ cueBall, aimRef }) {
 
     const aim = aimRef.current;
 
-    const angle = aim.charging
-      ? aim.lockedAngle
-      : aim.angle ?? 0;
-
-    const cos = aim.charging
-      ? aim.lockedCos
-      : aim.cos ?? Math.cos(angle);
-
-    const sin = aim.charging
-      ? aim.lockedSin
-      : aim.sin ?? Math.sin(angle);
-
-    const pullBack = aim.charging
-      ? aim.pullBack ?? 0
-      : 0;
+    const angle = aim.charging ? aim.lockedAngle : aim.angle ?? 0;
+    const cos = aim.charging ? aim.lockedCos : aim.cos ?? Math.cos(angle);
+    const sin = aim.charging ? aim.lockedSin : aim.sin ?? Math.sin(angle);
+    const pullBack = aim.charging ? aim.pullBack ?? 0 : 0;
 
     const cueX = toRenderX(cueBall.x);
     const cueZ = toRenderZ(cueBall.z);
@@ -147,25 +102,16 @@ export default function CueStickRenderer({ cueBall, aimRef }) {
       }
     }
 
-    group.position.set(
-      cueX - cos * distance,
-      0.45,
-      cueZ - sin * distance
-    );
-
+    group.position.set(cueX - cos * distance, 0.58, cueZ - sin * distance);
     group.rotation.set(0.05, -angle + Math.PI, 0);
 
     // Power meter
     if (meter) {
-      meter.position.set(cueX, 0.8, cueZ - 0.55);
+      meter.position.set(cueX, 0.85, cueZ - 0.55);
     }
 
     if (fill) {
-      const ratio = Math.min(
-        1,
-        Math.max(0, (aim.power ?? 0) / 18)
-      );
-
+      const ratio = Math.min(1, Math.max(0, (aim.power ?? 0) / 18));
       fill.scale.x = Math.max(0.001, ratio);
       fill.position.x = -0.4 + ratio * 0.4;
     }

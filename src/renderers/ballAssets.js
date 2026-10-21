@@ -1,10 +1,12 @@
 //src/renderers/balls/ballAssets.js
 
 import * as THREE from "three";
+
 import { BALL_R } from "../ecs/constants/table";
+import { ballAtlas } from "./ballTextures.js";
 
 // --------------------------------------------------
-// SHARED BALL GEOMETRY
+// SHARED GEOMETRY
 // --------------------------------------------------
 
 export const ballGeometry = new THREE.SphereGeometry(
@@ -14,25 +16,57 @@ export const ballGeometry = new THREE.SphereGeometry(
 );
 
 // --------------------------------------------------
-// SHARED BALL MATERIALS
+// SHARED MATERIAL
 // --------------------------------------------------
 
-const materials = new Map();
+export const ballMaterial = new THREE.MeshPhysicalMaterial({
+    map: ballAtlas,
 
-export function getBallMaterial(texture) {
-    if (!materials.has(texture)) {
-        const material = new THREE.MeshPhysicalMaterial({
-            map: texture,
+    roughness: 0.08,
+    metalness: 0,
 
-            roughness: 0.08,
-            metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
+});
 
-            clearcoat: 1,
-            clearcoatRoughness: 0.08,
-        });
+// --------------------------------------------------
+// INSTANCE UV ATTRIBUTE
+// --------------------------------------------------
 
-        materials.set(texture, material);
-    }
+ballGeometry.setAttribute(
+    "instanceUvOffset",
+    new THREE.InstancedBufferAttribute(
+        new Float32Array(16 * 2),
+        2
+    )
+);
 
-    return materials.get(texture);
-}
+// --------------------------------------------------
+// CUSTOM SHADER
+// --------------------------------------------------
+
+ballMaterial.onBeforeCompile = (shader) => {
+
+    // Declare per-instance UV offset
+    shader.vertexShader = shader.vertexShader.replace(
+        "#include <common>",
+        `
+        #include <common>
+
+        attribute vec2 instanceUvOffset;
+        `
+    );
+
+    // Override normal UV coordinates with atlas coordinates
+    shader.vertexShader = shader.vertexShader.replace(
+        "#include <uv_vertex>",
+        `
+        #include <uv_vertex>
+
+        vMapUv = uv * 0.25 + instanceUvOffset;
+        `
+    );
+};
+
+// Unique program cache key
+ballMaterial.customProgramCacheKey = () => "pool-ball-atlas-v1";

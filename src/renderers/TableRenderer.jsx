@@ -1,10 +1,11 @@
-// src/ecs/components/PoolTableRenderer.jsx
+// src/ecs/components/TableRenderer.jsx
 // table contains pockets
 
 import { TABLE_W, TABLE_H, CUSHION, PLAY_W, PLAY_H, PLAY_X, PLAY_Z } from "../ecs/constants/table";
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
-export default function PoolTableRenderer() {
+
+export default function TableRenderer() {
   const railHeight = 0.28;
   const railY = 0.34;
   const CORNER_POCKET_R = 0.28;
@@ -72,132 +73,43 @@ export default function PoolTableRenderer() {
       {/* BOTTOM RAILS */}
       {/* ========================================= */}
 
-      <mesh
-        position={[
-          -(PLAY_W / 4 + sideGap / 4),
-          railY,
-          PLAY_Z,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            topRailLength,
-            railHeight,
-            CUSHION,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ -(PLAY_W / 4 + sideGap / 4), railY, PLAY_Z ]} castShadow>
+        <boxGeometry args={[ topRailLength, railHeight, CUSHION, ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
-      <mesh
-        position={[
-          PLAY_W / 4 + sideGap / 4,
-          railY,
-          PLAY_Z,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            topRailLength,
-            railHeight,
-            CUSHION,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ PLAY_W / 4 + sideGap / 4, railY, PLAY_Z ]}
+        castShadow>
+        <boxGeometry args={[ topRailLength, railHeight, CUSHION ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
       {/* ========================================= */}
       {/* LEFT RAILS */}
       {/* ========================================= */}
 
-      <mesh
-        position={[
-          -PLAY_X,
-          railY,
-          -(PLAY_H / 4),
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            CUSHION,
-            railHeight,
-            PLAY_H / 2 - cornerGap,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ -PLAY_X, railY, -(PLAY_H / 4) ]} castShadow>
+        <boxGeometry args={[ CUSHION, railHeight, PLAY_H / 2 - cornerGap ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
-      <mesh
-        position={[
-          -PLAY_X,
-          railY,
-          PLAY_H / 4,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            CUSHION,
-            railHeight,
-            PLAY_H / 2 - cornerGap,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ -PLAY_X, railY, PLAY_H / 4 ]} castShadow>
+        <boxGeometry args={[ CUSHION, railHeight, PLAY_H / 2 - cornerGap ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
       {/* ========================================= */}
       {/* RIGHT RAILS */}
       {/* ========================================= */}
 
-      <mesh
-        position={[
-          PLAY_X,
-          railY,
-          -(PLAY_H / 4),
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            CUSHION,
-            railHeight,
-            PLAY_H / 2 - cornerGap,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ PLAY_X, railY, -(PLAY_H / 4) ]} castShadow>
+        <boxGeometry args={[ CUSHION, railHeight, PLAY_H / 2 - cornerGap ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
-      <mesh
-        position={[
-          PLAY_X,
-          railY,
-          PLAY_H / 4,
-        ]}
-        castShadow
-      >
-        <boxGeometry
-          args={[
-            CUSHION,
-            railHeight,
-            PLAY_H / 2 - cornerGap,
-          ]}
-        />
-        <meshStandardMaterial
-          color="#5b3418"
-        />
+      <mesh position={[ PLAY_X, railY, PLAY_H / 4 ]} castShadow>
+        <boxGeometry args={[ CUSHION, railHeight, PLAY_H / 2 - cornerGap ]} />
+        <meshStandardMaterial color="#5b3418" />
       </mesh>
 
       {/* ========================================= */}
@@ -205,24 +117,17 @@ export default function PoolTableRenderer() {
       {/* ========================================= */}
 
       {[
+        
         [-PLAY_X + 0.12, -PLAY_Z + 0.12, Math.PI / 4],
         [PLAY_X - 0.12, -PLAY_Z + 0.12, -Math.PI / 4],
 
         [-PLAY_X + 0.12, PLAY_Z - 0.12, -Math.PI / 4],
         [PLAY_X - 0.12, PLAY_Z - 0.12, Math.PI / 4],
+
       ].map(([x, z, rot], i) => (
-        <mesh
-          key={i}
-          position={[x, railY, z]}
-          rotation={[0, rot, 0]}
-          castShadow
-        >
-          <boxGeometry
-            args={[0.24, railHeight, 0.08]}
-          />
-          <meshStandardMaterial
-            color="#5b3418"
-          />
+        <mesh key={i} position={[x, railY, z]} rotation={[0, rot, 0]} castShadow>
+          <boxGeometry args={[0.24, railHeight, 0.08]} />
+          <meshStandardMaterial color="#5b3418" />
         </mesh>
       ))}
 
@@ -262,27 +167,9 @@ export default function PoolTableRenderer() {
           r: CORNER_POCKET_R,
         },
       ].map((pocket, i) => (
-        <mesh
-          key={i}
-          position={[
-            pocket.x,
-            0.35,
-            pocket.z,
-          ]}
-          receiveShadow
-        >
-          <cylinderGeometry
-            args={[
-              pocket.r,
-              pocket.r * 0.9,
-              0.22,
-              32,
-            ]}
-          />
-          <meshStandardMaterial
-            color="#120c08"
-            roughness={1}
-          />
+        <mesh key={i} position={[ pocket.x, 0.35, pocket.z ]} receiveShadow>
+          <cylinderGeometry args={[ pocket.r, pocket.r * 0.9, 0.22, 32 ]} />
+          <meshStandardMaterial color="#120c08" roughness={1} />
         </mesh>
       ))}
 
@@ -290,26 +177,14 @@ export default function PoolTableRenderer() {
       {/* RAIL CAP TRIM */}
       {/* ========================================= */}
 
-      <mesh
-        position={[0, railY + 0.08, -PLAY_Z]}
-      >
-        <boxGeometry
-          args={[PLAY_W, 0.03, 0.05]}
-        />
-        <meshStandardMaterial
-          color="#7b4a25"
-        />
+      <mesh position={[0, railY + 0.08, -PLAY_Z]}>
+        <boxGeometry args={[PLAY_W, 0.03, 0.05]} />
+        <meshStandardMaterial color="#7b4a25" />
       </mesh>
 
-      <mesh
-        position={[0, railY + 0.08, PLAY_Z]}
-      >
-        <boxGeometry
-          args={[PLAY_W, 0.03, 0.05]}
-        />
-        <meshStandardMaterial
-          color="#7b4a25"
-        />
+      <mesh position={[0, railY + 0.08, PLAY_Z]}>
+        <boxGeometry args={[PLAY_W, 0.03, 0.05]} />
+        <meshStandardMaterial color="#7b4a25" />
       </mesh>
 
       {/* ========================================= */}
@@ -317,25 +192,9 @@ export default function PoolTableRenderer() {
       {/* ========================================= */}
 
       {[-2, -1, 1, 2].map((n) => (
-        <mesh
-          key={`top-${n}`}
-          position={[
-            n * 0.9,
-            0.48,
-            -PLAY_Z - 0.02,
-          ]}
-          rotation={[
-            0,
-            Math.PI / 4,
-            0,
-          ]}
-        >
-          <boxGeometry
-            args={[0.05, 0.02, 0.05]}
-          />
-          <meshStandardMaterial
-            color="#f0d080"
-          />
+        <mesh key={`top-${n}`} position={[ n * 0.9, 0.48, -PLAY_Z - 0.02 ]} rotation={[ 0, Math.PI / 4, 0 ]}>
+          <boxGeometry args={[0.05, 0.02, 0.05]} />
+          <meshStandardMaterial color="#f0d080" />
         </mesh>
       ))}
 

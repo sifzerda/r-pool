@@ -1,12 +1,12 @@
 // src/renderers/balls/ballTextures.js
 
-import { CanvasTexture, SRGBColorSpace } from "three";
+import { CanvasTexture, SRGBColorSpace, LinearFilter } from "three";
 
 // --------------------------------------------------
 // BALL DEFINITIONS
 // --------------------------------------------------
 
-const BALL_DEFINITIONS = [
+const BALLS = [
     { id: 0, color: "#ffffff", type: "cue" },
 
     { id: 1, color: "#F5C518", type: "solid" },
@@ -29,97 +29,123 @@ const BALL_DEFINITIONS = [
 ];
 
 // --------------------------------------------------
-// TEXTURE GENERATOR
+// ATLAS CONFIGURATION
 // --------------------------------------------------
 
-function createBallTexture(number, color, type) {
-    const size = 1024;
+const GRID = 4;
+const CELL_SIZE = 512;
+const SIZE = GRID * CELL_SIZE;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
+// --------------------------------------------------
+// DRAW INDIVIDUAL BALL INTO ATLAS
+// --------------------------------------------------
 
-    const ctx = canvas.getContext("2d");
+function drawBall(ctx, ball, x, y) {
+    const s = CELL_SIZE;
 
-    // Base colour
+    ctx.save();
+
+    ctx.translate(x, y);
+
+    // Base
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, s, s);
 
-    // Cue ball: plain white
-    if (type === "cue") {
-        const texture = new CanvasTexture(canvas);
-        texture.colorSpace = SRGBColorSpace;
-        texture.anisotropy = 16;
-        texture.needsUpdate = true;
-
-        return texture;
+    // Solid / eight ball
+    if (ball.type === "solid" || ball.type === "eight") {
+        ctx.fillStyle = ball.color;
+        ctx.fillRect(0, 0, s, s);
     }
 
-    // Solid and eight balls
-    if (type === "solid" || type === "eight") {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, size, size);
-    }
-
-    // Striped balls
-    if (type === "stripe") {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, size * 0.33, size, size * 0.34);
+    // Stripes
+    if (ball.type === "stripe") {
+        ctx.fillStyle = ball.color;
+        ctx.fillRect(0, s * 0.33, s, s * 0.34);
     }
 
     // Number circles
-    const positions = [
-        size * 0.25,
-        size * 0.75,
-    ];
+    if (ball.type !== "cue") {
+        for (const cx of [s * 0.25, s * 0.75]) {
+            ctx.beginPath();
 
-    for (const x of positions) {
-        ctx.beginPath();
+            ctx.arc(
+                cx,
+                s / 2,
+                s * 0.12,
+                0,
+                Math.PI * 2
+            );
 
-        ctx.arc(
-            x,
-            size / 2,
-            size * 0.12,
-            0,
-            Math.PI * 2
-        );
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
 
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#dddddd";
+            ctx.stroke();
 
-        ctx.lineWidth = 6;
-        ctx.strokeStyle = "#dddddd";
-        ctx.stroke();
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 125px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
 
-        // Number
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 250px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+            ctx.fillText(String(ball.id), cx, s / 2);
+        }
+    }
 
-        ctx.fillText(String(number), x, size / 2);
+    ctx.restore();
+}
+
+// --------------------------------------------------
+// CREATE ATLAS
+// --------------------------------------------------
+
+function createBallAtlas() {
+    const canvas = document.createElement("canvas");
+
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+
+    const ctx = canvas.getContext("2d");
+
+    // Draw each ball into its own cell
+    for (const ball of BALLS) {
+        const col = ball.id % GRID;
+        const row = Math.floor(ball.id / GRID);
+
+        const x = col * CELL_SIZE;
+        const y = row * CELL_SIZE;
+
+        drawBall(ctx, ball, x, y);
     }
 
     const texture = new CanvasTexture(canvas);
 
     texture.colorSpace = SRGBColorSpace;
     texture.anisotropy = 16;
+
+    // Avoid mipmap filtering across neighbouring atlas cells.
+    texture.generateMipmaps = false;
+    texture.minFilter = LinearFilter;
+    texture.magFilter = LinearFilter;
+
     texture.needsUpdate = true;
 
     return texture;
 }
 
+// One texture shared by every ball
+export const ballAtlas = createBallAtlas();
+
 // --------------------------------------------------
-// CREATE ALL BALL TEXTURES
+// UV OFFSETS
 // --------------------------------------------------
 
-export const ballTextures = new Map(
-    BALL_DEFINITIONS.map(ball => [
-        ball.id,
-        createBallTexture(
-            ball.id,
-            ball.color,
-            ball.type
-        ),
-    ])
-);
+export function getBallUvOffset(ballId) {
+    const col = ballId % GRID;
+    const row = Math.floor(ballId / GRID);
+
+    return [
+        col / GRID,
+        (GRID - 1 - row) / GRID,
+    ];
+}

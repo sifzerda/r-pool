@@ -5,8 +5,8 @@ import { useFrame } from "@react-three/fiber";
 
 import { ballQuery, activeBalls } from "./ecs/world";
 
-import PoolTableRenderer from "./renderers/PoolTableRenderer";
-import CueStickRenderer from "./renderers/CueStickRenderer";
+import TableRenderer from "./renderers/TableRenderer";
+import StickRenderer from "./renderers/StickRenderer";
 import BallRenderer from "./renderers/BallRenderer";
 import AimGuideRenderer from "./renderers/AimGuideRenderer";
 import CueSystem from "./ecs/systems/CueSystem";
@@ -64,11 +64,11 @@ export default function PoolScene({ cueBall }) {
 
       <hemisphereLight intensity={0.4} />
 
-      <PoolTableRenderer />
+      <TableRenderer />
       <BallRenderer balls={ballQuery.entities} />
 
       <AimGuideRenderer cueBall={cueBall} aimRef={aimRef} />
-      <CueStickRenderer cueBall={cueBall} aimRef={aimRef} />
+      <StickRenderer cueBall={cueBall} aimRef={aimRef} />
       <InputSystem cueBall={cueBall} aimRef={aimRef} />
       <CueSystem cueBall={cueBall} aimRef={aimRef} />
     </>
