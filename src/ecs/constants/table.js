@@ -1,4 +1,4 @@
-//ecs/constants/table.js
+// src/ecs/constants/table.js
 
 export const TABLE_W = 6.8;
 export const TABLE_H = 3.4;
@@ -6,7 +6,7 @@ export const TABLE_H = 3.4;
 export const TABLE_X = 3.4;
 export const TABLE_Z = 1.7;
 
-export const CUSHION = 0.28; // 28 cm
+export const CUSHION = 0.28;
 
 export const PLAY_X = TABLE_W / 2 - CUSHION;
 export const PLAY_Z = TABLE_H / 2 - CUSHION;
@@ -17,10 +17,9 @@ export const PLAY_H = TABLE_H - CUSHION * 2;
 export const BALL_R = 0.1;
 export const BALL_Y = 0.35; // visual height above table
 
-export const POCKET_R = 0.30; // 14 cm
+export const POCKET_R = 0.3;
 
-export const FRICTION = 0.988;
-export const MIN_SPEED = 0.18;
-
+// Single source of truth for cue power / drag distance.
 export const MAX_POWER = 18;
+export const MAX_PULL = 1.2;
 export const CUE_MAX_PULL = 80;

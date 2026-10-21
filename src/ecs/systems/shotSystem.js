@@ -1,27 +1,23 @@
 // src/ecs/systems/shotSystem.js
 
-import { activeBall } from "../world";
+import { activeBall, markDirty } from "../world";
 
-export function shotSystem(
-  cueBall,
-  aimRef
-) {
-  const shot = aimRef.current.pendingShot;
+const POWER_TO_SPEED = 2.2;
+
+export function shotSystem(cueBall, aimRef) {
+  const aim = aimRef.current;
+  const shot = aim.pendingShot;
 
   if (!shot) return;
 
-  const cos = shot.cos ?? Math.cos(shot.angle);
-  const sin = shot.sin ?? Math.sin(shot.angle);
+  const strength = shot.power * POWER_TO_SPEED;
 
-  const strength = shot.power * 2.2;
-
-  cueBall.vx = cos * strength;
-  cueBall.vz = sin * strength;
-
+  cueBall.vx = shot.cos * strength;
+  cueBall.vz = shot.sin * strength;
   cueBall.sleeping = false;
-  cueBall.dirty = true;
 
+  markDirty(cueBall);
   activeBall(cueBall);
 
-  aimRef.current.pendingShot = null;
+  aim.pendingShot = null;
 }

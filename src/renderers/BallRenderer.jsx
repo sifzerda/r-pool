@@ -5,101 +5,79 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { ballGeometry, ballMaterial } from "./ballAssets.js";
 import { getBallUvOffset } from "./ballTextures.js";
-import { clearDirty } from "../ecs/world.js";
+import { dirtyBalls } from "../ecs/world.js";
 
-// --------------------------------
-// BALL RENDERER
-// --------------------------------
+function writeBall(mesh, dummy, ball) {
+    if (ball.pocketed) {
+        dummy.position.set(0, 0, 0);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.setScalar(0);
+    } else {
+        dummy.position.set(ball.x, ball.y, ball.z);
+        dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
+        dummy.scale.setScalar(1);
+    }
+
+    dummy.updateMatrix();
+    mesh.setMatrixAt(ball.instanceId, dummy.matrix);
+}
 
 export default function BallRenderer({ balls }) {
-
     const meshRef = useRef();
-    const initialized = useRef(false);
+    const needsFullWrite = useRef(true);
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    // --------------------------------
-    // INITIALISE INSTANCE UV OFFSETS
-    // --------------------------------
-
+    // Per-instance atlas offsets.
     useLayoutEffect(() => {
         const attribute = ballGeometry.getAttribute("instanceUvOffset");
-
-        if (!attribute) {
-            console.error("BallRenderer: Missing instanceUvOffset attribute");
-            return;
-        }
 
         for (let i = 0; i < balls.length; i++) {
             const ball = balls[i];
             const [u, v] = getBallUvOffset(ball.id);
-            attribute.setXY(i, u, v);
+            attribute.setXY(ball.instanceId, u, v);
         }
-        attribute.needsUpdate = true;
-        // New instance matrices must be initialised.
-        initialized.current = false;
-    }, [balls]);
 
-    // --------------------------------
-    // UPDATE INSTANCE TRANSFORMS
-    // --------------------------------
+        attribute.needsUpdate = true;
+        needsFullWrite.current = true;
+    }, [balls]);
 
     useFrame(() => {
         const mesh = meshRef.current;
-
         if (!mesh) return;
 
-        let changed = false;
+        // First frame: write every instance once.
+        if (needsFullWrite.current) {
+            needsFullWrite.current = false;
 
-        for (let i = 0; i < balls.length; i++) {
-            const ball = balls[i];
-
-            // Initialise every instance on first render.
-            if (!ball.dirty && initialized.current) {
-                continue;
+            for (let i = 0; i < balls.length; i++) {
+                writeBall(mesh, dummy, balls[i]);
+                balls[i].dirty = false;
             }
 
-            // --------------------------------
-            // POCKETED
-            // --------------------------------
-
-            if (ball.pocketed) {
-                dummy.position.set(0, 0, 0);
-                dummy.rotation.set(0, 0, 0);
-                dummy.scale.setScalar(0);
-            }
-
-            // --------------------------------
-            // VISIBLE BALL
-            // --------------------------------
-
-            else {
-                dummy.position.set(ball.x, ball.y, ball.z);
-                dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
-                dummy.scale.setScalar(1);
-            }
-
-            dummy.updateMatrix();
-            mesh.setMatrixAt(i, dummy.matrix);
-            clearDirty(ball);
-            changed = true;
-        }
-
-        initialized.current = true;
-
-        if (changed) {
+            dirtyBalls.clear();
             mesh.instanceMatrix.needsUpdate = true;
+            return;
         }
-    });
 
-    // --------------------------------
-    // RENDER
-    // --------------------------------
+        // After that, only touch balls that actually changed.
+        if (dirtyBalls.size === 0) return;
+
+        for (const ball of dirtyBalls) {
+            writeBall(mesh, dummy, ball);
+            ball.dirty = false;
+        }
+
+        dirtyBalls.clear();
+        mesh.instanceMatrix.needsUpdate = true;
+    });
 
     return (
         <instancedMesh
             ref={meshRef}
-            args={[ ballGeometry, ballMaterial, balls.length ]}
-            count={balls.length} castShadow receiveShadow
+            args={[ballGeometry, ballMaterial, balls.length]}
+            frustumCulled={false}
+            castShadow
+            receiveShadow
         />
     );
 }

@@ -1,46 +1,57 @@
 // src/renderers/AimGuideRenderer.jsx
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { ballQuery, activeBalls } from "../ecs/world";
 import { BALL_R } from "../ecs/constants/table";
-import * as THREE from "three";
 
 const GUIDE_Y = 0.45;
 const GUIDE_LENGTH = 5;
 const OBJECT_GUIDE_LENGTH = 2;
 const DEFLECT_GUIDE_LENGTH = 1.5;
+const HIT_RADIUS_SQ = (BALL_R * 2) ** 2;
 
-function setLinePoints(geo, x1, y1, z1, x2, y2, z2) {
-  if (!geo) return;
+function setLine(geo, x1, z1, x2, z2) {
+  const p = geo.attributes.position.array;
 
-  const positions = geo.attributes.position.array;
-
-  positions[0] = x1;
-  positions[1] = y1;
-  positions[2] = z1;
-  positions[3] = x2;
-  positions[4] = y2;
-  positions[5] = z2;
+  p[0] = x1;
+  p[1] = GUIDE_Y;
+  p[2] = z1;
+  p[3] = x2;
+  p[4] = GUIDE_Y;
+  p[5] = z2;
 
   geo.attributes.position.needsUpdate = true;
   geo.setDrawRange(0, 2);
 }
 
 function clearLine(geo) {
-  if (geo) geo.setDrawRange(0, 0);
+  geo.setDrawRange(0, 0);
+}
+
+function GuideLine({ color, geoRef }) {
+  const positions = useMemo(() => new Float32Array(6), []);
+
+  return (
+    <line renderOrder={999} frustumCulled={false}>
+      <bufferGeometry ref={geoRef}>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial color={color} depthTest={false} transparent opacity={0.85} />
+    </line>
+  );
 }
 
 export default function AimGuideRenderer({ cueBall, aimRef }) {
-  const cueGeoRef = useRef();
-  const objectGeoRef = useRef();
-  const deflectGeoRef = useRef();
-  const lastAngleRef = useRef(null);
+  const cueRef = useRef();
+  const objectRef = useRef();
+  const deflectRef = useRef();
+  const cache = useRef({ angle: NaN, x: NaN, z: NaN });
 
   useFrame(() => {
-    const cueGeo = cueGeoRef.current;
-    const objectGeo = objectGeoRef.current;
-    const deflectGeo = deflectGeoRef.current;
+    const cueGeo = cueRef.current;
+    const objectGeo = objectRef.current;
+    const deflectGeo = deflectRef.current;
 
     if (!cueGeo || !objectGeo || !deflectGeo) return;
 
@@ -48,59 +59,53 @@ export default function AimGuideRenderer({ cueBall, aimRef }) {
       clearLine(cueGeo);
       clearLine(objectGeo);
       clearLine(deflectGeo);
-
-      lastAngleRef.current = null;
+      cache.current.angle = NaN;
       return;
     }
 
-    const { angle, cos, sin } = aimRef.current;
+    const { angle, cos: dirX, sin: dirZ } = aimRef.current;
+    const c = cache.current;
 
-    if (
-      lastAngleRef.current !== null &&
-      Math.abs(angle - lastAngleRef.current) < 0.0001
-    ) {
-      return;
-    }
+    // Skip if nothing relevant changed since the last computation.
+    if (angle === c.angle && cueBall.x === c.x && cueBall.z === c.z) return;
 
-    lastAngleRef.current = angle;
+    c.angle = angle;
+    c.x = cueBall.x;
+    c.z = cueBall.z;
 
-    // Match shotSystem, which fires using -cos and -sin.
-    const dirX = cos ?? Math.cos(angle);
-    const dirZ = sin ?? Math.sin(angle);
+    // Nearest ball along the aim ray.
+    const balls = ballQuery.entities;
 
     let nearestBall = null;
     let nearestT = Infinity;
 
-    const hitRadiusSq = (BALL_R * 2) ** 2;
+    for (let i = 0; i < balls.length; i++) {
+      const ball = balls[i];
 
-    for (const ball of ballQuery) {
       if (ball === cueBall || ball.pocketed || ball.falling) continue;
 
       const relX = ball.x - cueBall.x;
       const relZ = ball.z - cueBall.z;
 
       const t = relX * dirX + relZ * dirZ;
-      if (t <= 0) continue;
+      if (t <= 0 || t >= nearestT) continue;
 
       const dx = relX - dirX * t;
       const dz = relZ - dirZ * t;
 
-      const distSq = dx * dx + dz * dz;
-
-      if (distSq < hitRadiusSq && t < nearestT) {
+      if (dx * dx + dz * dz < HIT_RADIUS_SQ) {
         nearestBall = ball;
         nearestT = t;
       }
     }
 
     if (!nearestBall) {
-      setLinePoints(
+      setLine(
         cueGeo,
-        cueBall.x, GUIDE_Y, cueBall.z,
-        cueBall.x + dirX * GUIDE_LENGTH, GUIDE_Y,
+        cueBall.x, cueBall.z,
+        cueBall.x + dirX * GUIDE_LENGTH,
         cueBall.z + dirZ * GUIDE_LENGTH
       );
-
       clearLine(objectGeo);
       clearLine(deflectGeo);
       return;
@@ -111,37 +116,34 @@ export default function AimGuideRenderer({ cueBall, aimRef }) {
 
     const nx = nearestBall.x - hitX;
     const nz = nearestBall.z - hitZ;
-
     const len = Math.hypot(nx, nz);
+
     if (len < 0.0001) return;
 
     const normalX = nx / len;
     const normalZ = nz / len;
 
-    setLinePoints(
-      cueGeo,
-      cueBall.x, GUIDE_Y, cueBall.z,
-      hitX, GUIDE_Y, hitZ
-    );
+    setLine(cueGeo, cueBall.x, cueBall.z, hitX, hitZ);
 
-    setLinePoints(
+    setLine(
       objectGeo,
-      nearestBall.x, GUIDE_Y, nearestBall.z,
+      nearestBall.x, nearestBall.z,
       nearestBall.x + normalX * OBJECT_GUIDE_LENGTH,
-      GUIDE_Y,
       nearestBall.z + normalZ * OBJECT_GUIDE_LENGTH
     );
 
-    const tx = dirX - normalX;
-    const tz = dirZ - normalZ;
+    // The cue ball deflects along the tangent: dir minus its component
+    // along the contact normal. (The old `dir - normal` was not a tangent.)
+    const dot = dirX * normalX + dirZ * normalZ;
+    const tx = dirX - dot * normalX;
+    const tz = dirZ - dot * normalZ;
     const tLen = Math.hypot(tx, tz);
 
     if (tLen > 0.001) {
-      setLinePoints(
+      setLine(
         deflectGeo,
-        hitX, GUIDE_Y, hitZ,
+        hitX, hitZ,
         hitX + (tx / tLen) * DEFLECT_GUIDE_LENGTH,
-        GUIDE_Y,
         hitZ + (tz / tLen) * DEFLECT_GUIDE_LENGTH
       );
     } else {
@@ -151,41 +153,9 @@ export default function AimGuideRenderer({ cueBall, aimRef }) {
 
   return (
     <>
-      <line renderOrder={999} ref={obj => {
-        if (obj) cueGeoRef.current = obj.geometry;
-      }}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(6), 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="white" depthTest={false} transparent opacity={0.85} />
-      </line>
-
-      <line renderOrder={999} ref={obj => {
-        if (obj) objectGeoRef.current = obj.geometry;
-      }}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(6), 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="yellow" depthTest={false} transparent opacity={0.85} />
-      </line>
-
-      <line renderOrder={999} ref={obj => {
-        if (obj) deflectGeoRef.current = obj.geometry;
-      }}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(6), 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="cyan" depthTest={false} transparent opacity={0.85} />
-      </line>
+      <GuideLine color="white" geoRef={cueRef} />
+      <GuideLine color="yellow" geoRef={objectRef} />
+      <GuideLine color="cyan" geoRef={deflectRef} />
     </>
   );
 }

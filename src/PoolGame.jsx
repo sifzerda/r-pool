@@ -1,3 +1,5 @@
+// src/PoolGame.jsx
+
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
@@ -7,54 +9,47 @@ import { usePoolStore } from "./store/poolStore";
 
 import PoolScene from "./PoolScene";
 
+const CONTAINER_STYLE = {
+  width: "100%",
+  height: "500px",
+  position: "relative",
+};
+
+const STATUS_STYLE = {
+  position: "absolute",
+  top: 10,
+  left: 10,
+  color: "white",
+};
+
+const CAMERA_POSITION = [0, 10, 0];
+const CAMERA_ROTATION = [-Math.PI / 2, 0, 0];
+
 export default function PoolGame() {
   const [cueBall, setCueBall] = useState(null);
+  const gameStatus = usePoolStore((state) => state.gameStatus);
 
-  const gameStatus = usePoolStore(
-    state => state.gameStatus
-  );
-
+  // Kept in an effect (not a lazy useState initialiser) so React StrictMode's
+  // double invocation can't leave a stale cue ball that was removed from the world.
   useEffect(() => {
-    const cue = setupGame();
-
-    setCueBall(cue);
-
+    setCueBall(setupGame());
     usePoolStore.getState().startGame();
   }, []);
 
   return (
-    <div style={{
-      width: "100%",
-      height: "500px",
-      position: "relative",
-    }}>
-
-      <Canvas shadows dpr={[1, 1.5]}>
-
+    <div style={CONTAINER_STYLE}>
+      <Canvas shadows dpr={[1, 1.5]} frameloop="demand">
         <OrthographicCamera
           makeDefault
-          position={[0, 10, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
+          position={CAMERA_POSITION}
+          rotation={CAMERA_ROTATION}
           zoom={80}
         />
 
-        {cueBall && (
-          <PoolScene cueBall={cueBall} />
-        )}
-
+        {cueBall && <PoolScene cueBall={cueBall} />}
       </Canvas>
 
-      {/* Outside Canvas: normal React UI */}
-
-      <div style={{
-        position: "absolute",
-        top: 10,
-        left: 10,
-        color: "white",
-      }}>
-        {gameStatus}
-      </div>
-
+      <div style={STATUS_STYLE}>{gameStatus}</div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { toRenderX, toRenderZ } from "../ecs/utils/coords.js";
+import { toRenderX, toRenderZ } from "../ecs/constants/coords.js";
 import { activeBalls } from "../ecs/world.js";
 
 // ─────────────────────────────────────────

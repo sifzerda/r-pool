@@ -1,70 +1,83 @@
 // src/ecs/systems/collisionSystem.js
 
 import { BALL_R } from "../constants/table.js";
-import { resolveCollision } from "../utils/collision.js";
-import { ballQuery, activeBall, markDirty } from "../world.js";
-import { SpatialGrid } from "../utils/spatialGrid.js";
-
-const grid = new SpatialGrid();
+import { ballQuery, activeBalls, activeBall, markDirty } from "../world.js";
 
 const MIN_DIST = BALL_R * 2;
 const MIN_DIST_SQ = MIN_DIST * MIN_DIST;
-const MIN_VELOCITY = 0.0001;
+const RESTITUTION = 0.96;
+const SPIN_FACTOR = 0.0085;
 
+function wake(ball) {
+  ball.sleeping = false;
+  activeBall(ball);
+}
+
+// With 16 equal-mass balls, brute force against only the moving balls is
+// cheaper than a spatial hash, and does nothing at all while the table is idle.
 export function collisionSystem() {
-  grid.clear();
+  if (activeBalls.size === 0) return;
 
-  // Build spatial grid.
-  for (const ball of ballQuery) {
-    if (ball.pocketed || ball.falling) continue;
-    grid.insert(ball);
-  }
+  const balls = ballQuery.entities;
 
-  // Check nearby ball pairs.
-  for (const a of ballQuery) {
+  for (const a of activeBalls) {
     if (a.pocketed || a.falling) continue;
 
-    grid.forEachNearby(a, (b) => {
-      if (a.id >= b.id) return;
-      if (b.pocketed || b.falling) return;
+    for (let i = 0; i < balls.length; i++) {
+      const b = balls[i];
+
+      if (b === a || b.pocketed || b.falling) continue;
+
+      // If b is also moving, the pair is handled when b is "a".
+      if (b.active && b.id < a.id) continue;
 
       const dx = b.x - a.x;
       const dz = b.z - a.z;
+      const d2 = dx * dx + dz * dz;
 
-      const distSq = dx * dx + dz * dz;
+      if (d2 >= MIN_DIST_SQ) continue;
 
-      if (distSq >= MIN_DIST_SQ) return;
+      // Handle perfectly overlapping centres.
+      let nx = 1;
+      let nz = 0;
+      let d = 0;
 
-      // Check whether the balls are approaching.
-      const distance = Math.sqrt(distSq);
-      if (distance === 0) return;
-
-      const nx = dx / distance;
-      const nz = dz / distance;
-
-      const relativeVelocity =
-        (b.vx - a.vx) * nx +
-        (b.vz - a.vz) * nz;
-
-      const approaching = relativeVelocity < -MIN_VELOCITY;
-
-      resolveCollision(a, b);
-
-      // Only activate balls when an actual collision transfers motion.
-      if (approaching) {
-        if (Math.hypot(a.vx, a.vz) > MIN_VELOCITY) {
-          a.sleeping = false;
-          activeBall(a);
-        }
-
-        if (Math.hypot(b.vx, b.vz) > MIN_VELOCITY) {
-          b.sleeping = false;
-          activeBall(b);
-        }
+      if (d2 > 1e-12) {
+        d = Math.sqrt(d2);
+        nx = dx / d;
+        nz = dz / d;
       }
+
+      // Separate overlapping balls.
+      const push = (MIN_DIST - d) * 0.5;
+
+      a.x -= nx * push;
+      a.z -= nz * push;
+      b.x += nx * push;
+      b.z += nz * push;
 
       markDirty(a);
       markDirty(b);
-    });
+
+      const vn = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
+
+      // Already separating.
+      if (vn >= 0) continue;
+
+      // Equal masses: each ball's velocity changes by -(1 + e) * vn / 2.
+      const j = -(1 + RESTITUTION) * vn * 0.5;
+
+      a.vx -= j * nx;
+      a.vz -= j * nz;
+      b.vx += j * nx;
+      b.vz += j * nz;
+
+      // Simple visual spin response.
+      a.rotY += j * SPIN_FACTOR;
+      b.rotY -= j * SPIN_FACTOR;
+
+      wake(a);
+      wake(b);
+    }
   }
 }

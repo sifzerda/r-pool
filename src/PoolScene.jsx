@@ -1,58 +1,55 @@
 // src/PoolScene.jsx
 
-import { useRef } from "react";
+import { useState } from "react";
 import { useFrame } from "@react-three/fiber";
 
-import { ballQuery, activeBalls } from "./ecs/world";
+import { ballQuery } from "./ecs/world";
 
 import TableRenderer from "./renderers/TableRenderer";
 import StickRenderer from "./renderers/StickRenderer";
 import BallRenderer from "./renderers/BallRenderer";
 import AimGuideRenderer from "./renderers/AimGuideRenderer";
-import CueSystem from "./ecs/systems/CueSystem";
-import InputSystem from "./ecs/InputSystem";
+import AimController from "./ecs/AimController";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
+const createAim = () => ({
+  angle: 0,
+  cos: 1,
+  sin: 0,
+
+  power: 0,
+  pullBack: 0,
+
+  charging: false,
+
+  pointerX: 0,
+  pointerZ: 0,
+
+  dragStartX: 0,
+  dragStartZ: 0,
+
+  lockedAngle: 0,
+  lockedCos: 1,
+  lockedSin: 0,
+
+  swing: 0,
+  swingT: 0,
+
+  pendingShot: null,
+});
+
 export default function PoolScene({ cueBall }) {
-  const aimRef = useRef({
-    angle: 0,
-    cos: 1,
-    sin: 0,
+  const [aimRef] = useState(() => ({ current: createAim() }));
+  const [engine] = useState(() => new PhysicsEngine(cueBall, aimRef));
 
-    power: 0,
-    pullBack: 0,
-
-    charging: false,
-
-    pointerX: 0,
-    pointerZ: 0,
-
-    dragStartX: 0,
-    dragStartZ: 0,
-
-    lockedAngle: 0,
-    lockedCos: 1,
-    lockedSin: 0,
-
-    swing: 0,
-    swingT: 0,
-
-    pendingShot: null,
-  });
-
-  const engineRef = useRef();
-
-  if (!engineRef.current) {
-    engineRef.current = new PhysicsEngine(cueBall, aimRef);
-  }
-
-  useFrame((_, delta) => {
-    engineRef.current.update(delta);
+  // frameloop="demand": keep rendering only while something is happening.
+  useFrame((state, delta) => {
+    if (engine.update(delta)) state.invalidate();
   });
 
   return (
     <>
-      <ambientLight intensity={0.45} />
+      <ambientLight intensity={0.85} />
 
       <directionalLight
         castShadow
@@ -60,17 +57,16 @@ export default function PoolScene({ cueBall }) {
         position={[4, 8, 2]}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
+        shadow-camera-near={1}
+        shadow-camera-far={20}
       />
-
-      <hemisphereLight intensity={0.4} />
 
       <TableRenderer />
       <BallRenderer balls={ballQuery.entities} />
 
       <AimGuideRenderer cueBall={cueBall} aimRef={aimRef} />
       <StickRenderer cueBall={cueBall} aimRef={aimRef} />
-      <InputSystem cueBall={cueBall} aimRef={aimRef} />
-      <CueSystem cueBall={cueBall} aimRef={aimRef} />
+      <AimController cueBall={cueBall} aimRef={aimRef} />
     </>
   );
 }

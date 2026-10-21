@@ -1,4 +1,4 @@
-//ecs/constants/pockets.js
+// src/ecs/constants/pockets.js
 
 import { PLAY_X, PLAY_Z } from "./table";
 

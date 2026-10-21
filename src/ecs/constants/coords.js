@@ -1,4 +1,4 @@
-// src/ecs/utils/coords.js
+// src/ecs/constants/coords.js
 
 export function toRenderX(x) { return x }
 export function toRenderZ(y) { return y }

@@ -1,5 +1,7 @@
 //src/store/poolStore.js
 
+// UNUSED
+
 import { create } from "zustand";
 
 export const usePoolStore = create((set, get) => ({

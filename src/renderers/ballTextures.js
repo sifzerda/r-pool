@@ -1,10 +1,6 @@
-// src/renderers/balls/ballTextures.js
+// src/renderers/ballTextures.js
 
 import { CanvasTexture, SRGBColorSpace, LinearFilter } from "three";
-
-// --------------------------------------------------
-// BALL DEFINITIONS
-// --------------------------------------------------
 
 const BALLS = [
     { id: 0, color: "#ffffff", type: "cue" },
@@ -28,76 +24,54 @@ const BALLS = [
     { id: 15, color: "#8B1A1A", type: "stripe" },
 ];
 
-// --------------------------------------------------
-// ATLAS CONFIGURATION
-// --------------------------------------------------
-
+// Balls are only ~16px across on screen (radius 0.1 at zoom 80), so a 2048px
+// atlas (512px cells) was 16x more memory than needed. 256px cells still
+// leave plenty of headroom if you zoom in: 1024x1024 = 4MB instead of 16MB.
 const GRID = 4;
-const CELL_SIZE = 512;
+const CELL_SIZE = 256;
 const SIZE = GRID * CELL_SIZE;
-
-// --------------------------------------------------
-// DRAW INDIVIDUAL BALL INTO ATLAS
-// --------------------------------------------------
 
 function drawBall(ctx, ball, x, y) {
     const s = CELL_SIZE;
 
     ctx.save();
-
     ctx.translate(x, y);
 
-    // Base
-    ctx.fillStyle = "#ffffff";
+    // Base colour (solids and the eight ball are fully coloured).
+    const solid = ball.type === "solid" || ball.type === "eight";
+    ctx.fillStyle = solid ? ball.color : "#ffffff";
     ctx.fillRect(0, 0, s, s);
 
-    // Solid / eight ball
-    if (ball.type === "solid" || ball.type === "eight") {
-        ctx.fillStyle = ball.color;
-        ctx.fillRect(0, 0, s, s);
-    }
-
-    // Stripes
+    // Stripe band
     if (ball.type === "stripe") {
         ctx.fillStyle = ball.color;
         ctx.fillRect(0, s * 0.33, s, s * 0.34);
     }
 
-    // Number circles
+    // Number circles (front and back of the ball)
     if (ball.type !== "cue") {
+        ctx.font = `bold ${Math.round(s * 0.245)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = s * 0.006;
+
         for (const cx of [s * 0.25, s * 0.75]) {
             ctx.beginPath();
-
-            ctx.arc(
-                cx,
-                s / 2,
-                s * 0.12,
-                0,
-                Math.PI * 2
-            );
+            ctx.arc(cx, s / 2, s * 0.12, 0, Math.PI * 2);
 
             ctx.fillStyle = "#ffffff";
             ctx.fill();
 
-            ctx.lineWidth = 3;
             ctx.strokeStyle = "#dddddd";
             ctx.stroke();
 
             ctx.fillStyle = "#000000";
-            ctx.font = "bold 125px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-
             ctx.fillText(String(ball.id), cx, s / 2);
         }
     }
 
     ctx.restore();
 }
-
-// --------------------------------------------------
-// CREATE ATLAS
-// --------------------------------------------------
 
 function createBallAtlas() {
     const canvas = document.createElement("canvas");
@@ -107,23 +81,21 @@ function createBallAtlas() {
 
     const ctx = canvas.getContext("2d");
 
-    // Draw each ball into its own cell
     for (const ball of BALLS) {
-        const col = ball.id % GRID;
-        const row = Math.floor(ball.id / GRID);
-
-        const x = col * CELL_SIZE;
-        const y = row * CELL_SIZE;
-
-        drawBall(ctx, ball, x, y);
+        drawBall(
+            ctx,
+            ball,
+            (ball.id % GRID) * CELL_SIZE,
+            Math.floor(ball.id / GRID) * CELL_SIZE
+        );
     }
 
     const texture = new CanvasTexture(canvas);
 
     texture.colorSpace = SRGBColorSpace;
-    texture.anisotropy = 16;
 
-    // Avoid mipmap filtering across neighbouring atlas cells.
+    // No mipmaps (they would bleed across neighbouring atlas cells), so
+    // anisotropic filtering has nothing to work with and is left at 1.
     texture.generateMipmaps = false;
     texture.minFilter = LinearFilter;
     texture.magFilter = LinearFilter;
@@ -136,16 +108,9 @@ function createBallAtlas() {
 // One texture shared by every ball
 export const ballAtlas = createBallAtlas();
 
-// --------------------------------------------------
-// UV OFFSETS
-// --------------------------------------------------
-
 export function getBallUvOffset(ballId) {
     const col = ballId % GRID;
     const row = Math.floor(ballId / GRID);
 
-    return [
-        col / GRID,
-        (GRID - 1 - row) / GRID,
-    ];
+    return [col / GRID, (GRID - 1 - row) / GRID];
 }

@@ -4,19 +4,16 @@ import { World } from "miniplex";
 
 export const world = new World();
 export const ballQuery = world.with("ball");
-export const cueBallQuery = world.with("cueBall");
-export const solidBallQuery = world.with("ball").where(ball => ball.type === "solid");
-export const stripeBallQuery = world.with("ball").where(ball => ball.type === "stripe");
-export const eightBallQuery = world.with("ball").where(ball => ball.type === "eight");
+
+// Balls currently moving (cheap to iterate: usually 0-16 entries).
 export const activeBalls = new Set();
+// Balls playing the pocket-drop animation.
+export const fallingBalls = new Set();
+// Balls whose transform changed since the renderer last read them.
 export const dirtyBalls = new Set();
 
-// helper for calculating aim line while balls moving (so not continously updating)
-export function ballsAreMoving() {
-  return activeBalls.size > 0;
-}
+export const ballsAreMoving = () => activeBalls.size > 0;
 
-//helpers for tracking only moving balls
 export function activeBall(ball) {
   if (ball.active) return;
   ball.active = true;
