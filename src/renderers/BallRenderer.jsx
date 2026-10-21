@@ -1,160 +1,105 @@
-//src/renderers/BallRenderer.jsx
+// src/renderers/BallRenderer.jsx
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useLayoutEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-
-import {
-    ballGeometry,
-    ballMaterial,
-} from "./ballAssets.js";
+import { ballGeometry, ballMaterial } from "./ballAssets.js";
 import { getBallUvOffset } from "./ballTextures.js";
+import { clearDirty } from "../ecs/world.js";
 
-// --------------------------------------------------
+// --------------------------------
 // BALL RENDERER
-// --------------------------------------------------
+// --------------------------------
 
 export default function BallRenderer({ balls }) {
-    const meshRef = useRef();
 
-    // Temporary object used to calculate instance transforms
+    const meshRef = useRef();
+    const initialized = useRef(false);
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    // Reusable Euler rotation
-    const rotation = useMemo(() => new THREE.Euler(), []);
-
-    // --------------------------------------------------
+    // --------------------------------
     // INITIALISE INSTANCE UV OFFSETS
-    // --------------------------------------------------
+    // --------------------------------
 
-    useMemo(() => {
-        const attribute = ballGeometry.getAttribute(
-            "instanceUvOffset"
-        );
+    useLayoutEffect(() => {
+        const attribute = ballGeometry.getAttribute("instanceUvOffset");
+
+        if (!attribute) {
+            console.error("BallRenderer: Missing instanceUvOffset attribute");
+            return;
+        }
 
         for (let i = 0; i < balls.length; i++) {
             const ball = balls[i];
-
             const [u, v] = getBallUvOffset(ball.id);
-
             attribute.setXY(i, u, v);
         }
-
         attribute.needsUpdate = true;
+        // New instance matrices must be initialised.
+        initialized.current = false;
     }, [balls]);
 
-    // --------------------------------------------------
-    // UPDATE INSTANCES
-    // --------------------------------------------------
+    // --------------------------------
+    // UPDATE INSTANCE TRANSFORMS
+    // --------------------------------
 
-    useFrame((_, delta) => {
+    useFrame(() => {
         const mesh = meshRef.current;
 
         if (!mesh) return;
 
+        let changed = false;
+
         for (let i = 0; i < balls.length; i++) {
             const ball = balls[i];
 
-            // ------------------------------------------
+            // Initialise every instance on first render.
+            if (!ball.dirty && initialized.current) {
+                continue;
+            }
+
+            // --------------------------------
             // POCKETED
-            // ------------------------------------------
+            // --------------------------------
 
             if (ball.pocketed) {
                 dummy.position.set(0, 0, 0);
                 dummy.rotation.set(0, 0, 0);
                 dummy.scale.setScalar(0);
-
-                dummy.updateMatrix();
-
-                mesh.setMatrixAt(i, dummy.matrix);
-
-                continue;
             }
 
-            // ------------------------------------------
-            // FALLING ANIMATION
-            // ------------------------------------------
+            // --------------------------------
+            // VISIBLE BALL
+            // --------------------------------
 
-            if (ball.falling) {
-                const dx = ball.pocketX - ball.x;
-                const dz = ball.pocketZ - ball.z;
-
-                ball.x += dx * 8 * delta;
-                ball.z += dz * 8 * delta;
-
-                ball.fallSpeed += 12 * delta;
-                ball.y -= ball.fallSpeed * delta;
-
-                ball.rotX += delta * 8;
-                ball.rotZ += delta * 8;
-
-                if (ball.y < -0.4) {
-                    ball.pocketed = true;
-                    ball.active = false;
-                    ball.dirty = true;
-
-                    dummy.scale.setScalar(0);
-                    dummy.position.set(0, 0, 0);
-                    dummy.rotation.set(0, 0, 0);
-
-                    dummy.updateMatrix();
-
-                    mesh.setMatrixAt(i, dummy.matrix);
-
-                    continue;
-                }
+            else {
+                dummy.position.set(ball.x, ball.y, ball.z);
+                dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
+                dummy.scale.setScalar(1);
             }
-
-            // ------------------------------------------
-            // NORMAL TRANSFORM
-            // ------------------------------------------
-
-            if (!ball.dirty && !ball.falling) {
-                continue;
-            }
-
-            dummy.position.set(
-                ball.x,
-                ball.y,
-                ball.z
-            );
-
-            rotation.set(
-                ball.rotX,
-                ball.rotY,
-                ball.rotZ
-            );
-
-            dummy.rotation.copy(rotation);
-
-            dummy.scale.setScalar(1);
 
             dummy.updateMatrix();
-
             mesh.setMatrixAt(i, dummy.matrix);
-
-            ball.dirty = false;
+            clearDirty(ball);
+            changed = true;
         }
 
-        // Tell Three.js that instance matrices changed
-        mesh.instanceMatrix.needsUpdate = true;
+        initialized.current = true;
+
+        if (changed) {
+            mesh.instanceMatrix.needsUpdate = true;
+        }
     });
 
-    // --------------------------------------------------
+    // --------------------------------
     // RENDER
-    // --------------------------------------------------
+    // --------------------------------
 
     return (
         <instancedMesh
             ref={meshRef}
-            args={[
-                ballGeometry,
-                ballMaterial,
-                balls.length,
-            ]}
-            count={balls.length}
-            castShadow
-            receiveShadow
+            args={[ ballGeometry, ballMaterial, balls.length ]}
+            count={balls.length} castShadow receiveShadow
         />
     );
 }

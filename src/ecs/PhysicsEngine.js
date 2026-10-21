@@ -26,7 +26,7 @@ export class PhysicsEngine {
       for (let i = 0; i < SUBSTEPS; i++) {
         physicsSystem(SUB_DT);
         collisionSystem();
-        pocketSystem();
+        pocketSystem(SUB_DT);
       }
 
       frictionSystem(FIXED_DT);

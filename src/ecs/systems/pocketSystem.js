@@ -1,57 +1,112 @@
 // src/ecs/systems/pocketSystem.js
 
 import {
-  activeBalls,
-  markDirty,
-  deactiveBall,
-} from "../world";
+    activeBalls,
+    ballQuery,
+    markDirty,
+    deactiveBall,
+} from "../world.js";
 
-import { POCKETS } from "../constants/pockets";
-import { POCKET_R } from "../constants/table";
+import { POCKETS } from "../constants/pockets.js";
+import { POCKET_R } from "../constants/table.js";
 
 const POCKET_R_SQ = POCKET_R * POCKET_R;
 
-export function pocketSystem() {
-  for (const ball of activeBalls) {
-    if (ball.pocketed || ball.falling) continue;
+// Falling animation settings
+const FALL_PULL = 8;
+const FALL_ACCELERATION = 12;
+const FALL_END_Y = -0.4;
 
-    for (const pocket of POCKETS) {
-      const dx = ball.x - pocket.x;
-      const dz = ball.z - pocket.z;
+// --------------------------------
+// Pocket detection
+// --------------------------------
 
-      if (dx * dx + dz * dz >= POCKET_R_SQ) continue;
+function detectPockets() {
+    for (const ball of activeBalls) {
+        if (ball.pocketed || ball.falling) continue;
 
-      if (ball.cueBall) {
-        // Scratch: return cue ball to the table centre.
-        ball.x = 0;
-        ball.z = 0;
+        for (const pocket of POCKETS) {
+            const dx = ball.x - pocket.x;
+            const dz = ball.z - pocket.z;
 
-        ball.vx = 0;
-        ball.vz = 0;
+            if (dx * dx + dz * dz >= POCKET_R_SQ) {
+                continue;
+            }
 
-        ball.sleeping = true;
+            if (ball.cueBall) {
+                // Scratch: return cue ball to table centre.
+                ball.x = 0;
+                ball.z = 0;
 
-        markDirty(ball);
-        deactiveBall(ball);
+                ball.vx = 0;
+                ball.vz = 0;
 
-      } else {
-        // Start pocket animation.
-        ball.pocketX = pocket.x;
-        ball.pocketZ = pocket.z;
+                ball.sleeping = true;
 
-        ball.falling = true;
-        ball.fallSpeed = 0;
+                markDirty(ball);
+                deactiveBall(ball);
+            } else {
+                // Start the falling animation.
+                ball.pocketX = pocket.x;
+                ball.pocketZ = pocket.z;
 
-        ball.vx = 0;
-        ball.vz = 0;
+                ball.falling = true;
+                ball.fallSpeed = 0;
 
-        ball.sleeping = true;
+                ball.vx = 0;
+                ball.vz = 0;
 
-        markDirty(ball);
-        deactiveBall(ball);
-      }
+                ball.sleeping = true;
 
-      break;
+                markDirty(ball);
+                deactiveBall(ball);
+            }
+
+            break;
+        }
     }
-  }
+}
+
+// --------------------------------
+// Falling animation
+// --------------------------------
+
+function updateFallingBalls(dt) {
+    // Use all ball entities, not just activeBalls.
+    // Falling balls have already been deactivated.
+    for (const ball of ballQuery.entities) {
+        if (!ball.falling || ball.pocketed) continue;
+
+        const dx = ball.pocketX - ball.x;
+        const dz = ball.pocketZ - ball.z;
+
+        ball.x += dx * FALL_PULL * dt;
+        ball.z += dz * FALL_PULL * dt;
+
+        ball.fallSpeed += FALL_ACCELERATION * dt;
+        ball.y -= ball.fallSpeed * dt;
+
+        ball.rotX += dt * 8;
+        ball.rotZ += dt * 8;
+
+        markDirty(ball);
+
+        // Finish the pocket animation.
+        if (ball.y < FALL_END_Y) {
+            ball.falling = false;
+            ball.pocketed = true;
+            ball.active = false;
+
+            markDirty(ball);
+        }
+    }
+}
+
+// --------------------------------
+// Main pocket system
+// --------------------------------
+
+export function pocketSystem(dt) {
+    detectPockets();
+    updateFallingBalls(dt);
 }
