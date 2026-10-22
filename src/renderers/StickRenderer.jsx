@@ -1,4 +1,4 @@
-// src/ecs/components/StickRenderer.jsx
+// src/renderers/StickRenderer.jsx
 
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
@@ -6,6 +6,9 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { toRenderX, toRenderZ } from "../ecs/constants/coords.js";
 import { activeBalls } from "../ecs/world.js";
+import {
+  stickTipMat, stickFerruleMat, stickShaftMat, stickAccentMat, stickButtMat,
+} from "./materials.js";
 
 // ─────────────────────────────────────────
 // Geometry creation
@@ -18,35 +21,25 @@ function makeCylinder(rTop, rBot, len, segs, offsetX) {
   return geo;
 }
 
-const geoTip = makeCylinder(0.018, 0.028, 0.14, 8, 0.07);
-const geoFerrule = makeCylinder(0.028, 0.032, 0.18, 8, 0.23);
+const geoTip = makeCylinder(0.018, 0.028, 0.14, 12, 0.07);
+const geoFerrule = makeCylinder(0.028, 0.032, 0.18, 12, 0.23);
 
 const geoMaple = mergeGeometries([
-  makeCylinder(0.032, 0.052, 2.20, 12, 1.42),
-  makeCylinder(0.060, 0.070, 0.82, 12, 3.65),
+  makeCylinder(0.032, 0.052, 2.20, 16, 1.42),
+  makeCylinder(0.060, 0.070, 0.82, 16, 3.65),
 ]);
 
 const geoRings = mergeGeometries([
-  makeCylinder(0.056, 0.056, 0.024, 8, 2.530),
-  makeCylinder(0.056, 0.056, 0.016, 8, 2.566),
-  makeCylinder(0.062, 0.062, 0.024, 8, 3.210),
-  makeCylinder(0.062, 0.062, 0.016, 8, 3.246),
+  makeCylinder(0.056, 0.056, 0.024, 12, 2.530),
+  makeCylinder(0.056, 0.056, 0.016, 12, 2.566),
+  makeCylinder(0.062, 0.062, 0.024, 12, 3.210),
+  makeCylinder(0.062, 0.062, 0.016, 12, 3.246),
 ]);
 
 const geoDark = mergeGeometries([
-  makeCylinder(0.056, 0.060, 0.64, 10, 2.88),
-  makeCylinder(0.070, 0.070, 0.072, 8, 4.10),
+  makeCylinder(0.056, 0.060, 0.64, 14, 2.88),
+  makeCylinder(0.070, 0.070, 0.072, 12, 4.10),
 ]);
-
-// ─────────────────────────────────────────
-// Materials
-// ─────────────────────────────────────────
-
-const matTip = new THREE.MeshStandardMaterial({ color: "#5c3317", roughness: 0.9 });
-const matFerrule = new THREE.MeshStandardMaterial({ color: "#f0ede8", roughness: 0.3, metalness: 0.1 });
-const matMaple = new THREE.MeshStandardMaterial({ color: "#d4a84b", roughness: 0.25, metalness: 0.05 });
-const matRings = new THREE.MeshStandardMaterial({ color: "#c8a030", roughness: 0.2, metalness: 0.6, emissive: "#4a3800", emissiveIntensity: 0.3 });
-const matDark = new THREE.MeshStandardMaterial({ color: "#1a0e06", roughness: 0.95 });
 
 // Power meter materials
 const meterBackground = new THREE.MeshBasicMaterial({ color: "#151515" });
@@ -120,11 +113,11 @@ export default function StickRenderer({ cueBall, aimRef }) {
   return (
     <>
       <group ref={ref}>
-        <mesh geometry={geoTip} material={matTip} castShadow />
-        <mesh geometry={geoFerrule} material={matFerrule} castShadow />
-        <mesh geometry={geoMaple} material={matMaple} castShadow />
-        <mesh geometry={geoRings} material={matRings} castShadow />
-        <mesh geometry={geoDark} material={matDark} castShadow />
+        <mesh geometry={geoTip} material={stickTipMat} castShadow />
+        <mesh geometry={geoFerrule} material={stickFerruleMat} castShadow />
+        <mesh geometry={geoMaple} material={stickShaftMat} castShadow />
+        <mesh geometry={geoRings} material={stickAccentMat} castShadow />
+        <mesh geometry={geoDark} material={stickButtMat} castShadow />
       </group>
 
       {/* Power meter */}

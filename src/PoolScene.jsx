@@ -10,6 +10,7 @@ import StickRenderer from "./renderers/StickRenderer";
 import BallRenderer from "./renderers/BallRenderer";
 import AimGuideRenderer from "./renderers/AimGuideRenderer";
 import AimController from "./ecs/AimController";
+import SceneLab from "./lab/SceneLab";
 import { PhysicsEngine } from "./ecs/PhysicsEngine";
 
 const createAim = () => ({
@@ -49,17 +50,8 @@ export default function PoolScene({ cueBall }) {
 
   return (
     <>
-      <ambientLight intensity={0.85} />
-
-      <directionalLight
-        castShadow
-        intensity={2.5}
-        position={[4, 8, 2]}
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        shadow-camera-near={1}
-        shadow-camera-far={20}
-      />
+      {/* Lights, reflections, background and exposure (all Lab-controlled). */}
+      <SceneLab />
 
       <TableRenderer />
       <BallRenderer balls={ballQuery.entities} />

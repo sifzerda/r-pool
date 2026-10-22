@@ -1,24 +1,14 @@
-//src/renderers/balls/ballAssets.js
+// src/renderers/ballAssets.js
 
 import * as THREE from "three";
 
 import { BALL_R } from "../ecs/constants/table";
 import { ballAtlas } from "./ballTextures.js";
 
-// --------------------------------------------------
-// SHARED GEOMETRY
-// --------------------------------------------------
+// Shared geometry
+export const ballGeometry = new THREE.SphereGeometry(BALL_R, 32, 32);
 
-export const ballGeometry = new THREE.SphereGeometry(
-    BALL_R,
-    32,
-    32
-);
-
-// --------------------------------------------------
-// SHARED MATERIAL
-// --------------------------------------------------
-
+// Shared material. The Lab edits these properties live.
 export const ballMaterial = new THREE.MeshPhysicalMaterial({
     map: ballAtlas,
 
@@ -27,27 +17,24 @@ export const ballMaterial = new THREE.MeshPhysicalMaterial({
 
     clearcoat: 1,
     clearcoatRoughness: 0.08,
+
+    iridescence: 0,
+    iridescenceIOR: 1.3,
+    iridescenceThicknessRange: [100, 700],
+
+    // "Glow": the ball lights itself with its own texture.
+    emissive: new THREE.Color("#ffffff"),
+    emissiveMap: ballAtlas,
+    emissiveIntensity: 0,
 });
 
-// --------------------------------------------------
-// INSTANCE UV ATTRIBUTE
-// --------------------------------------------------
-
+// Per-instance UV offset into the atlas.
 ballGeometry.setAttribute(
     "instanceUvOffset",
-    new THREE.InstancedBufferAttribute(
-        new Float32Array(16 * 2),
-        2
-    )
+    new THREE.InstancedBufferAttribute(new Float32Array(16 * 2), 2)
 );
 
-// --------------------------------------------------
-// CUSTOM SHADER
-// --------------------------------------------------
-
 ballMaterial.onBeforeCompile = (shader) => {
-
-    // Declare per-instance UV offset
     shader.vertexShader = shader.vertexShader.replace(
         "#include <common>",
         `
@@ -57,16 +44,19 @@ ballMaterial.onBeforeCompile = (shader) => {
         `
     );
 
-    // Override normal UV coordinates with atlas coordinates
+    // Atlas coordinates for the colour map, and the same ones for the glow map.
     shader.vertexShader = shader.vertexShader.replace(
         "#include <uv_vertex>",
         `
         #include <uv_vertex>
 
         vMapUv = uv * 0.25 + instanceUvOffset;
+
+        #ifdef USE_EMISSIVEMAP
+            vEmissiveMapUv = vMapUv;
+        #endif
         `
     );
 };
 
-// Unique program cache key
-ballMaterial.customProgramCacheKey = () => "pool-ball-atlas-v1";
+ballMaterial.customProgramCacheKey = () => "pool-ball-atlas-v2";
