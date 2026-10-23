@@ -24,7 +24,6 @@ const CORNER_GAP = CORNER_POCKET_R * 1.8;
 // Long rails: split in the middle by the side pocket (two pieces per side).
 const LONG_RAIL_LEN = (PLAY_W - SIDE_GAP) / 2 - CORNER_GAP;
 const LONG_RAIL_X = PLAY_W / 4 + SIDE_GAP / 4;
-
 // Short rails: one continuous piece per end.
 const END_RAIL_LEN = PLAY_H - CORNER_GAP * 1.4;
 
@@ -59,10 +58,15 @@ for (const sx of [-1, 1]) {
 
 const railsGeometry = mergeGeometries(railParts);
 
-const trimGeometry = mergeGeometries([
-  box(PLAY_W, 0.03, 0.05, 0, RAIL_Y + 0.08, -PLAY_Z),
-  box(PLAY_W, 0.03, 0.05, 0, RAIL_Y + 0.08, PLAY_Z),
-]);
+// Cap trim: same four pieces as the long rails, so it stops at each pocket
+// instead of running across the openings.
+const trimParts = [];
+for (const sz of [-1, 1]) {
+  for (const sx of [-1, 1]) {
+    trimParts.push(box(LONG_RAIL_LEN, 0.03, 0.05, sx * LONG_RAIL_X, RAIL_Y + 0.08, sz * PLAY_Z));
+  }
+}
+const trimGeometry = mergeGeometries(trimParts);
 
 const DIAMOND_Y = 0.48;
 const diamondParts = [];

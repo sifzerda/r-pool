@@ -1,25 +1,37 @@
 // src/ecs/systems/physics.js
 
 import { PLAY_X, PLAY_Z, BALL_R, POCKET_R } from "../constants/table.js";
+import { POCKETS } from "../constants/pockets.js";
 import { FIXED_DT } from "../constants/simulation.js";
 import { physicsConfig as cfg, physicsDerived as derived, bindTimeStep } from "../constants/physicsConfig.js";
 import { activeBalls, deactiveBall, markDirty } from "../world.js";
 
-const OPENING = POCKET_R + BALL_R;
+const POCKET_R_SQ = POCKET_R * POCKET_R;
 const INV_R = 1 / BALL_R;
 
+// Ball-centre limits (cushion faces are axis aligned).
 const MIN_X = -PLAY_X + BALL_R;
 const MAX_X = PLAY_X - BALL_R;
 const MIN_Z = -PLAY_Z + BALL_R;
 const MAX_Z = PLAY_Z - BALL_R;
 
+// Safety net: a ball this far outside the cushion line has escaped the table.
+const OUT_X = PLAY_X + POCKET_R;
+const OUT_Z = PLAY_Z + POCKET_R;
+
 bindTimeStep(FIXED_DT);
 
-function inCornerGap(v, play) {
-  return Math.abs(v + play) < OPENING || Math.abs(v - play) < OPENING;
-}
-function inPocketGap(v, play) {
-  return inCornerGap(v, play) || Math.abs(v) < OPENING;
+// A ball may only pass a cushion line while its centre is inside a pocket mouth.
+// This is the SAME circle pocketSystem uses to pot a ball, so a ball that gets
+// through is always potted. (The old square "gap" test was bigger than the pot
+// circle, and a ball in the difference sailed straight off the table.)
+function inPocketMouth(x, z) {
+  for (let i = 0; i < POCKETS.length; i++) {
+    const dx = x - POCKETS[i].x;
+    const dz = z - POCKETS[i].z;
+    if (dx * dx + dz * dz < POCKET_R_SQ) return true;
+  }
+  return false;
 }
 
 // Fraction of normal speed kept after a cushion hit. Harder hits lose more.
@@ -29,8 +41,7 @@ function cushionBounce(normalSpeed) {
 }
 
 // Rail grip: friction along the cushion, capped so it never reverses the
-// sideways speed. (The old code multiplied sideways speed by the bounce
-// factor, which cost 25% of it on every rail.)
+// sideways speed.
 function cushionGrip(sideSpeed, impulse) {
   const maxLoss = cfg.cushionFriction * impulse;
   const mag = Math.abs(sideSpeed);
@@ -40,6 +51,7 @@ function cushionGrip(sideSpeed, impulse) {
 
 function bounceX(ball, limit) {
   ball.x = limit;
+  // Only reflect a ball that is moving into the cushion.
   if ((limit === MIN_X && ball.vx >= 0) || (limit === MAX_X && ball.vx <= 0)) return;
   const vn = Math.abs(ball.vx);
   const e = cushionBounce(vn);
@@ -66,17 +78,25 @@ export function physicsSystem(dt) {
     ball.rotX += ball.vz * INV_R * dt;
     ball.rotZ -= ball.vx * INV_R * dt;
 
+    // Cushions: solid everywhere except inside a pocket mouth.
     if (ball.x < MIN_X) {
-      if (!inCornerGap(ball.z, PLAY_Z)) bounceX(ball, MIN_X);
+      if (!inPocketMouth(ball.x, ball.z)) bounceX(ball, MIN_X);
     } else if (ball.x > MAX_X) {
-      if (!inCornerGap(ball.z, PLAY_Z)) bounceX(ball, MAX_X);
+      if (!inPocketMouth(ball.x, ball.z)) bounceX(ball, MAX_X);
     }
 
     if (ball.z < MIN_Z) {
-      if (!inPocketGap(ball.x, PLAY_X)) bounceZ(ball, MIN_Z);
+      if (!inPocketMouth(ball.x, ball.z)) bounceZ(ball, MIN_Z);
     } else if (ball.z > MAX_Z) {
-      if (!inPocketGap(ball.x, PLAY_X)) bounceZ(ball, MAX_Z);
+      if (!inPocketMouth(ball.x, ball.z)) bounceZ(ball, MAX_Z);
     }
+
+    // Safety net (should never trigger): anything that still gets far outside the
+    // table, for example shoved by a collision, is put back at the cushion.
+    if (ball.x < -OUT_X) bounceX(ball, MIN_X);
+    else if (ball.x > OUT_X) bounceX(ball, MAX_X);
+    if (ball.z < -OUT_Z) bounceZ(ball, MIN_Z);
+    else if (ball.z > OUT_Z) bounceZ(ball, MAX_Z);
   }
 }
 
