@@ -1,19 +1,23 @@
 // src/renderers/TableRenderer.jsx
 // Static scene: repeated meshes are merged once at module load. Materials are
 // shared singletons (materials.js) so the Lab can restyle the table live.
+// The playing surface, cloth overlay and table body have real holes at the
+// pockets (see tableGeometry.js), so balls physically drop into them.
 
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-import { TABLE_W, TABLE_H, CUSHION, PLAY_W, PLAY_H, PLAY_X, PLAY_Z } from "../ecs/constants/table";
+import { PLAY_W, PLAY_H, PLAY_X, PLAY_Z, CUSHION } from "../ecs/constants/table";
 import {
-  feltMat, clothMat, frameMat, baseMat, railMat, trimMat, diamondMat, wellMat,
+  feltMat, clothMat, frameMat, railMat, trimMat, diamondMat, wellMat,
 } from "./materials";
+import {
+  CORNER_POCKET_R, SIDE_POCKET_R,
+  makeFeltGeometry, makeClothGeometry, makeFrameGeometry, makeLinerGeometry,
+} from "./tableGeometry";
 
 const RAIL_Y = 0.34;
 const RAIL_H = 0.28;
-const CORNER_POCKET_R = 0.28;
-const SIDE_POCKET_R = 0.22;
 const SIDE_GAP = SIDE_POCKET_R * 2.2;
 const CORNER_GAP = CORNER_POCKET_R * 1.8;
 
@@ -21,7 +25,7 @@ const CORNER_GAP = CORNER_POCKET_R * 1.8;
 const LONG_RAIL_LEN = (PLAY_W - SIDE_GAP) / 2 - CORNER_GAP;
 const LONG_RAIL_X = PLAY_W / 4 + SIDE_GAP / 4;
 
-// Short rails: one continuous piece per end, corner pocket to corner pocket.
+// Short rails: one continuous piece per end.
 const END_RAIL_LEN = PLAY_H - CORNER_GAP * 1.4;
 
 // ─── geometry helpers ───────────────────────────
@@ -30,12 +34,6 @@ function box(w, h, d, x, y, z, rotY = 0) {
   const geo = new THREE.BoxGeometry(w, h, d);
   geo.rotateY(rotY);
   geo.translate(x, y, z);
-  return geo;
-}
-
-function well(x, z, r) {
-  const geo = new THREE.CylinderGeometry(r, r * 0.9, 0.22, 32);
-  geo.translate(x, 0.35, z);
   return geo;
 }
 
@@ -85,14 +83,15 @@ for (const sx of [-1, 1]) {
 
 const diamondsGeometry = mergeGeometries(diamondParts);
 
-const wellsGeometry = mergeGeometries([
-  well(-PLAY_X, -PLAY_Z, CORNER_POCKET_R),
-  well(0, -PLAY_Z, SIDE_POCKET_R),
-  well(PLAY_X, -PLAY_Z, CORNER_POCKET_R),
-  well(-PLAY_X, PLAY_Z, CORNER_POCKET_R),
-  well(0, PLAY_Z, SIDE_POCKET_R),
-  well(PLAY_X, PLAY_Z, CORNER_POCKET_R),
-]);
+// Surface and body with real pocket holes, plus the dark cups lining each shaft.
+const feltGeometry = makeFeltGeometry();
+const clothGeometry = makeClothGeometry();
+const frameGeometry = makeFrameGeometry();
+const linerGeometry = makeLinerGeometry();
+
+// The liner is an open cylinder + a downward-facing floor, so draw its inside.
+wellMat.side = THREE.BackSide;
+wellMat.needsUpdate = true;
 
 export default function TableRenderer() {
   // Runs once when the texture loads and feeds the shared cloth overlay material.
@@ -107,31 +106,20 @@ export default function TableRenderer() {
 
   return (
     <group>
-      {/* Outer wood frame */}
-      <mesh receiveShadow position={[0, -0.05, 0]} material={frameMat}>
-        <boxGeometry args={[TABLE_W + 0.4, 0.5, TABLE_H + 0.4]} />
-      </mesh>
+      {/* Table body (wood frame), shafts cut through at each pocket */}
+      <mesh geometry={frameGeometry} material={frameMat} receiveShadow />
 
-      {/* Table base */}
-      <mesh receiveShadow material={baseMat}>
-        <boxGeometry args={[TABLE_W, 0.4, TABLE_H]} />
-      </mesh>
+      {/* Felt, notched at each pocket */}
+      <mesh geometry={feltGeometry} material={feltMat} receiveShadow />
 
-      {/* Felt */}
-      <mesh receiveShadow position={[0, 0.21, 0]} material={feltMat}>
-        <boxGeometry args={[PLAY_W, 0.02, PLAY_H]} />
-      </mesh>
+      {/* Felt texture overlay, same notches */}
+      <mesh geometry={clothGeometry} material={clothMat} />
 
-      {/* Felt texture overlay */}
-      <mesh position={[0, 0.221, 0]} rotation={[-Math.PI / 2, 0, 0]} material={clothMat}>
-        <planeGeometry args={[PLAY_W, PLAY_H]} />
-      </mesh>
+      {/* Pocket cups: dark wall and floor inside each shaft */}
+      <mesh geometry={linerGeometry} material={wellMat} receiveShadow />
 
       {/* Rails + pocket jaws */}
       <mesh geometry={railsGeometry} material={railMat} castShadow receiveShadow />
-
-      {/* Pocket wells */}
-      <mesh geometry={wellsGeometry} material={wellMat} receiveShadow />
 
       {/* Rail cap trim */}
       <mesh geometry={trimGeometry} material={trimMat} />

@@ -7,6 +7,8 @@ import { ballGeometry, ballMaterial } from "./ballAssets.js";
 import { getBallUvOffset } from "./ballTextures.js";
 import { dirtyBalls } from "../ecs/world.js";
 
+// A ball dropping into a pocket is drawn at its real height (ball.y), so it falls
+// through the hole in the table at full size. It is hidden once it lands.
 function writeBall(mesh, dummy, ball) {
     if (ball.pocketed) {
         dummy.position.set(0, 0, 0);

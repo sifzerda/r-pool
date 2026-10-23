@@ -1,7 +1,7 @@
 // src/ecs/systems/pocketSystem.js
 
 import { activeBalls, fallingBalls, markDirty, deactiveBall } from "../world.js";
-import { POCKETS } from "../constants/pockets.js";
+import { POCKETS, FALL_END_Y } from "../constants/pockets.js";
 import { POCKET_R } from "../constants/table.js";
 import { markPotted } from "../../store/pottedStore.js";
 
@@ -10,7 +10,9 @@ const POCKET_R_SQ = POCKET_R * POCKET_R;
 // Falling animation settings
 const FALL_PULL = 8;
 const FALL_ACCELERATION = 12;
-const FALL_END_Y = -0.4;
+
+// A ball starts dropping once its centre is inside the smallest hole (side pocket, 0.22).
+const DROP_RADIUS_SQ = 0.22 * 0.22;
 
 function detectPockets() {
   for (const ball of activeBalls) {
@@ -49,11 +51,17 @@ function detectPockets() {
 
 function updateFallingBalls(dt) {
   for (const ball of fallingBalls) {
-    ball.x += (ball.pocketX - ball.x) * FALL_PULL * dt;
-    ball.z += (ball.pocketZ - ball.z) * FALL_PULL * dt;
+    const px = ball.pocketX - ball.x;
+    const pz = ball.pocketZ - ball.z;
 
-    ball.fallSpeed += FALL_ACCELERATION * dt;
-    ball.y -= ball.fallSpeed * dt;
+    ball.x += px * FALL_PULL * dt;
+    ball.z += pz * FALL_PULL * dt;
+
+    // Only fall once the ball is over the hole.
+    if (px * px + pz * pz < DROP_RADIUS_SQ) {
+      ball.fallSpeed += FALL_ACCELERATION * dt;
+      ball.y -= ball.fallSpeed * dt;
+    }
 
     ball.rotX += dt * 8;
     ball.rotZ += dt * 8;
@@ -61,6 +69,7 @@ function updateFallingBalls(dt) {
     markDirty(ball);
 
     if (ball.y < FALL_END_Y) {
+      ball.y = FALL_END_Y;
       ball.falling = false;
       ball.pocketed = true;
       fallingBalls.delete(ball);
