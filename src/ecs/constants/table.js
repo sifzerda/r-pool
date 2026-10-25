@@ -1,25 +1,65 @@
 // src/ecs/constants/table.js
 
-export const TABLE_W = 6.8;
-export const TABLE_H = 3.4;
+const TABLE_W = 6.8;
+const TABLE_H = 3.4;
+const TABLE_X = TABLE_W / 2;
+const TABLE_Z = TABLE_H / 2;
+const CUSHION = 0.28;
+const PLAY_W = TABLE_W - CUSHION * 2;
+const PLAY_H = TABLE_H - CUSHION * 2;
+const PLAY_X = PLAY_W / 2;
+const PLAY_Z = PLAY_H / 2;
+const FRAME_BOTTOM = -0.3;
+const FRAME_TOP = 0.2;
+const FELT_THICKNESS = 0.02;
+const FELT_TOP_Y = FRAME_TOP + FELT_THICKNESS;
+const CLOTH_Y = FELT_TOP_Y + 1e-3;
+const BALL_R = 0.1;
+const BALL_Y = FELT_TOP_Y + BALL_R;
+const CORNER_POCKET_R = 0.28;
+const SIDE_POCKET_R = 0.22;
+const CORNER_CAPTURE_R = 0.25;
+const SIDE_CAPTURE_R = 0.2;
+const POCKET_FLOOR_Y = -0.28;
+const POCKET_R = CORNER_CAPTURE_R;
+const MAX_POWER = 18;
+const MAX_PULL = 1.2;
+const MIN_PULL = 0.025;
+const MAX_SHOT_SPEED = 24;
+const CUE_REST_DISTANCE = 0.35;
+const CUE_FOLLOW_DISTANCE = 0.22;
+const CUE_SWING_DURATION = 0.1;
+const CUE_MAX_PULL = 80;
 
-export const TABLE_X = 3.4;
-export const TABLE_Z = 1.7;
-
-export const CUSHION = 0.28;
-
-export const PLAY_X = TABLE_W / 2 - CUSHION;
-export const PLAY_Z = TABLE_H / 2 - CUSHION;
-
-export const PLAY_W = TABLE_W - CUSHION * 2;
-export const PLAY_H = TABLE_H - CUSHION * 2;
-
-export const BALL_R = 0.1;
-export const BALL_Y = 0.35; // visual height above table
-
-export const POCKET_R = 0.3;
-
-// Single source of truth for cue power / drag distance.
-export const MAX_POWER = 18;
-export const MAX_PULL = 1.2;
-export const CUE_MAX_PULL = 80;
+export {
+  BALL_R,
+  BALL_Y,
+  CLOTH_Y,
+  CORNER_CAPTURE_R,
+  CORNER_POCKET_R,
+  CUE_FOLLOW_DISTANCE,
+  CUE_MAX_PULL,
+  CUE_REST_DISTANCE,
+  CUE_SWING_DURATION,
+  CUSHION,
+  FELT_THICKNESS,
+  FELT_TOP_Y,
+  FRAME_BOTTOM,
+  FRAME_TOP,
+  MAX_POWER,
+  MAX_PULL,
+  MAX_SHOT_SPEED,
+  MIN_PULL,
+  PLAY_H,
+  PLAY_W,
+  PLAY_X,
+  PLAY_Z,
+  POCKET_FLOOR_Y,
+  POCKET_R,
+  SIDE_CAPTURE_R,
+  SIDE_POCKET_R,
+  TABLE_H,
+  TABLE_W,
+  TABLE_X,
+  TABLE_Z
+};

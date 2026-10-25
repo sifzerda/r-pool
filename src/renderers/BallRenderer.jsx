@@ -7,79 +7,45 @@ import { ballGeometry, ballMaterial } from "./ballAssets.js";
 import { getBallUvOffset } from "./ballTextures.js";
 import { dirtyBalls } from "../ecs/world.js";
 
-// A ball dropping into a pocket is drawn at its real height (ball.y), so it falls
-// through the hole in the table at full size. It is hidden once it lands.
 function writeBall(mesh, dummy, ball) {
-    if (ball.pocketed) {
-        dummy.position.set(0, 0, 0);
-        dummy.rotation.set(0, 0, 0);
-        dummy.scale.setScalar(0);
-    } else {
-        dummy.position.set(ball.x, ball.y, ball.z);
-        dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
-        dummy.scale.setScalar(1);
+  dummy.position.set(ball.x, ball.y, ball.z);
+  dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
+  dummy.scale.setScalar(ball.pocketed ? 0 : 1);
+  dummy.updateMatrix();
+  mesh.setMatrixAt(ball.instanceId, dummy.matrix);
+  ball.dirty = false;
+}
+
+function BallRenderer({ balls }) {
+  const meshRef = useRef();
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    const offsets = ballGeometry.getAttribute("instanceUvOffset");
+    for (const ball of balls) {
+      const [u, v] = getBallUvOffset(ball.id);
+      offsets.setXY(ball.instanceId, u, v);
+      writeBall(mesh, dummy, ball);
     }
-
-    dummy.updateMatrix();
-    mesh.setMatrixAt(ball.instanceId, dummy.matrix);
+    dirtyBalls.clear();
+    offsets.needsUpdate = true;
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [balls, dummy]);
+  
+  useFrame(() => {
+    const mesh = meshRef.current;
+    if (!mesh || !dirtyBalls.size) return;
+    for (const ball of dirtyBalls) writeBall(mesh, dummy, ball);
+    dirtyBalls.clear();
+    mesh.instanceMatrix.needsUpdate = true;
+  });
+  
+  return <instancedMesh ref={meshRef} args={[ballGeometry, ballMaterial, balls.length]} frustumCulled={false} castShadow receiveShadow dispose={null} />;
 }
 
-export default function BallRenderer({ balls }) {
-    const meshRef = useRef();
-    const needsFullWrite = useRef(true);
-    const dummy = useMemo(() => new THREE.Object3D(), []);
-
-    // Per-instance atlas offsets.
-    useLayoutEffect(() => {
-        const attribute = ballGeometry.getAttribute("instanceUvOffset");
-
-        for (let i = 0; i < balls.length; i++) {
-            const ball = balls[i];
-            const [u, v] = getBallUvOffset(ball.id);
-            attribute.setXY(ball.instanceId, u, v);
-        }
-
-        attribute.needsUpdate = true;
-        needsFullWrite.current = true;
-    }, [balls]);
-
-    useFrame(() => {
-        const mesh = meshRef.current;
-        if (!mesh) return;
-
-        // First frame: write every instance once.
-        if (needsFullWrite.current) {
-            needsFullWrite.current = false;
-
-            for (let i = 0; i < balls.length; i++) {
-                writeBall(mesh, dummy, balls[i]);
-                balls[i].dirty = false;
-            }
-
-            dirtyBalls.clear();
-            mesh.instanceMatrix.needsUpdate = true;
-            return;
-        }
-
-        // After that, only touch balls that actually changed.
-        if (dirtyBalls.size === 0) return;
-
-        for (const ball of dirtyBalls) {
-            writeBall(mesh, dummy, ball);
-            ball.dirty = false;
-        }
-
-        dirtyBalls.clear();
-        mesh.instanceMatrix.needsUpdate = true;
-    });
-
-    return (
-        <instancedMesh
-            ref={meshRef}
-            args={[ballGeometry, ballMaterial, balls.length]}
-            frustumCulled={false}
-            castShadow
-            receiveShadow
-        />
-    );
-}
+export {
+  BallRenderer as default
+};

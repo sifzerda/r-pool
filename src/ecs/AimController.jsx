@@ -3,134 +3,227 @@
 // Event driven: no per-frame raycast, works with mouse and touch, and only
 // reacts to the canvas (not clicks elsewhere on the page).
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { activeBalls } from "./world";
-import { MAX_POWER, MAX_PULL } from "./constants/table";
+import * as THREE from "three";
+import { canAim } from "./world.js";
+import { BALL_Y, MAX_POWER, MAX_PULL, MIN_PULL } from "./constants/table.js";
 
-function aimAtPointer(aim, cueBall) {
-  const angle = Math.atan2(aim.pointerZ - cueBall.z, aim.pointerX - cueBall.x);
-
-  aim.angle = angle;
-  aim.cos = Math.cos(angle);
-  aim.sin = Math.sin(angle);
+function createAim() {
+  return {
+    angle: 0,
+    cos: 1,
+    sin: 0,
+    power: 0,
+    pullBack: 0,
+    charging: false,
+    pointerId: null,
+    hasPointer: false,
+    pointerX: 0,
+    pointerZ: 0,
+    dragStartX: 0,
+    dragStartZ: 0,
+    lockedAngle: 0,
+    lockedCos: 1,
+    lockedSin: 0,
+    swing: 0,
+    swingT: 0,
+    shotX: 0,
+    shotZ: 0,
+    shotPullBack: 0,
+    pendingShot: null
+  };
 }
 
-export default function AimController({ cueBall, aimRef }) {
-  const gl = useThree((s) => s.gl);
-  const camera = useThree((s) => s.camera);
-  const invalidate = useThree((s) => s.invalidate);
+function aimAtPointer(aim, cue) {
+  if (!aim.hasPointer) return;
+  const dx = aim.pointerX - cue.x, dz = aim.pointerZ - cue.z;
+  const length = Math.hypot(dx, dz);
+  if (length < 1e-5) return;
+  aim.angle = Math.atan2(dz, dx);
+  aim.cos = dx / length;
+  aim.sin = dz / length;
+}
 
-  // Keep the aim following the cue ball (e.g. after a scratch reset).
+function AimController({ cueBall, aimRef }) {
+  const { gl, camera, invalidate } = useThree();
+  const scratch = useMemo(() => ({
+    raycaster: new THREE.Raycaster(),
+    pointer: new THREE.Vector2(),
+    hit: new THREE.Vector3(),
+    plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -BALL_Y),
+    lastCueX: NaN,
+    lastCueZ: NaN
+  }), []);
+
   useFrame(() => {
-    if (!aimRef.current.charging && activeBalls.size === 0) {
-      aimAtPointer(aimRef.current, cueBall);
-    }
-  });
+    const aim = aimRef.current;
+    if (aim.charging || !canAim(cueBall, aim)) return;
+    if (cueBall.x === scratch.lastCueX && cueBall.z === scratch.lastCueZ) return;
+    scratch.lastCueX = cueBall.x;
+    scratch.lastCueZ = cueBall.z;
+    aimAtPointer(aim, cueBall);
+  }, -2);
 
   useEffect(() => {
-    const el = gl.domElement;
-    const aim = aimRef.current;
-    const prevTouchAction = el.style.touchAction;
-
-    el.style.touchAction = "none";
-
-    // Top-down orthographic camera: screen pixels map straight to world units.
-    // Screen right = +x, screen down = +z.
-    function updatePointer(e) {
-      const rect = el.getBoundingClientRect();
-
-      aim.pointerX = (e.clientX - rect.left - rect.width / 2) / camera.zoom;
-      aim.pointerZ = (e.clientY - rect.top - rect.height / 2) / camera.zoom;
+    const element = gl.domElement, aim = aimRef.current;
+    const previousTouchAction = element.style.touchAction;
+    element.style.touchAction = "none";
+    let frame = null, latest = null;
+    function updatePointer(event) {
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+      scratch.pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
+      camera.updateMatrixWorld();
+      scratch.raycaster.setFromCamera(scratch.pointer, camera);
+      if (!scratch.raycaster.ray.intersectPlane(scratch.plane, scratch.hit)) return false;
+      aim.pointerX = scratch.hit.x;
+      aim.pointerZ = scratch.hit.z;
+      aim.hasPointer = true;
+      return true;
     }
 
-    function onMove(e) {
-      updatePointer(e);
+    function updatePull() {
+      const pull = Math.max(0, -((aim.pointerX - aim.dragStartX) * aim.lockedCos + (aim.pointerZ - aim.dragStartZ) * aim.lockedSin));
+      aim.pullBack = Math.min(MAX_PULL, pull);
+      aim.power = aim.pullBack / MAX_PULL * MAX_POWER;
+    }
 
-      if (aim.charging) {
-        const dx = aim.pointerX - aim.dragStartX;
-        const dz = aim.pointerZ - aim.dragStartZ;
+    function stopFrame() {
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+      latest = null;
+    }
 
-        // Power increases when dragging opposite to the aim vector.
-        const pull = Math.max(0, -(dx * aim.lockedCos + dz * aim.lockedSin));
-
-        aim.pullBack = Math.min(pull, MAX_PULL);
-        aim.power = (aim.pullBack / MAX_PULL) * MAX_POWER;
+    function releasePointer(id) {
+      if (id === null) return;
+      try {
+        if (element.hasPointerCapture?.(id)) element.releasePointerCapture(id);
+      } catch {
       }
+    }
 
+    function cancelCharge() {
+      stopFrame();
+      if (!aim.charging) return;
+      const id = aim.pointerId;
+      aim.pointerId = null;
+      aim.charging = false;
+      aim.power = aim.pullBack = aim.swing = aim.swingT = 0;
+      releasePointer(id);
       invalidate();
     }
 
-    function onDown(e) {
-      if (e.button !== 0 || aim.charging) return;
-      if (activeBalls.size > 0 || cueBall.pocketed || cueBall.falling) return;
+    function applyMove() {
+      frame = null;
+      const event = latest;
+      latest = null;
+      if (!event || !updatePointer(event)) return;
+      if (aim.charging) updatePull();
+      else if (canAim(cueBall, aim)) aimAtPointer(aim, cueBall);
+      invalidate();
+    }
 
-      updatePointer(e);
+    function onMove(event) {
+      if (aim.charging ? event.pointerId !== aim.pointerId : event.isPrimary === false) return;
+      latest = { clientX: event.clientX, clientY: event.clientY };
+      if (frame === null) frame = requestAnimationFrame(applyMove);
+    }
+
+    function onDown(event) {
+      if (event.button !== 0 || event.isPrimary === false || aim.charging || !canAim(cueBall, aim)) return;
+      stopFrame();
+      if (!updatePointer(event)) return;
+      event.preventDefault();
       aimAtPointer(aim, cueBall);
-
-      el.setPointerCapture?.(e.pointerId);
-
+      aim.pointerId = event.pointerId;
       aim.charging = true;
-      aim.pullBack = 0;
-      aim.power = 0;
-
-      // Lock the aim direction while charging.
+      aim.power = aim.pullBack = 0;
       aim.lockedAngle = aim.angle;
       aim.lockedCos = aim.cos;
       aim.lockedSin = aim.sin;
-
       aim.dragStartX = aim.pointerX;
       aim.dragStartZ = aim.pointerZ;
-
       aim.swing = 1;
+      aim.swingT = 0;
+      try {
+        element.setPointerCapture(event.pointerId);
+      } catch {
+        cancelCharge();
+        return;
+      }
       invalidate();
     }
 
-    function onUp(e) {
-      if (e.button !== 0 || !aim.charging) return;
-
-      el.releasePointerCapture?.(e.pointerId);
-
+    function onUp(event) {
+      if (!aim.charging || event.pointerId !== aim.pointerId) return;
+      stopFrame();
+      if (!canAim(cueBall, aim)) {
+        cancelCharge();
+        return;
+      }
+      if (updatePointer(event)) updatePull();
+      if (aim.pullBack < MIN_PULL) {
+        cancelCharge();
+        return;
+      }
+      const id = aim.pointerId;
+      aim.pendingShot = { cos: aim.lockedCos, sin: aim.lockedSin, power: aim.power };
+      aim.shotX = cueBall.x;
+      aim.shotZ = cueBall.z;
+      aim.shotPullBack = aim.pullBack;
+      aim.pointerId = null;
       aim.charging = false;
-
-      aim.pendingShot = {
-        cos: aim.lockedCos,
-        sin: aim.lockedSin,
-        power: aim.power,
-      };
-
       aim.swing = 2;
       aim.swingT = 0;
-      aim.power = 0;
-      aim.pullBack = 0;
-
+      aim.power = aim.pullBack = 0;
+      releasePointer(id);
       invalidate();
     }
 
-    function onCancel() {
-      if (!aim.charging) return;
-
-      aim.charging = false;
-      aim.power = 0;
-      aim.pullBack = 0;
-      aim.swing = 0;
-
-      invalidate();
+    function onCancel(event) {
+      if (event.pointerId === aim.pointerId) cancelCharge();
     }
 
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerdown", onDown);
-    el.addEventListener("pointerup", onUp);
-    el.addEventListener("pointercancel", onCancel);
+    function onKey(event) {
+      if (event.key === "Escape" && aim.charging) {
+        event.preventDefault();
+        cancelCharge();
+      }
+    }
 
+    function onHidden() {
+      if (document.hidden) cancelCharge();
+    }
+
+    element.addEventListener("pointermove", onMove);
+    element.addEventListener("pointerdown", onDown);
+    element.addEventListener("pointerup", onUp);
+    element.addEventListener("pointercancel", onCancel);
+    element.addEventListener("lostpointercapture", onCancel);
+    window.addEventListener("blur", cancelCharge);
+    window.addEventListener("keydown", onKey);
+    document.addEventListener("visibilitychange", onHidden);
+    
     return () => {
-      el.style.touchAction = prevTouchAction;
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerdown", onDown);
-      el.removeEventListener("pointerup", onUp);
-      el.removeEventListener("pointercancel", onCancel);
+      element.removeEventListener("pointermove", onMove);
+      element.removeEventListener("pointerdown", onDown);
+      element.removeEventListener("pointerup", onUp);
+      element.removeEventListener("pointercancel", onCancel);
+      element.removeEventListener("lostpointercapture", onCancel);
+      window.removeEventListener("blur", cancelCharge);
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("visibilitychange", onHidden);
+      cancelCharge();
+      stopFrame();
+      element.style.touchAction = previousTouchAction;
     };
-  }, [gl, camera, invalidate, cueBall, aimRef]);
 
+  }, [gl, camera, invalidate, cueBall, aimRef, scratch]);
   return null;
 }
+
+export {
+  createAim,
+  AimController as default
+};

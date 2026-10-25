@@ -1,50 +1,22 @@
 // src/ecs/constants/rack.js
 // Generates a triangular 15-ball rack.
 
-import { BALL_R } from "../constants/table.js";
+import { BALL_R } from "./table.js";
+import { BALLS } from "./balls.js";
 
-const DIAMETER = BALL_R * 2;
-const ROW_SPACING = DIAMETER * Math.sqrt(3) / 2;
+const DIAMETER = BALL_R * 2, ROW_SPACING = DIAMETER * Math.sqrt(3) / 2;
+const ORDER = [1, 9, 2, 3, 8, 10, 11, 4, 12, 5, 6, 13, 7, 14, 15];
 
-export function buildRack() {
-  const balls = [];
-
-  const startX = 0.9;
-  const startZ = 0;
-
-  const ballDefs = [
-    { num: 1, type: "solid", group: "object" },
-    { num: 2, type: "solid", group: "object" },
-    { num: 3, type: "solid", group: "object" },
-    { num: 4, type: "solid", group: "object" },
-    { num: 5, type: "solid", group: "object" },
-    { num: 6, type: "solid", group: "object" },
-    { num: 7, type: "solid", group: "object" },
-
-    { num: 8, type: "eight" },
-
-    { num: 9, type: "stripe", group: "object" },
-    { num: 10, type: "stripe", group: "object" },
-    { num: 11, type: "stripe", group: "object" },
-    { num: 12, type: "stripe", group: "object" },
-    { num: 13, type: "stripe", group: "object" },
-    { num: 14, type: "stripe", group: "object" },
-    { num: 15, type: "stripe", group: "object" },
-  ];
-
-  let index = 0;
-
-  for (let row = 0; row < 5; row++) {
-    for (let i = 0; i <= row; i++) {
-      const ball = ballDefs[index++];
-
-      balls.push({
-        ...ball,
-        x: startX + row * ROW_SPACING,
-        z: startZ + (i - row / 2) * DIAMETER,
-      });
-    }
+function buildRack() {
+  const rack = [];
+  let i = 0;
+  for (let row = 0; row < 5; row++) for (let column = 0; column <= row; column++) {
+    const num = ORDER[i++];
+    rack.push({ num, type: BALLS[num].type, group: "object", x: 0.9 + row * ROW_SPACING, z: (column - row / 2) * DIAMETER });
   }
-
-  return balls;
+  return rack;
 }
+
+export {
+  buildRack
+};

@@ -1,64 +1,47 @@
 // src/ecs/setupGame.js
 
-import { world, activeBalls, fallingBalls, dirtyBalls, markDirty } from "./world";
-import { BALL_R } from "./constants/table";
-import { buildRack } from "./constants/rack";
-import { resetPotted } from "../store/pottedStore";
-
-const BALL_Y = 0.3;
+import { world, clearWorld, markDirty } from "./world.js";
+import { BALL_R, BALL_Y } from "./constants/table.js";
+import { buildRack } from "./constants/rack.js";
+import { resetPotted } from "../store/pottedStore.js";
 
 function createBall(data) {
   return {
     ball: true,
     dirty: false,
-
+    active: false,
+    sleeping: true,
     vx: 0,
     vz: 0,
-
     y: BALL_Y,
     rotX: 0,
     rotY: 0,
     rotZ: 0,
-
     radius: BALL_R,
-
-    active: false,
-    sleeping: true,
-
     falling: false,
     fallSpeed: 0,
     pocketed: false,
-
-    ...data,
+    scratched: false,
+    pocketX: 0,
+    pocketZ: 0,
+    pocketRadius: 0,
+    ...data
   };
 }
 
-export function setupGame() {
-  world.clear();
-  activeBalls.clear();
-  fallingBalls.clear();
-  dirtyBalls.clear();
+function setupGame() {
+  clearWorld();
   resetPotted();
-
-  const cueBall = world.add(
-    createBall({
-      id: 0,
-      instanceId: 0,
-      cueBall: true,
-      type: "cue",
-      group: "cue",
-      x: 0,
-      z: 0,
-    })
-  );
-
-  markDirty(cueBall);
-
-  buildRack().forEach((ball, i) => {
-    markDirty(
-      world.add(createBall({ ...ball, id: i + 1, instanceId: i + 1 }))
-    );
-  });
-
-  return cueBall;
+  const cue = world.add(createBall({ id: 0, instanceId: 0, cueBall: true, type: "cue", group: "cue", x: 0, z: 0 }));
+  markDirty(cue);
+  const rack = buildRack();
+  for (let i = 0; i < rack.length; i++) {
+    const data = rack[i];
+    markDirty(world.add(createBall({ ...data, id: data.num, instanceId: i + 1 })));
+  }
+  return cue;
 }
+
+export {
+  setupGame
+};

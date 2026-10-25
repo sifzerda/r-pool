@@ -2,36 +2,63 @@
 
 import { World } from "miniplex";
 
-export const world = new World();
-export const ballQuery = world.with("ball");
+const world = new World();
+const ballQuery = world.with("ball");
+const activeBalls = /* @__PURE__ */ new Set();
+const fallingBalls = /* @__PURE__ */ new Set();
+const dirtyBalls = /* @__PURE__ */ new Set();
+let revision = 0;
 
-// Balls currently moving (cheap to iterate: usually 0-16 entries).
-export const activeBalls = new Set();
-// Balls playing the pocket-drop animation.
-export const fallingBalls = new Set();
-// Balls whose transform changed since the renderer last read them.
-export const dirtyBalls = new Set();
+const getWorldRevision = () => revision;
+const ballsAreMoving = () => activeBalls.size > 0 || fallingBalls.size > 0;
 
-export const ballsAreMoving = () => activeBalls.size > 0;
+function canAim(ball, aim) {
+  return !!ball && !ballsAreMoving() && !ball.pocketed && !ball.falling && !ball.scratched && aim.pendingShot == null && aim.swing !== 2;
+}
 
-export function activeBall(ball) {
-  if (ball.active) return;
+function activeBall(ball) {
   ball.active = true;
+  ball.sleeping = false;
   activeBalls.add(ball);
 }
 
-export function deactiveBall(ball) {
-  if (!ball.active) return;
+function deactiveBall(ball) {
   ball.active = false;
+  ball.sleeping = true;
   activeBalls.delete(ball);
 }
 
-export function markDirty(ball) {
+function markDirty(ball) {
   ball.dirty = true;
   dirtyBalls.add(ball);
+  revision++;
 }
 
-export function clearDirty(ball) {
+function clearDirty(ball) {
   ball.dirty = false;
   dirtyBalls.delete(ball);
 }
+
+function clearWorld() {
+  world.clear();
+  activeBalls.clear();
+  fallingBalls.clear();
+  dirtyBalls.clear();
+  revision++;
+}
+
+export {
+  activeBall,
+  activeBalls,
+  ballQuery,
+  ballsAreMoving,
+  canAim,
+  clearDirty,
+  clearWorld,
+  deactiveBall,
+  dirtyBalls,
+  fallingBalls,
+  getWorldRevision,
+  markDirty,
+  world
+};
