@@ -1,4 +1,4 @@
-// src/lab/tablePresets.js
+// src/lab/schema.js
 // Single source of truth for every adjustable appearance setting.
 // The Lab UI is generated from GROUPS, so adding a control here is enough
 // to get a slider/colour picker (then read it in applyAppearance.js).

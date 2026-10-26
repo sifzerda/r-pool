@@ -1,7 +1,7 @@
 // src/store/useGameStore.js
 
 import { create } from "zustand";
-import { DEFAULT_PRESET, PRESET_NAMES, isPreset, presetValues } from "../lab/tablePresets.js";
+import { DEFAULT_PRESET, PRESET_NAMES, isPreset, presetValues } from "../lab/schema.js";
 
 const STORAGE_KEY = "pool-appearance-preset-v1";
 const LEGACY_KEY = "pool-lab-v1";

@@ -1,7 +1,7 @@
 // src/screens/SettingsScreen.jsx
 
 import { useEffect, useRef } from "react";
-import { PRESET_NAMES } from "../lab/tablePresets.js";
+import { PRESET_NAMES } from "../lab/schema.js";
 import PreviewTable from "../renderers/PreviewRenderer.jsx";
 import useGameStore from "../store/useGameStore.js";
 
