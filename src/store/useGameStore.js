@@ -9,6 +9,7 @@ export const SCREENS = Object.freeze({
   SETTINGS: "settings",
   COMPLETE: "complete",
   HOW_TO_PLAY: "howtoplay",
+  SCORE_BOARD: "scoreboard",
 });
 
 export const createInitialStats = () => ({
@@ -41,22 +42,11 @@ const useGameStore = create((set, get) => ({
   pottedIds: new Set(),
 
   isPotted: (id) => get().pottedIds.has(id),
-
-  resetPotted: () =>
-    set({
-      stats: createInitialStats(),
-      pottedIds: new Set(),
-    }),
+  resetPotted: () => set({ stats: createInitialStats(), pottedIds: new Set() }),
 
   markPotted: (id) =>
     set((s) => {
-      if (
-        s.screen !== SCREENS.PLAY ||
-        !Number.isInteger(id) ||
-        id < 1 ||
-        id > 15 ||
-        s.pottedIds.has(id)
-      ) {
+      if (s.screen !== SCREENS.PLAY || !Number.isInteger(id) || id < 1 || id > 15 || s.pottedIds.has(id)) {
         return s;
       }
 
@@ -75,11 +65,7 @@ const useGameStore = create((set, get) => ({
 
   recordShot: () =>
     set((s) => {
-      if (
-        s.screen !== SCREENS.PLAY ||
-        s.stats.shotActive ||
-        s.stats.cleared
-      ) {
+      if (s.screen !== SCREENS.PLAY || s.stats.shotActive || s.stats.cleared) {
         return s;
       }
 
@@ -96,10 +82,7 @@ const useGameStore = create((set, get) => ({
 
   recordScratch: () =>
     set((s) => {
-      if (
-        s.screen !== SCREENS.PLAY ||
-        !s.stats.shotActive
-      ) {
+      if (s.screen !== SCREENS.PLAY || !s.stats.shotActive) {
         return s;
       }
 
@@ -116,10 +99,7 @@ const useGameStore = create((set, get) => ({
   finishShot: () => {
     const s = get();
 
-    if (
-      s.screen !== SCREENS.PLAY ||
-      !s.stats.shotActive
-    ) {
+    if (s.screen !== SCREENS.PLAY || !s.stats.shotActive) {
       return;
     }
 
@@ -132,104 +112,29 @@ const useGameStore = create((set, get) => ({
       lastPots: pots,
       bestPots: Math.max(s.stats.bestPots, pots),
       cleared,
-      message: cleared
-        ? "Table cleared!"
-        : pots > 1
-          ? `${pots} balls in one shot!`
-          : pots === 1
-            ? "Nice pot!"
-            : "Line up your next shot",
+      message: cleared ? "Table cleared!" : pots > 1 ? `${pots} balls in one shot!` : pots === 1 ? "Nice pot!" : "Line up your next shot",
     };
 
     if (cleared) {
-      set({
-        stats,
-        screen: SCREENS.COMPLETE,
-        completionRecorded: true,
-        result: { ...stats },
-      });
+      set({ stats, screen: SCREENS.COMPLETE, completionRecorded: true, result: { ...stats } });
     } else {
       set({ stats });
     }
   },
 
-  startGame: () =>
-    set((s) => ({
-      screen: SCREENS.PLAY,
-      sessionId: s.sessionId + 1,
-      result: null,
-      completionRecorded: false,
-      stats: createInitialStats(),
-      pottedIds: new Set(),
-    })),
-
-  pauseGame: () =>
-    set((s) =>
-      s.screen === SCREENS.PLAY
-        ? { screen: SCREENS.PAUSE }
-        : s
-    ),
-
-  resumeGame: () =>
-    set((s) =>
-      s.screen === SCREENS.PAUSE
-        ? { screen: SCREENS.PLAY }
-        : s
-    ),
-
-  openSettings: () =>
-    set((s) =>
-      s.screen === SCREENS.SETTINGS
-        ? s
-        : {
-            screen: SCREENS.SETTINGS,
-            settingsReturnScreen:
-              s.screen === SCREENS.PLAY
-                ? SCREENS.PAUSE
-                : s.screen,
-          }
-    ),
-
-  closeSettings: () =>
-    set((s) =>
-      s.screen === SCREENS.SETTINGS
-        ? { screen: s.settingsReturnScreen }
-        : s
-    ),
-
-  openHowToPlay: () =>
-    set((s) =>
-      [
-        SCREENS.MENU,
-        SCREENS.PAUSE,
-        SCREENS.COMPLETE,
-      ].includes(s.screen)
-        ? {
-            screen: SCREENS.HOW_TO_PLAY,
-            infoReturnScreen: s.screen,
-          }
-        : s
-    ),
-
-  closeInfo: () =>
-    set((s) =>
-      s.screen === SCREENS.HOW_TO_PLAY
-        ? { screen: s.infoReturnScreen }
-        : s
-    ),
-
-  returnToMenu: () =>
-    set({
-      screen: SCREENS.MENU,
-      result: null,
-    }),
+  startGame: () => set((s) => ({ screen: SCREENS.PLAY, sessionId: s.sessionId + 1, result: null, completionRecorded: false, stats: createInitialStats(), pottedIds: new Set(), })),
+  pauseGame: () => set((s) => s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : s),
+  resumeGame: () => set((s) => s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : s),
+  openScoreboard: () => set((s) => [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.SCORE_BOARD, infoReturnScreen: s.screen } : s),
+  openSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? s : { screen: SCREENS.SETTINGS, settingsReturnScreen: s.screen === SCREENS.PLAY ? SCREENS.PAUSE : s.screen }),
+  closeSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? { screen: s.settingsReturnScreen } : s),
+  openHowToPlay: () => set((s) => [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.HOW_TO_PLAY, infoReturnScreen: s.screen } : s),
+  closeInfo: () => set((s) => [ SCREENS.HOW_TO_PLAY, SCREENS.SCORE_BOARD, ].includes(s.screen) ? { screen: s.infoReturnScreen } : s),
+  returnToMenu: () => set({ screen: SCREENS.MENU, result: null }),
 
   completeGame: (result = { message: "Rack complete!" }) =>
     set((s) => {
-      if (
-        s.screen !== SCREENS.PLAY ||
-        s.completionRecorded
-      ) {
+      if (s.screen !== SCREENS.PLAY || s.completionRecorded) {
         return s;
       }
 
@@ -242,10 +147,7 @@ const useGameStore = create((set, get) => ({
 
   setSetting: (key, value) =>
     set((s) => {
-      if (
-        !Object.hasOwn(s.settings, key) ||
-        typeof value !== "boolean"
-      ) {
+      if (!Object.hasOwn(s.settings, key) || typeof value !== "boolean") {
         return s;
       }
 
