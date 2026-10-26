@@ -16,6 +16,7 @@ import SettingsScreen from "./screens/SettingsScreen.jsx";
 import GameCompleteScreen from "./screens/GameCompleteScreen.jsx";
 import HighScoresScreen from "./screens/HighScoresScreen.jsx";
 import HowToPlayScreen from "./screens/HowToPlayScreen.jsx";
+
 const POSITION = [0, 10, 0], ROTATION = [-Math.PI / 2, 0, 0];
 function FittedCamera() {
  const camera = useRef();
