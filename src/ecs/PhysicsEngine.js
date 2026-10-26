@@ -98,7 +98,7 @@ function collisionSystem() {
       if (Math.abs(dx) >= DIAMETER || Math.abs(dz) >= DIAMETER) continue;
       const distanceSq = dx * dx + dz * dz;
       if (distanceSq >= DIAMETER_SQ) continue;
-let nx = 1, nz = 0, distance = 0;
+      let nx = 1, nz = 0, distance = 0;
       if (distanceSq > 1e-12) {
         distance = Math.sqrt(distanceSq);
         nx = dx / distance;
@@ -198,11 +198,14 @@ function respawnCueBall(cueBall) {
     let nearest = Infinity;
     const columns = Math.floor((MAX_X - MIN_X) / RESPAWN_SPACING);
     const rows = Math.floor((MAX_Z - MIN_Z) / RESPAWN_SPACING);
+
     for (let row = 0; row <= rows; row++) {
       const candidateZ = MIN_Z + row * RESPAWN_SPACING;
+
       for (let column = 0; column <= columns; column++) {
         const candidateX = MIN_X + column * RESPAWN_SPACING;
         const distance = candidateX ** 2 + candidateZ ** 2;
+
         if (distance < nearest && isClear(candidateX, candidateZ, cueBall)) {
           nearest = distance;
           x = candidateX;
@@ -225,12 +228,14 @@ function PhysicsEngine(cueBall, aimRef) {
   function isSimulating() {
     return ballsAreMoving() || aimRef.current.pendingShot != null || cueBall.scratched;
   }
+
   function updateSwing(dt) {
     const aim = aimRef.current;
     if (aim.swing !== 2) return;
     aim.swingT = Math.min(1, aim.swingT + dt / CUE_SWING_DURATION);
     if (aim.swingT >= 1) aim.swing = 0;
   }
+
   function step() {
     shotSystem(cueBall, aimRef);
     let speedSq = 0;
@@ -250,6 +255,7 @@ function PhysicsEngine(cueBall, aimRef) {
     respawnCueBall(cueBall);
     if (!ballsAreMoving()) useGameStore.getState().finishShot();
   }
+
   function update(delta) {
     const dt = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), MAX_FRAME_DT) : 0;
     const wasSwinging = aimRef.current.swing === 2;

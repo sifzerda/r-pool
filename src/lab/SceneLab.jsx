@@ -9,7 +9,7 @@ import useGameStore from "../store/useGameStore.js";
 import { applyAppearance } from "./applyAppearance.js";
 
 export default function SceneLab() {
-  
+
   const p = useGameStore((s) => s.appearanceParams);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -28,7 +28,9 @@ export default function SceneLab() {
   return (
     <>
       <color attach="background" args={[p["scene.bg"]]} />
+     
       <ambientLight intensity={p["scene.ambient"]} />
+     
       <directionalLight castShadow intensity={p["scene.key"]}
         color={p["scene.keyColor"]} position={[4, 8, 2]}
         shadow-mapSize-width={1024} shadow-mapSize-height={1024}
@@ -36,8 +38,10 @@ export default function SceneLab() {
         shadow-camera-left={-5} shadow-camera-right={5}
         shadow-camera-top={5} shadow-camera-bottom={-5}
         shadow-bias={-0.0004} />
+     
       <pointLight position={[-3.2, 1.4, 0]} color={accent} intensity={glow * 3} distance={7} decay={2} />
       <pointLight position={[3.2, 1.4, 0]} color={accent} intensity={glow * 3} distance={7} decay={2} />
+    
       <Environment resolution={256} frames={1}>
         <Lightformer form="rect" intensity={0.3} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} />
         <Lightformer form="rect" intensity={1.8} color="#dbeaff" position={[-5, 4, -4]} target={[0, 0, 0]} scale={[5, 3, 1]} />
@@ -45,6 +49,7 @@ export default function SceneLab() {
         <Lightformer form="rect" intensity={1} position={[6, 3, -4]} target={[0, 0, 0]} scale={[3, 2, 1]} />
         <Lightformer form="ring" intensity={0.8} color="#ffffff" position={[-5, 3, 4]} target={[0, 0, 0]} scale={2.5} />
       </Environment>
+
     </>
   );
 }

@@ -19,7 +19,7 @@ function writeBall(mesh, dummy, ball) {
 function BallRenderer({ balls }) {
   const meshRef = useRef();
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  
+
   useLayoutEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
@@ -34,7 +34,7 @@ function BallRenderer({ balls }) {
     offsets.needsUpdate = true;
     mesh.instanceMatrix.needsUpdate = true;
   }, [balls, dummy]);
-  
+
   useFrame(() => {
     const mesh = meshRef.current;
     if (!mesh || !dirtyBalls.size) return;
@@ -42,8 +42,11 @@ function BallRenderer({ balls }) {
     dirtyBalls.clear();
     mesh.instanceMatrix.needsUpdate = true;
   });
-  
-  return <instancedMesh ref={meshRef} args={[ballGeometry, ballMaterial, balls.length]} frustumCulled={false} castShadow receiveShadow dispose={null} />;
+
+  return (
+    <instancedMesh ref={meshRef} args={[ballGeometry, ballMaterial, balls.length]} frustumCulled={false} castShadow receiveShadow dispose={null} />
+  )
+
 }
 
 export {

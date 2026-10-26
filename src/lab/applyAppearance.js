@@ -2,10 +2,11 @@
 // Pushes Lab settings into the shared materials/atlas. Runs on every change,
 // mutating objects in place (no React re-render of the 3D scene needed).
 
-import * as M from "../renderers/materials";
+import * as M from "../renderers/TableRenderer.jsx";
 
 // Features such as clearcoat/iridescence/sheen are compiled into the shader
 // only when > 0, so crossing zero needs a material rebuild.
+
 function setFeature(mat, prop, value) {
   const was = mat[prop] > 0;
   mat[prop] = value;

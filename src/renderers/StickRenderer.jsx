@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { canAim } from "../ecs/world.js";
 import { BALL_Y, MAX_POWER, CUE_REST_DISTANCE, CUE_FOLLOW_DISTANCE } from "../ecs/constants/table.js";
-import { stickTipMat, stickFerruleMat, stickShaftMat, stickAccentMat, stickButtMat } from "./materials.js";
+import { stickTipMat, stickFerruleMat, stickShaftMat, stickAccentMat, stickButtMat } from "./TableRenderer.jsx";
 
 const CUE_RENDER_Y = 0.58;
 
@@ -36,8 +36,9 @@ const fillGeo = new THREE.BoxGeometry(0.8, 0.025, 0.025);
 
 function StickRenderer({ cueBall, aimRef }) {
   const stick = useRef(), meter = useRef(), fill = useRef();
-  
+
   useFrame(() => {
+
     if (!stick.current || !meter.current || !fill.current) return;
     const aim = aimRef.current, following = aim.swing === 2, ready = canAim(cueBall, aim);
     stick.current.visible = ready || following;
@@ -50,6 +51,7 @@ function StickRenderer({ cueBall, aimRef }) {
       const t = THREE.MathUtils.clamp(aim.swingT, 0, 1), start = CUE_REST_DISTANCE + aim.shotPullBack;
       distance = start + (-CUE_FOLLOW_DISTANCE - start) * (1 - (1 - t) ** 3);
     }
+
     stick.current.position.set((following ? aim.shotX : cueBall.x) - cos * distance, CUE_RENDER_Y, (following ? aim.shotZ : cueBall.z) - sin * distance);
     stick.current.rotation.set(0, -angle + Math.PI, 0);
     meter.current.position.set(cueBall.x, BALL_Y + 0.3, cueBall.z - 0.55);
@@ -58,13 +60,15 @@ function StickRenderer({ cueBall, aimRef }) {
     fill.current.position.x = -0.4 + ratio * 0.4;
   });
 
-  return <>
-    <group ref={stick} visible={false} dispose={null}>
-      <mesh geometry={tip} material={stickTipMat} castShadow /><mesh geometry={ferrule} material={stickFerruleMat} castShadow />
-      <mesh geometry={shaft} material={stickShaftMat} castShadow /><mesh geometry={rings} material={stickAccentMat} castShadow /><mesh geometry={dark} material={stickButtMat} castShadow />
-    </group>
-    <group ref={meter} visible={false} dispose={null}><mesh geometry={backgroundGeo} material={backgroundMat} /><mesh ref={fill} geometry={fillGeo} position={[-0.4, 0.022, 0]} material={fillMat} /></group>
-  </>;
+  return (
+    <>
+      <group ref={stick} visible={false} dispose={null}>
+        <mesh geometry={tip} material={stickTipMat} castShadow /><mesh geometry={ferrule} material={stickFerruleMat} castShadow />
+        <mesh geometry={shaft} material={stickShaftMat} castShadow /><mesh geometry={rings} material={stickAccentMat} castShadow /><mesh geometry={dark} material={stickButtMat} castShadow />
+      </group>
+      <group ref={meter} visible={false} dispose={null}><mesh geometry={backgroundGeo} material={backgroundMat} /><mesh ref={fill} geometry={fillGeo} position={[-0.4, 0.022, 0]} material={fillMat} /></group>
+    </>
+  )
 }
 
 export {

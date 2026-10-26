@@ -183,7 +183,7 @@ function GhostBall({ lineRef }) {
 
     return array;
   }, []);
-  
+
   return <lineLoop
     ref={lineRef}
     renderOrder={999}
@@ -312,11 +312,15 @@ function AimGuideRenderer({ cueBall, aimRef }) {
     commit(cueGeometry, count);
   });
 
-  return <>
-    <GuideLine color="white" geometryRef={cueRef} />
-    <GuideLine color="yellow" geometryRef={objectRef} />
-    <GhostBall lineRef={ghostRef} />
-  </>;
+  return (
+
+    <>
+      <GuideLine color="white" geometryRef={cueRef} />
+      <GuideLine color="yellow" geometryRef={objectRef} />
+      <GhostBall lineRef={ghostRef} />
+    </>
+
+  )
 }
 
 export {
