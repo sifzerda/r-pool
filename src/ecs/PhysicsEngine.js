@@ -13,6 +13,7 @@ const DIAMETER_SQ = DIAMETER * DIAMETER;
 const RESPAWN_SPACING = DIAMETER + 0.01;
 const RESPAWN_SPACING_SQ = RESPAWN_SPACING ** 2;
 const MAX_STEPS = Math.ceil(MAX_FRAME_DT / FIXED_DT);
+
 bindTimeStep(FIXED_DT);
 
 function shotSystem(cueBall, aimRef) {
@@ -93,68 +94,11 @@ function collisionSystem() {
     for (let j = i + 1; j < balls.length; j++) {
       const b = balls[j];
       if (b.pocketed || b.falling || !a.active && !b.active) continue;
-      const dx = b.x - a.x, dz = b.z - a.z;
-      if (Math.abs(dx) >= DIAMETER || Math.abs(dz) >= DIAMETER) continue;
-      const distanceSq = dx * dx + dz * dz;
-      if (distanceSq >= DIAMETER_SQ) continue;
-      let nx = 1, nz = 0, distance = 0;
-      if (distanceSq > 1e-12) {
-        distance = Math.sqrt(distanceSq);
-        nx = dx / distance;
-        nz = dz / distance;
-      } else {
-        const rvx = a.vx - b.vx, rvz = a.vz - b.vz;
-        const speed = Math.hypot(rvx, rvz);
-        if (speed > 1e-8) {
-          nx = rvx / speed;
-          nz = rvz / speed;
-        }
+      const d2 = dist2(a, b);
+      if (d2 < (BALL_R * 2) * (BALL_R * 2)) {
+        resolveCollision(a, b);
       }
-
-      const correction = (DIAMETER - distance) * 0.5;
-      a.x -= nx * correction;
-      a.z -= nz * correction;
-      b.x += nx * correction;
-      b.z += nz * correction;
-      markDirty(a);
-      markDirty(b);
-      const normalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
-      if (normalSpeed >= 0) continue;
-      const impulse = -(1 + cfg.ballE) * normalSpeed * 0.5;
-      a.vx -= impulse * nx;
-      a.vz -= impulse * nz;
-      b.vx += impulse * nx;
-      b.vz += impulse * nz;
-      a.rotY += impulse * 85e-4;
-      b.rotY -= impulse * 85e-4;
-      activeBall(a);
-      activeBall(b);
     }
-  }
-}
-
-function detectPockets() {
-  for (const ball of activeBalls) {
-    if (ball.pocketed || ball.falling) continue;
-    const pocket = findCapturePocket(ball.x, ball.z);
-    if (!pocket) continue;
-    ball.vx = ball.vz = 0;
-    deactiveBall(ball);
-    if (ball.cueBall) {
-      ball.scratched = true;
-      ball.pocketed = true;
-      ball.falling = false;
-      useGameStore.getState().recordScratch();
-    } else {
-      ball.pocketX = pocket.x;
-      ball.pocketZ = pocket.z;
-      ball.pocketRadius = pocket.radius;
-      ball.falling = true;
-      ball.fallSpeed = 0;
-      fallingBalls.add(ball);
-      useGameStore.getState().markPotted(ball.id);
-    }
-    markDirty(ball);
   }
 }
 
@@ -211,30 +155,27 @@ function respawnCueBall(cueBall) {
     }
     if (nearest === Infinity) return false;
   }
+  
   Object.assign(cueBall, { x, z, y: BALL_Y, vx: 0, vz: 0, rotX: 0, rotY: 0, rotZ: 0, scratched: false, pocketed: false, falling: false, fallSpeed: 0 });
   deactiveBall(cueBall);
   markDirty(cueBall);
   return true;
 }
 
-class PhysicsEngine {
-  constructor(cueBall, aimRef) {
-    this.cueBall = cueBall;
-    this.aimRef = aimRef;
-    this.accumulator = 0;
-    this.wasSimulating = false;
+function PhysicsEngine(cueBall, aimRef) {
+  let accumulator = 0;
+  let wasSimulating = false;
+  function isSimulating() {
+    return ballsAreMoving() || aimRef.current.pendingShot != null || cueBall.scratched;
   }
-  isSimulating() {
-    return ballsAreMoving() || this.aimRef.current.pendingShot != null || this.cueBall.scratched;
-  }
-  updateSwing(dt) {
-    const aim = this.aimRef.current;
+  function updateSwing(dt) {
+    const aim = aimRef.current;
     if (aim.swing !== 2) return;
     aim.swingT = Math.min(1, aim.swingT + dt / CUE_SWING_DURATION);
     if (aim.swingT >= 1) aim.swing = 0;
   }
-  step() {
-    shotSystem(this.cueBall, this.aimRef);
+  function step() {
+    shotSystem(cueBall, aimRef);
     let speedSq = 0;
     for (const ball of activeBalls) speedSq = Math.max(speedSq, ball.vx ** 2 + ball.vz ** 2);
     const substeps = Math.min(MAX_SUBSTEPS, Math.max(1, Math.ceil(Math.sqrt(speedSq) * FIXED_DT / (BALL_R * 0.5))));
@@ -249,31 +190,33 @@ class PhysicsEngine {
     for (const ball of activeBalls) markDirty(ball);
     updateFallingBalls(FIXED_DT);
     frictionSystem();
-    respawnCueBall(this.cueBall);
+    respawnCueBall(cueBall);
     if (!ballsAreMoving()) useGameStore.getState().finishShot();
   }
-  update(delta) {
+  function update(delta) {
     const dt = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), MAX_FRAME_DT) : 0;
-    const wasSwinging = this.aimRef.current.swing === 2;
-    this.updateSwing(dt);
-    const started = this.isSimulating();
+    const wasSwinging = aimRef.current.swing === 2;
+    updateSwing(dt);
+    const started = isSimulating();
     if (started) {
-      this.accumulator += dt;
+      accumulator += dt;
       let steps = 0;
-      while (this.accumulator + 1e-12 >= FIXED_DT && steps++ < MAX_STEPS) {
-        this.step();
-        this.accumulator = Math.max(0, this.accumulator - FIXED_DT);
-        if (!this.isSimulating()) {
-          this.accumulator = 0;
+      while (accumulator + 1e-12 >= FIXED_DT && steps++ < MAX_STEPS) {
+        step();
+        accumulator = Math.max(0, accumulator - FIXED_DT);
+        if (!isSimulating()) {
+          accumulator = 0;
           break;
         }
       }
-    } else this.accumulator = 0;
-    const moving = this.isSimulating();
-    const needsFrame = started || moving || this.wasSimulating || wasSwinging || this.aimRef.current.swing === 2;
-    this.wasSimulating = moving;
+    } else accumulator = 0;
+    const moving = isSimulating();
+    const needsFrame = started || moving || wasSimulating || wasSwinging || aimRef.current.swing === 2;
+    wasSimulating = moving;
     return needsFrame;
   }
+
+  return { isSimulating, updateSwing, step, update };
 }
 
 export {
