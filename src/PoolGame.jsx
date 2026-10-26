@@ -14,7 +14,6 @@ import PlayScreen from "./screens/PlayScreen.jsx";
 import PauseScreen from "./screens/PauseScreen.jsx";
 import SettingsScreen from "./screens/SettingsScreen.jsx";
 import GameCompleteScreen from "./screens/GameCompleteScreen.jsx";
-import HighScoresScreen from "./screens/HighScoresScreen.jsx";
 import HowToPlayScreen from "./screens/HowToPlayScreen.jsx";
 
 const POSITION = [0, 10, 0], ROTATION = [-Math.PI / 2, 0, 0];
@@ -63,7 +62,7 @@ export default function PoolGame() {
             if (s.screen === SCREENS.PLAY) s.pauseGame();
             else if (s.screen === SCREENS.PAUSE) s.resumeGame();
             else if (s.screen === SCREENS.SETTINGS) s.closeSettings();
-            else if ([SCREENS.HIGH_SCORES, SCREENS.HOW_TO_PLAY].includes(s.screen)) s.closeInfo();
+            else if ([SCREENS.HOW_TO_PLAY].includes(s.screen)) s.closeInfo();
         }
         function onVisibility() { if (document.hidden) useGameStore.getState().pauseGame(); }
         window.addEventListener("keydown", onKeyDown);
@@ -82,7 +81,6 @@ export default function PoolGame() {
             {screen === SCREENS.SETTINGS && <SettingsScreen />}
             {screen === SCREENS.COMPLETE && <GameCompleteScreen />}
             {screen === SCREENS.PLAY && labOpen && <div style={{ position: "absolute", top: 0, right: 0, bottom: 62, maxWidth: "100%", overflow: "auto", zIndex: 5 }}><LabPanel onClose={() => setLabOpen(false)} /></div>}
-            {screen === SCREENS.HIGH_SCORES && <HighScoresScreen />}
             {screen === SCREENS.HOW_TO_PLAY && <HowToPlayScreen />}
 
         </div>

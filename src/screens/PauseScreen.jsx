@@ -8,7 +8,6 @@ export default function PauseScreen() {
   const startGame = useGameStore((s) => s.startGame);
   const openSettings = useGameStore((s) => s.openSettings);
   const returnToMenu = useGameStore((s) => s.returnToMenu);
-  const openHighScores = useGameStore((s) => s.openHighScores);
   const openHowToPlay = useGameStore((s) => s.openHowToPlay);
 
   return (
@@ -18,7 +17,6 @@ export default function PauseScreen() {
       <button style={buttonStyle} onClick={startGame}>New rack</button>
       <button style={buttonStyle} onClick={openSettings}>Settings</button>
       <button style={buttonStyle} onClick={returnToMenu}>Main menu</button>
-      <button style={buttonStyle} onClick={openHighScores}>High scores</button>
       <button style={buttonStyle} onClick={openHowToPlay}>How to play</button>
     </ScreenPanel>
 
