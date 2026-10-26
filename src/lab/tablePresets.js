@@ -1,20 +1,11 @@
-// src/lab/schema.js
+// src/lab/tablePresets.js
 // Single source of truth for every adjustable appearance setting.
 // The Lab UI is generated from GROUPS, so adding a control here is enough
 // to get a slider/colour picker (then read it in applyAppearance.js).
 
 // Appearance defaults and complete named presets. No customization controls.
+
 export const CLASSIC = Object.freeze({
-  "ball.roughness": 0.08,
-  "ball.clearcoat": 1,
-  "ball.clearcoatRoughness": 0.08,
-  "ball.metalness": 0,
-  "ball.iridescence": 0,
-  "ball.glow": 0,
-  "ball.saturation": 1,
-  "ball.brightness": 1,
-  "ball.stripeWidth": 0.34,
-  "ball.badgeSize": 0.12,
   "stick.shaft": "#d4a84b",
   "stick.butt": "#1a0e06",
   "stick.accent": "#c8a030",
@@ -47,9 +38,6 @@ export const CLASSIC = Object.freeze({
 
 export const PRESETS = Object.freeze({
   "Showroom": {
-    "ball.roughness": 0.05,
-    "ball.clearcoatRoughness": 0.03,
-    "ball.saturation": 1.12,
     "stick.roughness": 0.18,
     "stick.accentMetal": 0.9,
     "stick.glow": 0.15,
@@ -73,10 +61,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 1.2
   },
   "Neon": {
-    "ball.roughness": 0.1,
-    "ball.iridescence": 0.45,
-    "ball.glow": 0.35,
-    "ball.saturation": 1.3,
     "stick.shaft": "#1b1b26",
     "stick.butt": "#08080e",
     "stick.accent": "#00e5ff",
@@ -106,8 +90,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 3.5
   },
   "Tournament Blue": {
-    "ball.roughness": 0.06,
-    "ball.clearcoatRoughness": 0.04,
     "stick.shaft": "#e6c98a",
     "stick.butt": "#10151f",
     "stick.accent": "#d9dde3",
@@ -132,16 +114,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 0.8
   },
   "Pink Lounge": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.1155,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#5a39ac",
     "stick.butt": "#150f24",
     "stick.accent": "#2925f4",
@@ -172,16 +144,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 0.9596
   },
   "Red Lounge": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.1249,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#ac393d",
     "stick.butt": "#240f13",
     "stick.accent": "#f425d5",
@@ -212,16 +174,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 0.8094
   },
   "Flamingo Lounge": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.3692,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#ac3983",
     "stick.butt": "#0f1024",
     "stick.accent": "#f42554",
@@ -252,16 +204,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 3.133
   },
   "Green Lounge": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.4631,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#39ac5a",
     "stick.butt": "#0f2412",
     "stick.accent": "#f44225",
@@ -292,16 +234,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 0.3585
   },
   "Noir Lounge": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#000000",
     "stick.butt": "#24230f",
     "stick.accent": "#004cff",
@@ -332,16 +264,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 1.6
   },
   "Clean Green": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.1373,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#adca1c",
     "stick.butt": "#0f1f24",
     "stick.accent": "#ffffff",
@@ -372,16 +294,6 @@ export const PRESETS = Object.freeze({
     "scene.accentGlow": 1.95
   },
   "Gentleman's Club": {
-    "ball.roughness": 0.06,
-    "ball.clearcoat": 1,
-    "ball.clearcoatRoughness": 0.04,
-    "ball.metalness": 0,
-    "ball.iridescence": 0,
-    "ball.glow": 0,
-    "ball.saturation": 1.1373,
-    "ball.brightness": 1,
-    "ball.stripeWidth": 0.34,
-    "ball.badgeSize": 0.12,
     "stick.shaft": "#3c211a",
     "stick.butt": "#0f1f24",
     "stick.accent": "#ad9600",
@@ -414,7 +326,7 @@ export const PRESETS = Object.freeze({
 });
 
 export const DEFAULT_PRESET = "Showroom";
-export const PRESET_NAMES = Object.freeze(["Classic", ...Object.keys(PRESETS)]);
+export const PRESET_NAMES = Object.freeze(Object.keys(PRESETS));
 export const isPreset = (name) => typeof name === "string" && PRESET_NAMES.includes(name);
-export const presetValues = (name) => ({ ...CLASSIC, ...(name === "Classic" ? {} : PRESETS[isPreset(name) ? name : DEFAULT_PRESET]) });
+export const presetValues = (name) => ({ ...CLASSIC, ...PRESETS[isPreset(name) ? name : DEFAULT_PRESET] });
 export const DEFAULTS = Object.freeze(presetValues(DEFAULT_PRESET));

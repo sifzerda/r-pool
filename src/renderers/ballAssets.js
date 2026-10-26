@@ -6,7 +6,7 @@ import { ballAtlas } from "./ballTextures.js";
 
 const ballGeometry = new THREE.SphereGeometry(BALL_R, 24, 16);
 const ballMaterial = new THREE.MeshPhysicalMaterial({
-  
+
   map: ballAtlas,
   roughness: 0.08,
   metalness: 0,
@@ -17,8 +17,9 @@ const ballMaterial = new THREE.MeshPhysicalMaterial({
   iridescenceThicknessRange: [100, 700],
   emissive: new THREE.Color("#ffffff"),
   emissiveMap: ballAtlas,
-  emissiveIntensity: 0
-  
+  emissiveIntensity: 0,
+  envMapIntensity: 1.5,
+
 });
 
 ballGeometry.setAttribute("instanceUvOffset", new THREE.InstancedBufferAttribute(new Float32Array(16 * 2), 2));
