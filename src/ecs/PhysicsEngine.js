@@ -94,11 +94,68 @@ function collisionSystem() {
     for (let j = i + 1; j < balls.length; j++) {
       const b = balls[j];
       if (b.pocketed || b.falling || !a.active && !b.active) continue;
-      const d2 = dist2(a, b);
-      if (d2 < (BALL_R * 2) * (BALL_R * 2)) {
-        resolveCollision(a, b);
+      const dx = b.x - a.x, dz = b.z - a.z;
+      if (Math.abs(dx) >= DIAMETER || Math.abs(dz) >= DIAMETER) continue;
+      const distanceSq = dx * dx + dz * dz;
+      if (distanceSq >= DIAMETER_SQ) continue;
+let nx = 1, nz = 0, distance = 0;
+      if (distanceSq > 1e-12) {
+        distance = Math.sqrt(distanceSq);
+        nx = dx / distance;
+        nz = dz / distance;
+      } else {
+        const rvx = a.vx - b.vx, rvz = a.vz - b.vz;
+        const speed = Math.hypot(rvx, rvz);
+        if (speed > 1e-8) {
+          nx = rvx / speed;
+          nz = rvz / speed;
+        }
       }
+
+      const correction = (DIAMETER - distance) * 0.5;
+      a.x -= nx * correction;
+      a.z -= nz * correction;
+      b.x += nx * correction;
+      b.z += nz * correction;
+      markDirty(a);
+      markDirty(b);
+      const normalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
+      if (normalSpeed >= 0) continue;
+      const impulse = -(1 + cfg.ballE) * normalSpeed * 0.5;
+      a.vx -= impulse * nx;
+      a.vz -= impulse * nz;
+      b.vx += impulse * nx;
+      b.vz += impulse * nz;
+      a.rotY += impulse * 85e-4;
+      b.rotY -= impulse * 85e-4;
+      activeBall(a);
+      activeBall(b);
     }
+  }
+}
+
+function detectPockets() {
+  for (const ball of activeBalls) {
+    if (ball.pocketed || ball.falling) continue;
+    const pocket = findCapturePocket(ball.x, ball.z);
+    if (!pocket) continue;
+    ball.vx = ball.vz = 0;
+    deactiveBall(ball);
+    if (ball.cueBall) {
+      ball.scratched = true;
+      ball.pocketed = true;
+      ball.falling = false;
+      useGameStore.getState().recordScratch();
+    } else {
+      ball.pocketX = pocket.x;
+      ball.pocketZ = pocket.z;
+      ball.pocketRadius = pocket.radius;
+      ball.falling = true;
+      ball.fallSpeed = 0;
+      fallingBalls.add(ball);
+      useGameStore.getState().markPotted(ball.id);
+    }
+    markDirty(ball);
   }
 }
 
@@ -155,7 +212,7 @@ function respawnCueBall(cueBall) {
     }
     if (nearest === Infinity) return false;
   }
-  
+
   Object.assign(cueBall, { x, z, y: BALL_Y, vx: 0, vz: 0, rotX: 0, rotY: 0, rotZ: 0, scratched: false, pocketed: false, falling: false, fallSpeed: 0 });
   deactiveBall(cueBall);
   markDirty(cueBall);
