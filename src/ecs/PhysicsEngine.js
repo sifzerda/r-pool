@@ -6,7 +6,7 @@ import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "./constants/tableBounds.js";
 import { FIXED_DT, MAX_SUBSTEPS, MAX_FRAME_DT } from "./constants/simulation.js";
 import { physicsConfig as cfg, physicsDerived, bindTimeStep, shotSpeed } from "./constants/physicsConfig.js";
 import { FALL_END_Y, FALL_GRAVITY, findCapturePocket } from "./constants/pockets.js";
-import { markPotted, recordShot, recordScratch, finishShot } from "../store/pottedStore.js";
+import useGameStore from "../store/useGameStore.js";
 
 const DIAMETER = BALL_R * 2;
 const DIAMETER_SQ = DIAMETER * DIAMETER;
@@ -28,7 +28,7 @@ function shotSystem(cueBall, aimRef) {
   cueBall.vz = shot.sin / length * speed;
   activeBall(cueBall);
   markDirty(cueBall);
-  recordShot();
+  useGameStore.getState().recordShot();
   return true;
 }
 
@@ -144,7 +144,7 @@ function detectPockets() {
       ball.scratched = true;
       ball.pocketed = true;
       ball.falling = false;
-      recordScratch();
+      useGameStore.getState().recordScratch();
     } else {
       ball.pocketX = pocket.x;
       ball.pocketZ = pocket.z;
@@ -152,7 +152,7 @@ function detectPockets() {
       ball.falling = true;
       ball.fallSpeed = 0;
       fallingBalls.add(ball);
-      markPotted(ball.id);
+      useGameStore.getState().markPotted(ball.id);
     }
     markDirty(ball);
   }
@@ -250,7 +250,7 @@ class PhysicsEngine {
     updateFallingBalls(FIXED_DT);
     frictionSystem();
     respawnCueBall(this.cueBall);
-    if (!ballsAreMoving()) finishShot();
+    if (!ballsAreMoving()) useGameStore.getState().finishShot();
   }
   update(delta) {
     const dt = Number.isFinite(delta) ? Math.min(Math.max(delta, 0), MAX_FRAME_DT) : 0;

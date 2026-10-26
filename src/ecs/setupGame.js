@@ -3,7 +3,7 @@
 import { world, clearWorld, markDirty } from "./world.js";
 import { BALL_R, BALL_Y } from "./constants/table.js";
 import { buildRack } from "./constants/rack.js";
-import { resetPotted } from "../store/pottedStore.js";
+import useGameStore from "../store/useGameStore.js";
 
 function createBall(data) {
   return {
@@ -31,7 +31,7 @@ function createBall(data) {
 
 function setupGame() {
   clearWorld();
-  resetPotted();
+  useGameStore.getState().resetPotted();
   const cue = world.add(createBall({ id: 0, instanceId: 0, cueBall: true, type: "cue", group: "cue", x: 0, z: 0 }));
   markDirty(cue);
   const rack = buildRack();
@@ -42,6 +42,4 @@ function setupGame() {
   return cue;
 }
 
-export {
-  setupGame
-};
+export { setupGame };
