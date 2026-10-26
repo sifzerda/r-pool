@@ -3,82 +3,50 @@
 // The Lab UI is generated from GROUPS, so adding a control here is enough
 // to get a slider/colour picker (then read it in applyAppearance.js).
 
-const r = (key, label, min, max, step, def) => ({ key, label, type: "range", min, max, step, def });
-const c = (key, label, def) => ({ key, label, type: "color", def });
+// Appearance defaults and complete named presets. No customization controls.
+export const CLASSIC = Object.freeze({
+  "ball.roughness": 0.08,
+  "ball.clearcoat": 1,
+  "ball.clearcoatRoughness": 0.08,
+  "ball.metalness": 0,
+  "ball.iridescence": 0,
+  "ball.glow": 0,
+  "ball.saturation": 1,
+  "ball.brightness": 1,
+  "ball.stripeWidth": 0.34,
+  "ball.badgeSize": 0.12,
+  "stick.shaft": "#d4a84b",
+  "stick.butt": "#1a0e06",
+  "stick.accent": "#c8a030",
+  "stick.ferrule": "#f0ede8",
+  "stick.tip": "#5c3317",
+  "stick.roughness": 0.25,
+  "stick.accentMetal": 0.6,
+  "stick.glow": 0.3,
+  "table.felt": "#008000",
+  "table.feltRough": 0.95,
+  "table.feltSheen": 0,
+  "table.cloth": 1,
+  "table.rail": "#5b3418",
+  "table.railRough": 1,
+  "table.railMetal": 0,
+  "table.frame": "#3a1f0f",
+  "table.pocket": "#120c08",
+  "table.trim": "#7b4a25",
+  "table.diamond": "#f0d080",
+  "table.diamondGlow": 0,
+  "scene.bg": "#101014",
+  "scene.exposure": 1,
+  "scene.ambient": 0.85,
+  "scene.key": 2.5,
+  "scene.keyColor": "#ffffff",
+  "scene.reflections": 0,
+  "scene.accent": "#00e5ff",
+  "scene.accentGlow": 0
+});
 
-export const GROUPS = [
-  {
-    id: "balls",
-    label: "Balls",
-    controls: [
-      r("ball.roughness", "Roughness", 0, 1, 0.01, 0.08),
-      r("ball.clearcoat", "Clearcoat", 0, 1, 0.01, 1),
-      r("ball.clearcoatRoughness", "Clearcoat roughness", 0, 1, 0.01, 0.08),
-      r("ball.metalness", "Metalness", 0, 1, 0.01, 0),
-      r("ball.iridescence", "Iridescence", 0, 1, 0.01, 0),
-      r("ball.glow", "Glow", 0, 2, 0.01, 0),
-      r("ball.saturation", "Saturation", 0, 2, 0.01, 1),
-      r("ball.brightness", "Brightness", 0.5, 1.5, 0.01, 1),
-      r("ball.stripeWidth", "Stripe width", 0.15, 0.5, 0.01, 0.34),
-      r("ball.badgeSize", "Number badge", 0.06, 0.2, 0.005, 0.12),
-    ],
-  },
-  {
-    id: "stick",
-    label: "Stick",
-    controls: [
-      c("stick.shaft", "Shaft", "#d4a84b"),
-      c("stick.butt", "Butt", "#1a0e06"),
-      c("stick.accent", "Accent rings", "#c8a030"),
-      c("stick.ferrule", "Ferrule", "#f0ede8"),
-      c("stick.tip", "Tip", "#5c3317"),
-      r("stick.roughness", "Roughness", 0.05, 1, 0.01, 0.25),
-      r("stick.accentMetal", "Accent metalness", 0, 1, 0.01, 0.6),
-      r("stick.glow", "Accent glow", 0, 3, 0.01, 0.3),
-    ],
-  },
-  {
-    id: "table",
-    label: "Table",
-    controls: [
-      c("table.felt", "Felt", "#008000"),
-      r("table.feltRough", "Felt roughness", 0.3, 1, 0.01, 0.95),
-      r("table.feltSheen", "Felt sheen", 0, 1, 0.01, 0),
-      r("table.cloth", "Cloth texture", 0, 1, 0.01, 1),
-      c("table.rail", "Rails", "#5b3418"),
-      r("table.railRough", "Rail roughness", 0.1, 1, 0.01, 1),
-      r("table.railMetal", "Rail metalness", 0, 1, 0.01, 0),
-      c("table.frame", "Outer frame", "#3a1f0f"),
-      c("table.pocket", "Pockets", "#120c08"),
-      c("table.trim", "Rail trim", "#7b4a25"),
-      c("table.diamond", "Diamonds", "#f0d080"),
-      r("table.diamondGlow", "Diamond glow", 0, 3, 0.01, 0),
-    ],
-  },
-  {
-    id: "scene",
-    label: "Scene",
-    controls: [
-      c("scene.bg", "Background", "#101014"),
-      r("scene.exposure", "Exposure", 0.4, 2, 0.01, 1),
-      r("scene.ambient", "Ambient light", 0, 2, 0.01, 0.85),
-      r("scene.key", "Key light", 0, 6, 0.01, 2.5),
-      c("scene.keyColor", "Key colour", "#ffffff"),
-      r("scene.reflections", "Reflections", 0, 3, 0.01, 0),
-      c("scene.accent", "Accent colour", "#00e5ff"),
-      r("scene.accentGlow", "Accent glow", 0, 8, 0.05, 0),
-    ],
-  },
-];
-
-// "Classic" = the original look (the schema defaults).
-export const CLASSIC = Object.fromEntries(
-  GROUPS.flatMap((g) => g.controls.map((ctl) => [ctl.key, ctl.def]))
-);
-
-// Presets are partial overrides on top of CLASSIC.
-export const PRESETS = {
-  Showroom: {
+export const PRESETS = Object.freeze({
+  "Showroom": {
     "ball.roughness": 0.05,
     "ball.clearcoatRoughness": 0.03,
     "ball.saturation": 1.12,
@@ -102,10 +70,9 @@ export const PRESETS = {
     "scene.key": 2.6,
     "scene.reflections": 0.7,
     "scene.accent": "#7fd6ff",
-    "scene.accentGlow": 1.2,
+    "scene.accentGlow": 1.2
   },
-
-  Neon: {
+  "Neon": {
     "ball.roughness": 0.1,
     "ball.iridescence": 0.45,
     "ball.glow": 0.35,
@@ -136,9 +103,8 @@ export const PRESETS = {
     "scene.key": 1.6,
     "scene.reflections": 1,
     "scene.accent": "#ff2bd6",
-    "scene.accentGlow": 3.5,
+    "scene.accentGlow": 3.5
   },
-
   "Tournament Blue": {
     "ball.roughness": 0.06,
     "ball.clearcoatRoughness": 0.04,
@@ -163,7 +129,7 @@ export const PRESETS = {
     "scene.key": 2.6,
     "scene.reflections": 0.7,
     "scene.accent": "#9cc8ff",
-    "scene.accentGlow": 0.8,
+    "scene.accentGlow": 0.8
   },
   "Pink Lounge": {
     "ball.roughness": 0.06,
@@ -203,9 +169,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#ed33ff",
-    "scene.accentGlow": 0.9596,
+    "scene.accentGlow": 0.9596
   },
-
   "Red Lounge": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -244,9 +209,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#d933ff",
-    "scene.accentGlow": 0.8094,
+    "scene.accentGlow": 0.8094
   },
-
   "Flamingo Lounge": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -285,9 +249,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#ff3362",
-    "scene.accentGlow": 3.133,
+    "scene.accentGlow": 3.133
   },
-
   "Green Lounge": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -326,9 +289,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#66ff33",
-    "scene.accentGlow": 0.3585,
+    "scene.accentGlow": 0.3585
   },
-
   "Noir Lounge": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -367,9 +329,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#00ff91",
-    "scene.accentGlow": 1.6,
+    "scene.accentGlow": 1.6
   },
-
   "Clean Green": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -408,9 +369,8 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.6,
     "scene.accent": "#00ccc9",
-    "scene.accentGlow": 1.95,
+    "scene.accentGlow": 1.95
   },
-
   "Gentleman's Club": {
     "ball.roughness": 0.06,
     "ball.clearcoat": 1,
@@ -449,11 +409,12 @@ export const PRESETS = {
     "scene.keyColor": "#ffffff",
     "scene.reflections": 0.7,
     "scene.accent": "#ffd833",
-    "scene.accentGlow": 3.0143,
-  },
-};
+    "scene.accentGlow": 3.0143
+  }
+});
 
 export const DEFAULT_PRESET = "Showroom";
-
-export const presetValues = (name) => ({ ...CLASSIC, ...PRESETS[name] });
-export const DEFAULTS = presetValues(DEFAULT_PRESET);
+export const PRESET_NAMES = Object.freeze(["Classic", ...Object.keys(PRESETS)]);
+export const isPreset = (name) => typeof name === "string" && PRESET_NAMES.includes(name);
+export const presetValues = (name) => ({ ...CLASSIC, ...(name === "Classic" ? {} : PRESETS[isPreset(name) ? name : DEFAULT_PRESET]) });
+export const DEFAULTS = Object.freeze(presetValues(DEFAULT_PRESET));

@@ -2,25 +2,19 @@
 
 import HUD from "../components/HUD.jsx";
 import useGameStore from "../store/useGameStore.js";
-import { buttonStyle } from "./ScreenPanel.jsx";
 
-export default function PlayScreen({ labOpen, onToggleLab }) {
+export default function PlayScreen() {
+  const showHUD = useGameStore((s) => s.settings.showHUD);
+  const pauseGame = useGameStore((s) => s.pauseGame);
+  const startGame = useGameStore((s) => s.startGame);
 
-    const showHUD = useGameStore((s) => s.settings.showHUD);
-    const pauseGame = useGameStore((s) => s.pauseGame);
-    const startGame = useGameStore((s) => s.startGame);
-
-    return (
-        <>
-
-            {showHUD && <HUD />}
-
-            <div style={{ position: "absolute", bottom: 12, right: 12, display: "flex", flexWrap: "wrap", gap: 8 }}>
-                <button style={buttonStyle} onClick={pauseGame}>Pause</button>
-                <button style={buttonStyle} onClick={startGame}>New rack</button>
-                <button style={buttonStyle} onClick={onToggleLab} aria-expanded={labOpen}>Lab</button>
-            </div>
-        </>
-    )
-
+  return (
+    <>
+      {showHUD && <HUD />}
+      <div className="absolute bottom-3 right-3 flex flex-wrap gap-2">
+        <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={pauseGame} >Pause</button>
+        <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={startGame} >New rack</button>
+      </div>
+    </>
+  );
 }
