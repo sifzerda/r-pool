@@ -1,11 +1,13 @@
 // src/screens/PauseScreen.jsx
 
-import useScreenStore from "../store/useScreenStore.js";
-import Panel, { Button, ACTIONS, SUBTLE } from "./ScreenPanel.jsx";
-
+import useGameStore from "../store/useGameStore.js";
+import ScreenPanel, { buttonStyle } from "./ScreenPanel.jsx";
 export default function PauseScreen() {
-  const resume = useScreenStore((state) => state.resume), settings = useScreenStore((state) => state.openSettings), menu = useScreenStore((state) => state.goToMenu), start = useScreenStore((state) => state.startGame);
-  return <Panel title="PAUSED"><p style={SUBTLE}>Your table is preserved. Resume to continue the current shot.</p>
-    <div style={ACTIONS}><Button onClick={resume}>Resume</Button><Button onClick={settings}>Settings</Button><Button onClick={start}>New rack</Button><Button onClick={menu}>Main menu</Button></div>
-  </Panel>;
+  const resumeGame = useGameStore((s) => s.resumeGame);
+  const startGame = useGameStore((s) => s.startGame);
+  const openSettings = useGameStore((s) => s.openSettings);
+  const returnToMenu = useGameStore((s) => s.returnToMenu);
+  const openHighScores = useGameStore((s) => s.openHighScores);
+  const openHowToPlay = useGameStore((s) => s.openHowToPlay);
+  return <ScreenPanel title="Paused"><button style={buttonStyle} onClick={resumeGame}>Resume</button><button style={buttonStyle} onClick={startGame}>New rack</button><button style={buttonStyle} onClick={openSettings}>Settings</button><button style={buttonStyle} onClick={returnToMenu}>Main menu</button><button style={buttonStyle} onClick={openHighScores}>High scores</button><button style={buttonStyle} onClick={openHowToPlay}>How to play</button></ScreenPanel>;
 }

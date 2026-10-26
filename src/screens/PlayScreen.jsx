@@ -1,26 +1,18 @@
 // src/screens/PlayScreen.jsx
 
-import { lazy, Suspense } from "react";
-import useScreenStore, { SCREEN } from "../store/useScreenStore.js";
-
-// Loaded only after Play, preserving compatibility with browser-only textures.
-const PoolGame = lazy(() => import("../PoolGame.jsx"));
-
-export default function PlayScreen() {
-  const screen = useScreenStore(state => state.screen);
-  const blocked = screen !== SCREEN.PLAY;
-
-  // PoolScreens keeps this mounted through pause, settings and completion.
-  // Only starting a new session changes its React key.
-  return (
-    <div
-      inert={blocked}
-      aria-hidden={blocked}
-      style={{ pointerEvents: blocked ? "none" : "auto" }}
-    >
-      <Suspense fallback={<p style={{ color: "#c8edf5", padding: 24 }}>Loading table…</p>}>
-        <PoolGame />
-      </Suspense>
-    </div>
-  );
+import HUD from "../components/HUD.jsx";
+import useGameStore from "../store/useGameStore.js";
+import { buttonStyle } from "./ScreenPanel.jsx";
+export default function PlayScreen({ labOpen, onToggleLab }) {
+ const showHUD = useGameStore((s) => s.settings.showHUD);
+ const pauseGame = useGameStore((s) => s.pauseGame);
+ const startGame = useGameStore((s) => s.startGame);
+ return <>
+  {showHUD && <HUD />}
+  <div style={{ position: "absolute", bottom: 12, right: 12, display: "flex", flexWrap: "wrap", gap: 8 }}>
+   <button style={buttonStyle} onClick={pauseGame}>Pause</button>
+   <button style={buttonStyle} onClick={startGame}>New rack</button>
+   <button style={buttonStyle} onClick={onToggleLab} aria-expanded={labOpen}>Lab</button>
+  </div>
+ </>;
 }

@@ -1,17 +1,12 @@
 // src/screens/GameCompleteScreen.jsx
 
-import useScreenStore from "../store/useScreenStore.js";
-import Panel, { Button, ACTIONS, SUBTLE } from "./ScreenPanel.jsx";
-
+import useGameStore from "../store/useGameStore.js";
+import ScreenPanel, { buttonStyle } from "./ScreenPanel.jsx";
 export default function GameCompleteScreen() {
-  const result = useScreenStore((state) => state.result), start = useScreenStore((state) => state.startGame), scores = useScreenStore((state) => state.openHighscores), menu = useScreenStore((state) => state.goToMenu);
- 
- return <Panel title="TABLE CLEARED"><p style={SUBTLE}>All 15 object balls potted. Your completed game has been added to the local rankings.</p>
-    {result && <div style={{ display: "flex", gap: 24, flexWrap: "wrap", padding: "12px 0" }}>
-      <span><strong>{result.shots}</strong> shots</span>
-      <span><strong>{result.scratches}</strong> scratches</span>
-      <span><strong>{result.bestPots}</strong> best single-shot pots</span>
-      </div>}
-    <div style={ACTIONS}><Button onClick={start}>Play again</Button><Button onClick={scores}>Highscores</Button><Button onClick={menu}>Main menu</Button></div>
-  </Panel>;
+  const result = useGameStore((s) => s.result);
+  const startGame = useGameStore((s) => s.startGame);
+  const returnToMenu = useGameStore((s) => s.returnToMenu);
+  const openHighScores = useGameStore((s) => s.openHighScores);
+  const openHowToPlay = useGameStore((s) => s.openHowToPlay);
+  return <ScreenPanel title="Game complete"><p role="status">{result?.message || "Rack complete!"}</p><button style={buttonStyle} onClick={startGame}>Play again</button><button style={buttonStyle} onClick={returnToMenu}>Main menu</button><button style={buttonStyle} onClick={openHighScores}>High scores</button><button style={buttonStyle} onClick={openHowToPlay}>How to play</button></ScreenPanel>;
 }

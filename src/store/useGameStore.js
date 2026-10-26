@@ -1,138 +1,47 @@
 //src/store/useGameStore.js
 
 import { create } from "zustand";
-const SCREEN = Object.freeze({
-  MENU: "menu",
-  PLAY: "play",
-  SETTINGS: "settings",
-  GAME_COMPLETE: "gamecomplete",
-  PAUSE: "pause",
-  HIGHSCORES: "highscores"
-});
 
-const QUALITY_DPR = Object.freeze({ low: 1, balanced: 1.5, high: 2 });
-const DEFAULT_SETTINGS = Object.freeze({ quality: "balanced", shadows: true, aimGuide: true });
-const STORAGE_KEY = "pool-preferences-v1";
-const LIMIT = 20;
-
-function cleanSettings(value = {}) {
-  return {
-    quality: Object.hasOwn(QUALITY_DPR, value?.quality) ? value.quality : DEFAULT_SETTINGS.quality,
-    shadows: typeof value?.shadows === "boolean" ? value.shadows : DEFAULT_SETTINGS.shadows,
-    aimGuide: typeof value?.aimGuide === "boolean" ? value.aimGuide : DEFAULT_SETTINGS.aimGuide
-  };
+export const SCREENS = Object.freeze({ MENU: "menu", PLAY: "play", PAUSE: "pause", SETTINGS: "settings", COMPLETE: "complete", HIGH_SCORES: "highscores", HOW_TO_PLAY: "howtoplay" });
+const SCORE_KEY = "pool-high-scores-v1";
+function validScores(value) {
+  return Array.isArray(value) ? value.filter((v) => v && typeof v.name === "string" && Number.isFinite(v.score) && v.score >= 0 && typeof v.date === "string").sort((a, b) => b.score - a.score).slice(0, 10) : [];
 }
-
-function cleanScore(value) {
-  if (!value || typeof value.id !== "string" || !Number.isInteger(value.shots) || value.shots < 1 || !Number.isInteger(value.scratches) || value.scratches < 0 || !Number.isFinite(value.completedAt) || !Number.isInteger(value.bestPots) || value.bestPots < 0 || value.bestPots > 15) return null;
-  return { id: value.id, shots: value.shots, scratches: value.scratches, bestPots: value.bestPots, completedAt: value.completedAt };
+function loadScores() {
+  try { return validScores(JSON.parse(localStorage.getItem(SCORE_KEY) || "[]")); }
+  catch { return []; }
 }
-
-const rankScores = (scores) => [...scores].sort((a, b) => a.shots - b.shots || a.scratches - b.scratches || a.completedAt - b.completedAt).slice(0, LIMIT);
-function save(state) {
-  try {
-    if (typeof window !== "undefined") window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings: state.settings, highscores: state.highscores }));
-  } catch {
-  }
+function saveScores(scores) {
+  try { localStorage.setItem(SCORE_KEY, JSON.stringify(scores)); } catch { /* Keep scores in memory when storage is unavailable. */ }
 }
-
-function newRunId() {
-  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-const useGameStore = create((set, get) => ({
-  screen: SCREEN.MENU,
+const useGameStore = create((set) => ({
+  highScores: loadScores(),
+  infoReturnScreen: SCREENS.MENU,
+  openHighScores: () => set((s) => [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.HIGH_SCORES, infoReturnScreen: s.screen } : {}),
+  openHowToPlay: () => set((s) => [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.HOW_TO_PLAY, infoReturnScreen: s.screen } : {}),
+  closeInfo: () => set((s) => [SCREENS.HIGH_SCORES, SCREENS.HOW_TO_PLAY].includes(s.screen) ? { screen: s.infoReturnScreen } : {}),
+  screen: SCREENS.MENU,
+  settingsReturnScreen: SCREENS.MENU,
   sessionId: 0,
-  runId: null,
-  hasGame: false,
-  history: [],
   result: null,
-  settings: { ...DEFAULT_SETTINGS },
-  highscores: [],
-  hydrated: false,
-  hydrate: () => {
-    if (get().hydrated) return;
-    let saved = null;
-    try {
-      if (typeof window !== "undefined") saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null");
-    } catch {
+  settings: { showAimGuide: true, showHUD: true },
+  startGame: () => set((s) => ({ screen: SCREENS.PLAY, sessionId: s.sessionId + 1, result: null })),
+  pauseGame: () => set((s) => s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : {}),
+  resumeGame: () => set((s) => s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : {}),
+  openSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? {} : { screen: SCREENS.SETTINGS, settingsReturnScreen: s.screen === SCREENS.PLAY ? SCREENS.PAUSE : s.screen }),
+  closeSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? { screen: s.settingsReturnScreen } : {}),
+  returnToMenu: () => set({ screen: SCREENS.MENU, result: null }),
+  completeGame: (result = { message: "Rack complete!" }) => set((s) => {
+    if (s.screen !== SCREENS.PLAY) return {};
+    const finalResult = result || { message: "Rack complete!" };
+    let highScores = s.highScores;
+    if (Number.isFinite(finalResult.score) && finalResult.score >= 0) {
+      const name = typeof finalResult.name === "string" ? finalResult.name.trim().slice(0, 24) || "Player" : "Player";
+      highScores = validScores([...highScores, { name, score: finalResult.score, date: new Date().toISOString() }]);
+      saveScores(highScores);
     }
-    const ids = /* @__PURE__ */ new Set();
-    const highscores = (Array.isArray(saved?.highscores) ? saved.highscores : []).map(cleanScore).filter((score) => {
-      if (!score || ids.has(score.id)) return false;
-      ids.add(score.id);
-      return true;
-    });
-    set({ settings: cleanSettings(saved?.settings), highscores: rankScores(highscores), hydrated: true });
-  },
-
-  startGame: () => set((state) => ({ screen: SCREEN.PLAY, sessionId: state.sessionId + 1, runId: newRunId(), hasGame: true, history: [], result: null })),
-  
-  pause: () => {
-    if (get().screen === SCREEN.PLAY) set({ screen: SCREEN.PAUSE, history: [] });
-  },
-
-  resume: () => {
-    if (get().screen === SCREEN.PAUSE) set({ screen: SCREEN.PLAY, history: [] });
-  },
-
-  togglePause: () => {
-    const state = get();
-    if (state.screen === SCREEN.PLAY) state.pause();
-    else if (state.screen === SCREEN.PAUSE) state.resume();
-  },
-
-  openSettings: () => {
-    const { screen, history } = get();
-    if (screen !== SCREEN.SETTINGS) set({ screen: SCREEN.SETTINGS, history: [...history, screen] });
-  },
-
-  openHighscores: () => {
-    const { screen, history } = get();
-    if (screen !== SCREEN.HIGHSCORES) set({ screen: SCREEN.HIGHSCORES, history: [...history, screen] });
-  },
-
-  back: () => {
-    const { screen, history } = get();
-    if (screen !== SCREEN.SETTINGS && screen !== SCREEN.HIGHSCORES) return;
-    set({ screen: history.at(-1) ?? SCREEN.MENU, history: history.slice(0, -1) });
-  },
-
-  goToMenu: () => set({ screen: SCREEN.MENU, hasGame: false, history: [], runId: null, result: null }),
-  
-  completeGame: (stats) => {
-    const state = get();
-    if (state.screen !== SCREEN.PLAY || !state.hasGame || !stats?.cleared || stats.potted !== 15) return false;
-    const result = cleanScore({ id: state.runId, shots: stats.shots, scratches: stats.scratches, bestPots: stats.bestPots, completedAt: Date.now() });
-    if (!result) return false;
-    const highscores = rankScores([...state.highscores.filter((score) => score.id !== result.id), result]);
-    set({ screen: SCREEN.GAME_COMPLETE, history: [], result, highscores });
-    save(get());
-    return true;
-  },
-
-  updateSettings: (patch) => {
-    const current = get().settings;
-    const settings = cleanSettings({ ...current, ...patch });
-    if (settings.quality === current.quality && settings.shadows === current.shadows && settings.aimGuide === current.aimGuide) return;
-    set({ settings });
-    save(get());
-  },
-
-  resetSettings: () => {
-    set({ settings: { ...DEFAULT_SETTINGS } });
-    save(get());
-  }
+    return { screen: SCREENS.COMPLETE, result: finalResult, highScores };
+  }),
+  setSetting: (key, value) => set((s) => Object.hasOwn(s.settings, key) && typeof value === "boolean" ? { settings: { ...s.settings, [key]: value } } : {}),
 }));
-
-const isPlaying = () => useGameStore.getState().screen === SCREEN.PLAY;
-const selectIsPlaying = (state) => state.screen === SCREEN.PLAY;
-var stdin_default = useGameStore;
-
-export {
-  QUALITY_DPR,
-  SCREEN,
-  stdin_default as default,
-  isPlaying,
-  selectIsPlaying
-};
+export default useGameStore;
