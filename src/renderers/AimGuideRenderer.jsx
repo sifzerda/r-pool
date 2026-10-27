@@ -8,11 +8,13 @@ import { POCKETS } from "../ecs/constants/pockets.js";
 import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "../ecs/constants/tableBounds.js";
 
 const GUIDE_Y = BALL_Y + BALL_R + 0.02;
-const PATH_LENGTH = 8;
+
+const PATH_LENGTH = 8; // White line – cue ball's predicted path
 const MAX_BOUNCES = 3;
-const OBJECT_GUIDE_LENGTH = 2;
-const DEFLECT_GUIDE_LENGTH = 1.5;
-const POST_HIT_BOUNCES = 1;
+const OBJECT_GUIDE_LENGTH = 0.5; // Yellow line – object ball's predicted path after impact
+const DEFLECT_GUIDE_LENGTH = 0.5; // White line – cue ball's deflection after impact
+
+const POST_HIT_BOUNCES = 0;
 const DIAMETER = BALL_R * 2;
 const DIAMETER_SQ = DIAMETER * DIAMETER;
 const EPS = 1e-7;
