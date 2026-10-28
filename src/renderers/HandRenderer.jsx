@@ -1,5 +1,4 @@
 // // src/renderers/HandRenderer.jsx
-
 // renders the hand for ball-in-hand events
 
 import { useRef } from "react";

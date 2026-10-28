@@ -84,7 +84,7 @@ export default function PoolGame() {
 
     return (
 
-        <div className="relative h-[560px] w-full min-w-0 overflow-hidden rounded-[18px] bg-[#061017]">
+        <div className="relative h-140 w-full min-w-0 overflow-hidden rounded-[18px] bg-[#061017]">
 
             {hasRack && <Rack key={sessionId} />}
             {screen === SCREENS.SCORE_BOARD && <ScoreboardScreen />}

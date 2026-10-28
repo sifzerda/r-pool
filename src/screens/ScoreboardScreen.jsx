@@ -20,7 +20,7 @@ export default function ScoreboardScreen() {
     return (
         <div className="absolute inset-0 z-10 grid min-h-0 place-items-center bg-[#030a11]/85 p-4 sm:p-5">
             <section ref={panel} tabIndex={-1} aria-label="Scoreboard"
-                className="grid max-h-full w-full max-w-[360px] min-h-0 gap-3.5 overflow-y-auto overscroll-contain rounded-3xl border border-[#285562] bg-[#091820] p-5 font-sans text-cyan-50 outline-none sm:p-7">
+                className="grid max-h-full w-full max-w-90 min-h-0 gap-3.5 overflow-y-auto overscroll-contain rounded-3xl border border-[#285562] bg-[#091820] p-5 font-sans text-cyan-50 outline-none sm:p-7">
                 <h1 className="mb-2 text-[28px] font-bold">Scoreboard</h1>
                 {scores.length === 0 ? (
                     <p role="status" className="text-center text-slate-300">No highscores yet.</p>
@@ -39,7 +39,7 @@ export default function ScoreboardScreen() {
                                 {scores.map((entry, index) => (
                                     <tr key={entry.id ?? `${entry.date}-${index}`}>
                                         <td className="border-b border-[#285562] px-2 py-3">{index + 1}</td>
-                                        <td className="border-b border-[#285562] px-2 py-3 [overflow-wrap:anywhere]">{entry.name || "Player"}</td>
+                                        <td className="border-b border-[#285562] px-2 py-3 wrap-anywhere">{entry.name || "Player"}</td>
                                         <td className="border-b border-[#285562] px-2 py-3 text-right tabular-nums text-cyan-300">{entry.score.toLocaleString()}</td>
                                     </tr>
                                 ))}
@@ -47,7 +47,7 @@ export default function ScoreboardScreen() {
                         </table>
                     </div>
                 )}
-                <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeInfo} >Back</button>
+                <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-4.5 py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeInfo} >Back</button>
             </section>
         </div>
     );

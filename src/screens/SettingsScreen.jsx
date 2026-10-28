@@ -19,11 +19,11 @@ export default function SettingsScreen() {
   return (
     <div className="absolute inset-0 z-10 grid min-h-0 place-items-center bg-[#030a11]/85 p-4 sm:p-5">
       <section ref={panel} tabIndex={-1} aria-label="Settings"
-        className="grid max-h-full w-full max-w-[960px] min-h-0 gap-3.5 overflow-y-auto overscroll-contain rounded-3xl border border-[#285562] bg-[#091820] p-5 font-sans text-cyan-50 outline-none sm:p-7">
+        className="grid max-h-full w-full max-w-240 min-h-0 gap-3.5 overflow-y-auto overscroll-contain rounded-3xl border border-[#285562] bg-[#091820] p-5 font-sans text-cyan-50 outline-none sm:p-7">
         <h1 className="mb-2 text-[28px] font-bold">Settings</h1>
         <div className="grid min-w-0 gap-5 md:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0">
-            <div className="h-[240px] overflow-hidden rounded-2xl border border-[#285562] md:h-[360px]">
+            <div className="h-60 overflow-hidden rounded-2xl border border-[#285562] md:h-90">
               <PreviewTable />
             </div>
             <p className="mt-2 text-sm text-slate-300" role="status">Preview: {selectedPreset}</p>
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
                 checked={settings.showHUD} onChange={(event) => setSetting("showHUD", event.target.checked)} />
               Show HUD
             </label>
-            <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeSettings} >Back</button>
+            <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-4.5 py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeSettings} >Back</button>
           </div>
         </div>
       </section>
