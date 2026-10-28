@@ -7,7 +7,7 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { TABLE_W, TABLE_H, BALL_Y } from "../ecs/constants/table.js";
 import TableRenderer from "../renderers/TableRenderer.jsx";
-import SceneLab from "../lab/SceneLab.jsx";
+import SceneLab from "../paintjob/SceneLab.jsx";
 import * as M from "./TableRenderer.jsx";
 
 const CAMERA_POSITION = [0, 10, 0];

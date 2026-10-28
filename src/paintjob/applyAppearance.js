@@ -1,4 +1,4 @@
-// src/lab/applyAppearance.js
+// src/paintjob/applyAppearance.js
 // Pushes Lab settings into the shared materials/atlas. Runs on every change,
 // mutating objects in place (no React re-render of the 3D scene needed).
 

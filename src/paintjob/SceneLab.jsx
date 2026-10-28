@@ -1,4 +1,4 @@
-// src/lab/SceneLab.jsx
+// src/paintjob/SceneLab.jsx
 // Lights, reflections, background and exposure, all driven by the Lab.
 // Replaces the hard-coded lights that used to live in PoolScene.
 

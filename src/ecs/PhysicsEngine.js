@@ -7,6 +7,7 @@ import { FIXED_DT, MAX_SUBSTEPS, MAX_FRAME_DT } from "./constants/simulation.js"
 import { physicsConfig as cfg, physicsDerived, bindTimeStep, shotSpeed } from "./constants/physicsConfig.js";
 import { FALL_END_Y, FALL_GRAVITY, findCapturePocket } from "./constants/pockets.js";
 import useGameStore from "../store/useGameStore.js";
+import { logPendingShotComparison } from "../ai/AIPhysicsDebugger.js";
 
 const DIAMETER = BALL_R * 2;
 const DIAMETER_SQ = DIAMETER * DIAMETER;
@@ -19,9 +20,30 @@ bindTimeStep(FIXED_DT);
 function shotSystem(cueBall, aimRef) {
   const aim = aimRef.current;
   const shot = aim.pendingShot;
+
   if (!shot) return false;
+
   aim.pendingShot = null;
-  if (ballsAreMoving() || cueBall.pocketed || cueBall.falling || cueBall.scratched || !Number.isFinite(shot.power) || !Number.isFinite(shot.cos) || !Number.isFinite(shot.sin) || shot.power <= 0) return false;
+  const game = useGameStore.getState();
+  const shooter = shot.player || "human";
+
+  if (game.currentPlayer !== shooter || game.ballInHand || game.winner) {
+    return false;
+  }
+
+  if (
+    ballsAreMoving() ||
+    fallingBalls.size > 0 ||
+    cueBall.pocketed ||
+    cueBall.falling ||
+    cueBall.scratched ||
+    !Number.isFinite(shot.power) ||
+    !Number.isFinite(shot.cos) ||
+    !Number.isFinite(shot.sin) ||
+    shot.power <= 0
+  ) {
+    return false;
+  }
   const length = Math.hypot(shot.cos, shot.sin);
   if (length < 1e-8) return false;
   const speed = shotSpeed(Math.min(1, shot.power / MAX_POWER), MAX_SHOT_SPEED);
@@ -41,6 +63,9 @@ function bounce(ball, axis, limit, minimum) {
   const speed = Math.abs(ball[velocity]);
   const restitution = Math.max(Math.min(cfg.cushionMinE, cfg.cushionE), cfg.cushionE - cfg.cushionSpeedLoss * speed);
   ball[velocity] *= -restitution;
+
+  useGameStore.getState().recordRailContact();
+
   const side = ball[tangent];
   ball[tangent] = Math.sign(side) * Math.max(0, Math.abs(side) - cfg.cushionFriction * (1 + restitution) * speed);
 }
@@ -121,6 +146,13 @@ function collisionSystem() {
       markDirty(b);
       const normalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
       if (normalSpeed >= 0) continue;
+
+      // Record the first object ball contacted by the cue ball.
+      if (a.cueBall && !b.cueBall) {
+        useGameStore.getState().recordFirstContact(b.id);
+      } else if (b.cueBall && !a.cueBall) {
+        useGameStore.getState().recordFirstContact(a.id);
+      }
       const impulse = -(1 + cfg.ballE) * normalSpeed * 0.5;
       a.vx -= impulse * nx;
       a.vz -= impulse * nz;
@@ -226,7 +258,11 @@ function PhysicsEngine(cueBall, aimRef) {
   let accumulator = 0;
   let wasSimulating = false;
   function isSimulating() {
-    return ballsAreMoving() || aimRef.current.pendingShot != null || cueBall.scratched;
+    return (
+      ballsAreMoving() ||
+      fallingBalls.size > 0 ||
+      aimRef.current.pendingShot != null
+    );
   }
 
   function updateSwing(dt) {
@@ -252,8 +288,16 @@ function PhysicsEngine(cueBall, aimRef) {
     for (const ball of activeBalls) markDirty(ball);
     updateFallingBalls(FIXED_DT);
     frictionSystem();
-    respawnCueBall(cueBall);
-    if (!ballsAreMoving()) useGameStore.getState().finishShot();
+    // Do not automatically respawn the cue ball.
+    // A scratch will be resolved as ball-in-hand by the rules system.
+    if (!ballsAreMoving() && fallingBalls.size === 0) {
+      logPendingShotComparison(
+        ballQuery.entities,
+        useGameStore.getState()
+      );
+
+      useGameStore.getState().finishShot();
+    }
   }
 
   function update(delta) {

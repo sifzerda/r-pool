@@ -1,7 +1,7 @@
 // src/screens/SettingsScreen.jsx
 
 import { useEffect, useRef } from "react";
-import { PRESET_NAMES } from "../lab/schema.js";
+import { PRESET_NAMES } from "../paintjob/schema.js";
 import PreviewTable from "../renderers/PreviewRenderer.jsx";
 import useGameStore from "../store/useGameStore.js";
 
@@ -24,30 +24,49 @@ export default function SettingsScreen() {
         <div className="grid min-w-0 gap-5 md:grid-cols-[minmax(0,1fr)_280px]">
           <div className="min-w-0">
             <div className="h-[240px] overflow-hidden rounded-2xl border border-[#285562] md:h-[360px]">
-              <PreviewTable  />
+              <PreviewTable />
             </div>
             <p className="mt-2 text-sm text-slate-300" role="status">Preview: {selectedPreset}</p>
           </div>
           <div className="grid content-start gap-3.5">
-        <label className="grid gap-2 text-sm font-semibold">
-          Appearance preset
-          <select value={selectedPreset} onChange={(event) => applyPreset(event.target.value)}
-            className="w-full cursor-pointer rounded-xl border border-[#285562] bg-[#142a33] px-3 py-3 text-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">
-            {PRESET_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
-          </select>
-        </label>
-        <p className="text-sm text-slate-300">Choose a complete look for the table, cue, balls and lighting.</p>
-        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#285562] p-3">
-          <input type="checkbox" className="h-4 w-4 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
-            checked={settings.showAimGuide} onChange={(event) => setSetting("showAimGuide", event.target.checked)} />
-          Show aim guide
-        </label>
-        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#285562] p-3">
-          <input type="checkbox" className="h-4 w-4 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
-            checked={settings.showHUD} onChange={(event) => setSetting("showHUD", event.target.checked)} />
-          Show HUD
-        </label>
-        <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeSettings} >Back</button>
+            <label className="grid gap-2 text-sm font-semibold">
+              Appearance preset
+              <select value={selectedPreset} onChange={(event) => applyPreset(event.target.value)}
+                className="w-full cursor-pointer rounded-xl border border-[#285562] bg-[#142a33] px-3 py-3 text-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">
+                {PRESET_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </label>
+            <p className="text-sm text-slate-300">Choose a complete look for the table, cue, balls and lighting.</p>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#285562] p-3">
+              <input type="checkbox" className="h-4 w-4 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
+                checked={settings.showAimGuide} onChange={(event) => setSetting("showAimGuide", event.target.checked)} />
+              Show aim guide
+            </label>
+
+
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#285562] p-3">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
+                checked={settings.solo}
+                onChange={(event) => setSetting("solo", event.target.checked)}
+              />
+              Solo
+            </label>
+
+            <p className="text-sm text-slate-300">
+              {settings.solo
+                ? "Play alone. Clear both solids and stripes before potting the eight ball."
+                : "Play against the AI opponent."}
+            </p>
+
+
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#285562] p-3">
+              <input type="checkbox" className="h-4 w-4 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
+                checked={settings.showHUD} onChange={(event) => setSetting("showHUD", event.target.checked)} />
+              Show HUD
+            </label>
+            <button type="button" className="rounded-xl border border-[#3f6470] bg-[#142a33] px-[18px] py-2.5 text-sm font-semibold text-cyan-50 transition-colors hover:bg-[#1c3b47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 cursor-pointer touch-manipulation" onClick={closeSettings} >Back</button>
           </div>
         </div>
       </section>

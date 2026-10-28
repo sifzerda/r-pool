@@ -20,8 +20,7 @@ export default function Header() {
 
   return (
     <header className="relative z-10">
-      <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
-
+      <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-[#050d24]/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(15,35,100,0.18)]">
         {/* Top Light Strip */}
         <div className="h-0.5 w-full bg-linear-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
 
@@ -37,7 +36,7 @@ export default function Header() {
 
             {/* Main Title */}
             <div className="relative text-center">
-              <div className="absolute inset-0 bg-cyan-400/20 blur-[80px]" />
+              <div className="absolute inset-0 bg-blue-400/20 blur-[80px]" />
 
               <p className="text-[10px] uppercase tracking-[0.9em] text-cyan-400">Open 24/7</p>
 
@@ -51,7 +50,7 @@ export default function Header() {
 
               <div className="mt-4 flex items-center justify-center gap-4">
                 <div className="h-px w-20 bg-linear-to-r from-transparent to-cyan-400" />
-                <span className="text-[10px] uppercase tracking-[0.6em] text-fuchsia-300/80">
+                <span className="text-[10px] uppercase tracking-[0.6em] text-blue-300">
                   Prisma Neon Lounge
                 </span>
                 <div className="h-px w-20 bg-linear-to-l from-transparent to-cyan-400" />
@@ -59,10 +58,10 @@ export default function Header() {
             </div>
 
             {/* DESKTOP NAV */}
-            <nav className="hidden md:flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.35em] text-cyan-500/70">
+            <nav className="hidden md:flex flex-wrap items-center justify-center gap-4 text-xs uppercase tracking-[0.35em] text-blue-400/80">
               {links.map((item) => (
                 <Link to={item.href}
-                  key={item.label} 
+                  key={item.label}
                   className="transition-colors duration-300 hover:text-cyan-300">
                   {item.label}
                 </Link>
