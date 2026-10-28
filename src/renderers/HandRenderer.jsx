@@ -25,11 +25,7 @@ export default function HandRenderer({ cueBall, aimRef }) {
 
         if (!visible) return;
 
-        hand.position.set(
-            Number.isFinite(aim.handX) ? aim.handX : cueBall.x,
-            HAND_Y + (aim.handLift || 0),
-            Number.isFinite(aim.handZ) ? aim.handZ : cueBall.z
-        );
+        hand.position.set(Number.isFinite(aim.handX) ? aim.handX : cueBall.x, HAND_Y + (aim.handLift || 0), Number.isFinite(aim.handZ) ? aim.handZ : cueBall.z);
     });
 
     return (
@@ -61,10 +57,7 @@ export default function HandRenderer({ cueBall, aimRef }) {
             ))}
 
             {/* Thumb */}
-            <mesh
-                position={[-0.145, 0.055, 0.015]}
-                rotation={[0.2, 0, -0.75]}
-            >
+            <mesh position={[-0.145, 0.055, 0.015]} rotation={[0.2, 0, -0.75]}>
                 <capsuleGeometry args={[0.032, 0.105, 4, 8]} />
                 <meshStandardMaterial color="#d5a184" roughness={0.85} />
             </mesh>

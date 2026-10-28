@@ -3,36 +3,15 @@
 
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-
 import useGameStore from "../store/useGameStore.js";
-
-import {
-    ballQuery,
-    ballsAreMoving,
-} from "../ecs/world.js";
-
-import {
-    MIN_X,
-    MAX_X,
-    MIN_Z,
-    MAX_Z,
-} from "../ecs/constants/tableBounds.js";
-
-import {
-    MAX_POWER,
-    MAX_PULL,
-    MIN_PULL,
-} from "../ecs/constants/table.js";
-
+import { ballQuery, ballsAreMoving } from "../ecs/world.js";
+import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "../ecs/constants/tableBounds.js";
+import { MAX_POWER, MAX_PULL, MIN_PULL } from "../ecs/constants/table.js";
 import { placeCueBall } from "../ecs/AimController.jsx";
 import { planShot } from "./ShotPlanner.js";
 import { aiPhysics } from "./aiPhysics.js";
 import { simulateShot } from "./ShotSimulation.js";
-
-import {
-    setPendingPrediction,
-    clearPendingPrediction,
-} from "./AIPhysicsDebugger.js";
+import { setPendingPrediction, clearPendingPrediction } from "./AIPhysicsDebugger.js";
 
 const GROUP_BALLS = {
     solids: [1, 2, 3, 4, 5, 6, 7],
@@ -44,11 +23,7 @@ const AI_CHARGE_DURATION = 0.55;
 function getAIPlacement(cueBall, balls, game) {
     const group = game.playerGroups.ai;
     const potted = game.pottedIds;
-
-    const remaining = group
-        ? GROUP_BALLS[group].filter((id) => !potted.has(id))
-        : [];
-
+    const remaining = group ? GROUP_BALLS[group].filter((id) => !potted.has(id)) : [];
     const isEightBallLegal = Boolean(group && remaining.length === 0);
 
     let best = null;
@@ -155,29 +130,16 @@ export default function AIController({ cueBall, aimRef }) {
 
             placement.elapsed += Math.max(0, dt);
 
-            const progress = Math.min(
-                1,
-                placement.elapsed / placement.duration
-            );
-
+            const progress = Math.min(1, placement.elapsed / placement.duration);
             const eased = progress * progress * (3 - 2 * progress);
 
-            aim.handX =
-                placement.fromX +
-                (placement.toX - placement.fromX) * eased;
-
-            aim.handZ =
-                placement.fromZ +
-                (placement.toZ - placement.fromZ) * eased;
+            aim.handX = placement.fromX + (placement.toX - placement.fromX) * eased;
+            aim.handZ = placement.fromZ + (placement.toZ - placement.fromZ) * eased;
 
             aim.handLift = Math.sin(progress * Math.PI) * 0.12;
 
             if (progress >= 1) {
-                const placed = placeCueBall(
-                    cueBall,
-                    placement.toX,
-                    placement.toZ
-                );
+                const placed = placeCueBall(cueBall, placement.toX, placement.toZ);
 
                 aim.handLift = 0;
                 aim.handPlacement = null;
@@ -196,10 +158,7 @@ export default function AIController({ cueBall, aimRef }) {
         if (phase.current === "charging") {
             chargeTime.current += Math.max(0, dt);
 
-            const progress = Math.min(
-                1,
-                chargeTime.current / AI_CHARGE_DURATION
-            );
+            const progress = Math.min(1, chargeTime.current / AI_CHARGE_DURATION);
 
             // Ease the stick into its pulled-back position.
             const eased = 1 - (1 - progress) ** 2;
@@ -234,12 +193,7 @@ export default function AIController({ cueBall, aimRef }) {
             return;
         }
 
-        if (
-            submitted.current ||
-            phase.current === "waiting" ||
-            ballsAreMoving() ||
-            aim.pendingShot
-        ) {
+        if (submitted.current || phase.current === "waiting" || ballsAreMoving() || aim.pendingShot) {
             return;
         }
 
@@ -268,14 +222,8 @@ export default function AIController({ cueBall, aimRef }) {
         }
 
         const group = game.playerGroups.ai;
-
-        const remaining = group
-            ? GROUP_BALLS[group].filter((id) => !game.pottedIds.has(id))
-            : [];
-
-        const isEightBallLegal = Boolean(
-            group && remaining.length === 0
-        );
+        const remaining = group ? GROUP_BALLS[group].filter((id) => !game.pottedIds.has(id)) : [];
+        const isEightBallLegal = Boolean(group && remaining.length === 0);
 
         const shot = planShot({
             cueBall,
@@ -312,13 +260,7 @@ export default function AIController({ cueBall, aimRef }) {
         aim.aiShotType = shot.type;
         aim.aiTargetId = shot.targetId;
 
-        plannedPull.current = Math.min(
-            MAX_PULL,
-            Math.max(
-                MIN_PULL,
-                (shot.power / MAX_POWER) * MAX_PULL
-            )
-        );
+        plannedPull.current = Math.min(MAX_PULL, Math.max(MIN_PULL, (shot.power / MAX_POWER) * MAX_PULL));
 
         // Start the visible pullback animation.
         aim.aiControlled = true;
