@@ -229,9 +229,17 @@ function AimController({ cueBall, aimRef }) {
         return false;
       }
 
-      aim.pointerX = scratch.hit.x;
-      aim.pointerZ = scratch.hit.z;
-      aim.hasPointer = true;
+aim.pointerX = scratch.hit.x;
+aim.pointerZ = scratch.hit.z;
+aim.hasPointer = true;
+
+const game = useGameStore.getState();
+
+if (isPlacingBall() || game.debugShowHand) {
+    aim.handX = scratch.hit.x;
+    aim.handZ = scratch.hit.z;
+    aim.handLift = 0;
+}
 
       if (isPlacingBall()) {
         aim.handX = scratch.hit.x;

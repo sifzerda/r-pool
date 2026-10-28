@@ -11,8 +11,8 @@ const Slot = memo(function Slot({ ball, potted }) {
   const background = ball.type === "stripe"
     ? `linear-gradient(#fff 0 22%,${ball.color} 22% 78%,#fff 78%)`
     : ball.color;
-  
-    return (
+
+  return (
     <div title={`${ball.id}${potted ? " potted" : " on table"}`}
       style={potted ? undefined : { background }}
       className={`relative flex-none rounded-full w-[clamp(12px,3.7vw,26px)] h-[clamp(12px,3.7vw,26px)] ${potted ? "bg-[radial-gradient(circle,#08080a,#222226)] shadow-[inset_0_2px_4px_#000]" : "shadow-[0_2px_3px_#0009]"
@@ -47,7 +47,7 @@ function ShotStats() {
 function ShotMessage() {
   const message = useGameStore((s) => s.stats.message);
   const cleared = useGameStore((s) => s.stats.cleared);
- 
+
   return <div role="status" aria-live="polite"
     className={`text-center bg-[#111a] rounded-md px-2 py-0.75 ${cleared ? "text-[#9dffbd]" : "text-[#eee]"}`}>
     {message}
@@ -55,12 +55,33 @@ function ShotMessage() {
 }
 
 export default function HUD() {
+  const debugShowHand = useGameStore((s) => Boolean(s.debugShowHand));
+
+  function toggleHandDebug() {
+    useGameStore.setState((state) => ({
+      debugShowHand: !state.debugShowHand,
+    }));
+  }
+
   return (
 
     <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-12px)] flex flex-col items-center gap-1.5 pointer-events-none select-none text-[#eee] text-xs font-sans">
       <BallTray />
       <ShotStats />
       <ShotMessage />
+
+      <button
+  type="button"
+  onClick={toggleHandDebug}
+  className={`pointer-events-auto px-3 py-1 rounded-md border text-xs font-bold tracking-wider transition-colors ${
+    debugShowHand
+      ? "bg-cyan-500/30 border-cyan-400 text-cyan-200"
+      : "bg-[#111b] border-[#555] text-white hover:bg-[#333]"
+  }`}
+>
+  {debugShowHand ? "HIDE HAND" : "SHOW HAND"}
+</button>
+
     </div>
   )
 }
