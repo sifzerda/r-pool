@@ -111,10 +111,15 @@ Renderers	        Visuals only
 
 ## Tasks
 
+- [ ] make 2d handrenderer
+
+
+
+
 - [x] get game working in lightweight miniplex ecs, then add in three.js
 - [x] expand ecs structure to something more elaborate, game engine, physics, 3d ball on 2D table, optimization
-- [ ] possibly add zustand or jotai
-- [ ] create modular layout/s
+- ~~[ ] possibly add zustand or jotai~~
+- ~~[ ] create modular layout/s~~
 
 - [x] add cue stick and shooting logic
 - refine ball/shooting physics
@@ -131,16 +136,16 @@ Renderers	        Visuals only
 
 LATER: 
 
-- [ ] table texture, ball textures/mesh, stick, etc
+- ~~[ ] table texture, ball textures/mesh, stick, etc~~
 - 
-- [ ] add screens: start, pause, highscores, settings, win, lose
+- ~~[ ] add screens: start, pause, highscores, settings, win, lose~~
 
-- [ ] upgrade into full 8-ball rules engine (i.e. turns, fouls, win detection) using current ECS structure and optimizing performance
+- ~~[ ] upgrade into full 8-ball rules engine (i.e. turns, fouls, win detection) using current ECS structure and optimizing performance~~
 
 - [x] 3d revolving balls
 
 - [x] numbered balls
 
-- [ ] AimGuide not appearing since combining ball renderers
+- ~~[ ] AimGuide not appearing since combining ball renderers~~
 
 - [ ] put neonlayout on global app level so all pages inherit it
