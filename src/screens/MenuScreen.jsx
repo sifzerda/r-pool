@@ -14,7 +14,7 @@ export default function MenuScreen() {
   useEffect(() => { panel.current?.focus(); }, []);
 
   return (
-    <div className="absolute inset-0 z-10 grid min-h-0 place-items-center bg-[#030a11]/85 p-4 sm:p-5">
+    <div className="absolute inset-0 z-10 grid min-h-0 place-items-center p-4 sm:p-5">
       <section ref={panel} tabIndex={-1} aria-label="Pool"
         className="grid max-h-full w-full max-w-90 min-h-0 gap-3.5 overflow-y-auto overscroll-contain rounded-3xl border border-[#285562] bg-[#091820] p-5 font-sans text-cyan-50 outline-none sm:p-7">
         <h1 className="mb-2 text-[28px] font-bold">Pool</h1>

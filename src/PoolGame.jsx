@@ -84,13 +84,13 @@ export default function PoolGame() {
 
     return (
 
-        <div className="relative h-140 w-full min-w-0 overflow-hidden rounded-[18px] bg-[#061017]">
+        <div className="relative h-120 w-full min-w-0 overflow-hidden rounded-[18px]">
 
             {hasRack && <Rack key={sessionId} />}
             {screen === SCREENS.SCORE_BOARD && <ScoreboardScreen />}
             {screen === SCREENS.HOW_TO_PLAY && <HowToPlayScreen />}
             {screen === SCREENS.MENU && <MenuScreen />}
-            {screen === SCREENS.PLAY && <PlayScreen />}
+            {screen === SCREENS.PLAY && <PlayScreen />} 
             {screen === SCREENS.PAUSE && <PauseScreen />}
             {screen === SCREENS.SETTINGS && <SettingsScreen />}
             {screen === SCREENS.COMPLETE && <GameCompleteScreen />}
