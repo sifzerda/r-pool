@@ -161,41 +161,41 @@ function AimController({ cueBall, aimRef }) {
 
   useFrame(() => {
     const aim = aimRef.current;
- const placing = isPlacingBall();
+    const placing = isPlacingBall();
 
     if (placing) {
-        if (!scratch.wasPlacing) {
-            aim.handX = cueBall.x;
-            aim.handZ = cueBall.z;
-            aim.handLift = 0;
-        }
+      if (!scratch.wasPlacing) {
+        aim.handX = cueBall.x;
+        aim.handZ = cueBall.z;
+        aim.handLift = 0;
+      }
 
-        scratch.wasPlacing = true;
-        return;
+      scratch.wasPlacing = true;
+      return;
     }
 
     scratch.wasPlacing = false;
 
     if (
-        !isHumanTurn() ||
-        aim.charging ||
-        !canAim(cueBall, aim)
+      !isHumanTurn() ||
+      aim.charging ||
+      !canAim(cueBall, aim)
     ) {
-        return;
+      return;
     }
 
     if (
-        cueBall.x === scratch.lastCueX &&
-        cueBall.z === scratch.lastCueZ
+      cueBall.x === scratch.lastCueX &&
+      cueBall.z === scratch.lastCueZ
     ) {
-        return;
+      return;
     }
 
     scratch.lastCueX = cueBall.x;
     scratch.lastCueZ = cueBall.z;
 
     aimAtPointer(aim, cueBall);
-}, -2);
+  }, -2);
 
   useEffect(() => {
     const element = gl.domElement;
@@ -229,17 +229,9 @@ function AimController({ cueBall, aimRef }) {
         return false;
       }
 
-aim.pointerX = scratch.hit.x;
-aim.pointerZ = scratch.hit.z;
-aim.hasPointer = true;
-
-const game = useGameStore.getState();
-
-if (isPlacingBall() || game.debugShowHand) {
-    aim.handX = scratch.hit.x;
-    aim.handZ = scratch.hit.z;
-    aim.handLift = 0;
-}
+      aim.pointerX = scratch.hit.x;
+      aim.pointerZ = scratch.hit.z;
+      aim.hasPointer = true;
 
       if (isPlacingBall()) {
         aim.handX = scratch.hit.x;

@@ -31,9 +31,7 @@ export default function HandRenderer({ cueBall, aimRef }) {
 
         if (!hand) return;
 
-        const debugShowHand = Boolean(game.debugShowHand);
-
-        const visible = game.screen === "play" && !game.winner && (debugShowHand || (game.ballInHand && (game.currentPlayer === "human" || game.currentPlayer === "ai")));
+        const visible = game.screen === "play" && !game.winner && (game.ballInHand && (game.currentPlayer === "human" || game.currentPlayer === "ai"));
         hand.visible = visible;
 
         if (!visible) return;

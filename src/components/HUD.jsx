@@ -13,9 +13,7 @@ const GROUP_IDS = {
   stripes: STRIPES.map((b) => b.id),
 };
 const SOLO_IDS = [...GROUP_IDS.solids, ...GROUP_IDS.stripes];
-
-const LABEL_CLASS =
-  "text-[clamp(8px,1.9vw,11px)] font-bold tracking-wider uppercase";
+const LABEL_CLASS = "text-[clamp(8px,1.9vw,11px)] font-bold tracking-wider uppercase";
 
 const Slot = memo(function Slot({ ball }) {
   if (!ball) {
@@ -24,16 +22,11 @@ const Slot = memo(function Slot({ ball }) {
     );
   }
 
-  const background = ball.type === "stripe"
-    ? `linear-gradient(#fff 0 22%,${ball.color} 22% 78%,#fff 78%)`
-    : ball.color;
+  const background = ball.type === "stripe" ? `linear-gradient(#fff 0 22%,${ball.color} 22% 78%,#fff 78%)` : ball.color;
 
   return (
-    <div
-      title={`${ball.id}`}
-      style={{ background }}
-      className="relative flex-none rounded-full w-[clamp(12px,3.7vw,26px)] h-[clamp(12px,3.7vw,26px)] shadow-[0_2px_3px_#0009]"
-    >
+    <div title={`${ball.id}`} style={{ background }}
+      className="relative flex-none rounded-full w-[clamp(12px,3.7vw,26px)] h-[clamp(12px,3.7vw,26px)] shadow-[0_2px_3px_#0009]">
       <div className="absolute left-[22%] top-[22%] w-[56%] h-[56%] rounded-full bg-white text-[#111] grid place-items-center font-bold font-[Arial] text-[clamp(7px,1.8vw,11px)]">
         {ball.id}
       </div>
@@ -47,10 +40,7 @@ const Slot = memo(function Slot({ ball }) {
 const TraySide = memo(function TraySide({ label, groupName, ids, count, pottedIds, active }) {
   // pottedIds is a Set, so iteration order = order the balls were potted.
   const filled = ids ? [...pottedIds].filter((id) => ids.includes(id)) : [];
-
-  const slots = Array.from({ length: count }, (_, i) =>
-    filled[i] !== undefined ? BALL_BY_ID.get(filled[i]) : null
-  );
+  const slots = Array.from({ length: count }, (_, i) => filled[i] !== undefined ? BALL_BY_ID.get(filled[i]) : null);
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -80,11 +70,8 @@ const BallTray = memo(function BallTray() {
   const playerGroups = useGameStore((s) => s.playerGroups);
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const solo = useGameStore((s) => Boolean(s.settings.solo));
-
   const eightPotted = pottedIds.has(8);
-
-  const frame =
-    "flex items-center gap-[clamp(8px,2vw,16px)] px-3 py-1.5 rounded-2xl bg-[linear-gradient(#2a2a2e,#141416)] border border-[#3a3a40] shadow-[0_2px_8px_#0008]";
+  const frame = "flex items-center gap-[clamp(8px,2vw,16px)] px-3 py-1.5 rounded-2xl bg-[linear-gradient(#2a2a2e,#141416)] border border-[#3a3a40] shadow-[0_2px_8px_#0008]";
 
   if (solo) {
     return (
@@ -142,42 +129,20 @@ function ShotMessage() {
   const cleared = useGameStore((s) => s.stats.cleared);
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={`text-center bg-[#111a] rounded-md px-2 py-0.75 ${cleared ? "text-[#9dffbd]" : "text-[#eee]"}`}
-    >
+    <div role="status" aria-live="polite"
+      className={`text-center bg-[#111a] rounded-md px-2 py-0.75 ${cleared ? "text-[#9dffbd]" : "text-[#eee]"}`}>
       {message}
     </div>
   );
 }
 
 export default function HUD() {
-  const debugShowHand = useGameStore((s) => Boolean(s.debugShowHand));
-
-  function toggleHandDebug() {
-    useGameStore.setState((state) => ({
-      debugShowHand: !state.debugShowHand,
-    }));
-  }
 
   return (
     <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-12px)] flex flex-col items-center gap-1.5 pointer-events-none select-none text-[#eee] text-xs font-sans">
       <BallTray />
       <ShotStats />
       <ShotMessage />
-
-      <button
-        type="button"
-        onClick={toggleHandDebug}
-        className={`pointer-events-auto px-3 py-1 rounded-md border text-xs font-bold tracking-wider transition-colors ${
-          debugShowHand
-            ? "bg-cyan-500/30 border-cyan-400 text-cyan-200"
-            : "bg-[#111b] border-[#555] text-white hover:bg-[#333]"
-        }`}
-      >
-        {debugShowHand ? "HIDE HAND" : "SHOW HAND"}
-      </button>
     </div>
   );
 }
