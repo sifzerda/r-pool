@@ -1,3 +1,4 @@
+
 // src/components/HUD.js
 
 // Ball tray: Player (left) vs AI (right), with the 8-ball slot in the centre.
@@ -22,11 +23,16 @@ const Slot = memo(function Slot({ ball }) {
     );
   }
 
-  const background = ball.type === "stripe" ? `linear-gradient(#fff 0 22%,${ball.color} 22% 78%,#fff 78%)` : ball.color;
+  const background = ball.type === "stripe"
+    ? `linear-gradient(#fff 0 22%,${ball.color} 22% 78%,#fff 78%)`
+    : ball.color;
 
   return (
-    <div title={`${ball.id}`} style={{ background }}
-      className="relative flex-none rounded-full w-[clamp(12px,3.7vw,26px)] h-[clamp(12px,3.7vw,26px)] shadow-[0_2px_3px_#0009]">
+    <div
+      title={`${ball.id}`}
+      style={{ background }}
+      className="relative flex-none rounded-full w-[clamp(12px,3.7vw,26px)] h-[clamp(12px,3.7vw,26px)] shadow-[0_2px_3px_#0009]"
+    >
       <div className="absolute left-[22%] top-[22%] w-[56%] h-[56%] rounded-full bg-white text-[#111] grid place-items-center font-bold font-[Arial] text-[clamp(7px,1.8vw,11px)]">
         {ball.id}
       </div>
@@ -35,12 +41,12 @@ const Slot = memo(function Slot({ ball }) {
   );
 });
 
-// One side of the tray. `ids` is the list of ball ids that belong to this
-// side (null while the group is still unassigned); `count` is the slot count.
 const TraySide = memo(function TraySide({ label, groupName, ids, count, pottedIds, active }) {
-  // pottedIds is a Set, so iteration order = order the balls were potted.
   const filled = ids ? [...pottedIds].filter((id) => ids.includes(id)) : [];
-  const slots = Array.from({ length: count }, (_, i) => filled[i] !== undefined ? BALL_BY_ID.get(filled[i]) : null);
+  const slots = Array.from(
+    { length: count },
+    (_, i) => filled[i] !== undefined ? BALL_BY_ID.get(filled[i]) : null
+  );
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -55,7 +61,6 @@ const TraySide = memo(function TraySide({ label, groupName, ids, count, pottedId
   );
 });
 
-// The 8-ball slot: always shown, empty until the 8-ball is potted.
 const EightBallSlot = memo(function EightBallSlot({ potted }) {
   return (
     <div className="flex flex-col items-center gap-1">
@@ -71,6 +76,7 @@ const BallTray = memo(function BallTray() {
   const currentPlayer = useGameStore((s) => s.currentPlayer);
   const solo = useGameStore((s) => Boolean(s.settings.solo));
   const eightPotted = pottedIds.has(8);
+
   const frame = "flex items-center gap-[clamp(8px,2vw,16px)] px-3 py-1.5 rounded-2xl bg-[linear-gradient(#2a2a2e,#141416)] border border-[#3a3a40] shadow-[0_2px_8px_#0008]";
 
   if (solo) {
@@ -82,7 +88,9 @@ const BallTray = memo(function BallTray() {
     );
   }
 
-  const groupLabel = (g) => (g ? (g === "solids" ? "Solids" : "Stripes") : null);
+  const groupLabel = (g) => (
+    g ? (g === "solids" ? "Solids" : "Stripes") : null
+  );
 
   return (
     <div aria-label={`${pottedIds.size} of 15 balls potted`} className={frame}>
@@ -109,11 +117,38 @@ const BallTray = memo(function BallTray() {
   );
 });
 
+function DifficultyIndicator() {
+  const difficulty = useGameStore((s) => s.difficulty || "medium");
+  const solo = useGameStore((s) => Boolean(s.settings.solo));
+
+  if (solo) return null;
+
+  const colors = {
+    easy: "text-[#9dffbd] border-[#9dffbd]/30",
+    medium: "text-cyan-300 border-cyan-400/30",
+    hard: "text-fuchsia-300 border-fuchsia-400/30",
+  };
+
+  const color = colors[difficulty] || colors.medium;
+
+  return (
+    <div className={`flex items-center gap-2 rounded-lg border bg-[#111d] px-3 py-1 ${color}`}>
+      <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
+        AI Difficulty
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-wider">
+        {difficulty}
+      </span>
+    </div>
+  );
+}
+
 function ShotStats() {
   const shots = useGameStore((s) => s.stats.shots);
   const potted = useGameStore((s) => s.stats.potted);
   const scratches = useGameStore((s) => s.stats.scratches);
   const bestPots = useGameStore((s) => s.stats.bestPots);
+
   return (
     <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 px-2.25 py-0.75 rounded-lg bg-[#111b]">
       <span>Shots {shots}</span>
@@ -129,18 +164,21 @@ function ShotMessage() {
   const cleared = useGameStore((s) => s.stats.cleared);
 
   return (
-    <div role="status" aria-live="polite"
-      className={`text-center bg-[#111a] rounded-md px-2 py-0.75 ${cleared ? "text-[#9dffbd]" : "text-[#eee]"}`}>
+    <div
+      role="status"
+      aria-live="polite"
+      className={`text-center bg-[#111a] rounded-md px-2 py-0.75 ${cleared ? "text-[#9dffbd]" : "text-[#eee]"}`}
+    >
       {message}
     </div>
   );
 }
 
 export default function HUD() {
-
   return (
     <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-12px)] flex flex-col items-center gap-1.5 pointer-events-none select-none text-[#eee] text-xs font-sans">
       <BallTray />
+      <DifficultyIndicator />
       <ShotStats />
       <ShotMessage />
     </div>

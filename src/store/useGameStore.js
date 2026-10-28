@@ -144,8 +144,7 @@ const useGameStore = create((set, get) => ({
 
   startGame: (options = {}) => {
     const difficulty = ["easy", "medium", "hard"].includes(options.difficulty)
-      ? options.difficulty
-      : get().difficulty;
+      ? options.difficulty : get().settings.aiDifficulty || "medium";
 
     set((s) => ({
       screen: SCREENS.PLAY,
@@ -455,15 +454,11 @@ const useGameStore = create((set, get) => ({
   ),
 
   openHowToPlay: () => set((s) =>
-    [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen)
-      ? { screen: SCREENS.HOW_TO_PLAY, infoReturnScreen: s.screen }
-      : {}
+    [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.HOW_TO_PLAY, infoReturnScreen: s.screen } : {}
   ),
 
   closeInfo: () => set((s) =>
-    [SCREENS.SCORE_BOARD, SCREENS.HOW_TO_PLAY].includes(s.screen)
-      ? { screen: s.infoReturnScreen }
-      : {}
+    [SCREENS.SCORE_BOARD, SCREENS.HOW_TO_PLAY].includes(s.screen) ? { screen: s.infoReturnScreen } : {}
   ),
 
   screen: SCREENS.MENU,
@@ -474,15 +469,11 @@ const useGameStore = create((set, get) => ({
     showAimGuide: true,
     showHUD: true,
     solo: false,
+    aiDifficulty: "medium",
   },
 
-  pauseGame: () => set((s) =>
-    s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : {}
-  ),
-
-  resumeGame: () => set((s) =>
-    s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : {}
-  ),
+  pauseGame: () => set((s) => s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : {}),
+  resumeGame: () => set((s) => s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : {}),
 
   openSettings: () => set((s) =>
     s.screen === SCREENS.SETTINGS
@@ -494,11 +485,7 @@ const useGameStore = create((set, get) => ({
       }
   ),
 
-  closeSettings: () => set((s) =>
-    s.screen === SCREENS.SETTINGS
-      ? { screen: s.settingsReturnScreen }
-      : {}
-  ),
+  closeSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? { screen: s.settingsReturnScreen } : {}),
 
   returnToMenu: () => set({
     screen: SCREENS.MENU,
@@ -515,11 +502,34 @@ const useGameStore = create((set, get) => ({
     };
   }),
 
-  setSetting: (key, value) => set((s) =>
-    Object.hasOwn(s.settings, key) && typeof value === "boolean"
-      ? { settings: { ...s.settings, [key]: value } }
-      : {}
-  ),
+  setSetting: (key, value) => set((s) => {
+    // Boolean settings
+    if (
+      ["showAimGuide", "showHUD", "solo"].includes(key) && typeof value === "boolean"
+    ) {
+      return {
+        settings: {
+          ...s.settings,
+          [key]: value,
+        },
+      };
+    }
+
+    // AI difficulty
+    if (
+      key === "aiDifficulty" && ["easy", "medium", "hard"].includes(value)
+    ) {
+      return {
+        settings: {
+          ...s.settings,
+          aiDifficulty: value,
+        },
+        difficulty: value,
+      };
+    }
+
+    return {};
+  }),
 }));
 
 export default useGameStore;
