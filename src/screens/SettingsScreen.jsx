@@ -14,13 +14,10 @@ export default function SettingsScreen() {
   const applyPreset = useGameStore((s) => s.applyPreset);
 
   const panel = useRef(null);
-
   const difficulty = settings.aiDifficulty || "medium";
   const aiEnabled = !settings.solo;
 
-  useEffect(() => {
-    panel.current?.focus();
-  }, []);
+  useEffect(() => { panel.current?.focus() }, []);
 
   return (
     <div className="absolute inset-0 z-10 grid min-h-0 place-items-center bg-[#030a11]/85 p-4 sm:p-5">
@@ -83,18 +80,11 @@ export default function SettingsScreen() {
               : "border-[#285562]/40 opacity-40"
               }`}>
 
-              <label htmlFor="ai-difficulty"
-                className="text-sm font-semibold">
-                AI difficulty
-              </label>
+              <label htmlFor="ai-difficulty" className="text-sm font-semibold">AI difficulty</label>
 
-              <select
-                id="ai-difficulty"
-                value={difficulty}
-                disabled={!aiEnabled}
+              <select id="ai-difficulty" value={difficulty} disabled={!aiEnabled}
                 onChange={(event) => setSetting("aiDifficulty", event.target.value)}
-                className="w-full cursor-pointer rounded-xl border border-[#285562] bg-[#142a33] px-3 py-3 text-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 disabled:cursor-not-allowed"
-              >
+                className="w-full cursor-pointer rounded-xl border border-[#285562] bg-[#142a33] px-3 py-3 text-cyan-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 disabled:cursor-not-allowed">
                 {Object.keys(AI_DIFFICULTIES).map((level) => (
                   <option key={level} value={level}>
                     {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -103,9 +93,7 @@ export default function SettingsScreen() {
               </select>
 
               <p className="text-xs text-slate-400">
-                {aiEnabled
-                  ? "Select Opponent difficulty."
-                  : "Difficulty is unavailable in Solo mode."}
+                {aiEnabled ? "Select Opponent difficulty." : "Difficulty is unavailable in Solo mode."}
               </p>
             </div>
 

@@ -4,10 +4,9 @@ import PoolGame from "../PoolGame.jsx";
 
 export default function HomePage() {
   return (
-    <section className="relative z-10 px-6 py-4 flex-1 flex flex-col min-h-0">
-      <div className="mx-auto relative w-full flex-1 flex flex-col min-h-0 rounded-[36px] border border-cyan-400/15 bg-black/40 p-6 backdrop-blur-2xl shadow-[0_0_60px_rgba(34,211,238,0.08)]">
-        <div className="absolute left-0 top-0 h-1 w-full bg-linear-to-r from-transparent via-cyan-400 to-transparent" />
-
+   
+   <section className="relative z-10 flex flex-1 min-h-0 items-center justify-center">
+      <div className="relative w-[min(100%,900px)] h-125 shrink-0">
         <PoolGame />
       </div>
     </section>
