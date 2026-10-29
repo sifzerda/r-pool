@@ -1,9 +1,8 @@
 // src/ai/difficulty.js
 
-
 export const AI_DIFFICULTIES = {
   easy: {
-    aimError: 0.045,
+    aimError: 0.035,
     powerError: 0.18,
     selectionNoise: 18,
     maxCandidates: 8,
