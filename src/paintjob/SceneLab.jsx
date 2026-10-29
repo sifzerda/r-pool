@@ -26,9 +26,7 @@ export default function SceneLab() {
   const glow = p["scene.accentGlow"];
 
   return (
-    <>
-      <color attach="background" args={[p["scene.bg"]]} />
-     
+    <>     
       <ambientLight intensity={p["scene.ambient"]} />
      
       <directionalLight castShadow intensity={p["scene.key"]}

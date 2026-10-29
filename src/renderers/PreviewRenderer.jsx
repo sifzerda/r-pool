@@ -19,14 +19,20 @@ function PreviewCamera() {
   const height = useThree((s) => s.size.height);
   const invalidate = useThree((s) => s.invalidate);
 
-  useLayoutEffect(() => {
-    if (!camera.current) return;
+useLayoutEffect(() => {
+  if (!camera.current) return;
 
-    camera.current.zoom = Math.max(1, Math.min((width - 20) / (TABLE_W + 1.6), (height - 20) / (TABLE_H + 2.4)));
+  camera.current.zoom = Math.max(
+    1,
+    Math.min(
+      (width - 4) / (TABLE_W + 0.4),
+      (height - 4) / (TABLE_H + 0.8)
+    )
+  );
 
-    camera.current.updateProjectionMatrix();
-    invalidate();
-  }, [width, height, invalidate]);
+  camera.current.updateProjectionMatrix();
+  invalidate();
+}, [width, height, invalidate]);
 
   return (
     <OrthographicCamera
@@ -44,7 +50,7 @@ function PreviewCamera() {
 // Stationary cue sample using the game's shared cue materials.
 // No physics or aiming controls are needed.
 function CueSample() {
-  const length = TABLE_W * 0.8;
+  const length = TABLE_W * 1.0;
 
   const parts = [
     {
@@ -90,7 +96,7 @@ function CueSample() {
   ];
 
   return (
-    <group position={[0, BALL_Y, TABLE_H / 2 + 0.8]}>
+    <group position={[0, BALL_Y, TABLE_H / 2 + 0.35]}>
       {parts.map((part) => (
         <mesh key={part.name} castShadow
           position={[((part.start + part.end - 1) * length) / 2, 0, 0]}

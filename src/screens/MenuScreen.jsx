@@ -25,25 +25,18 @@ export default function MenuScreen() {
   return (
     <div className="absolute inset-0 z-10 grid min-h-0 place-items-center p-4 sm:p-5">
 
-      <section
-        ref={panel}
-        tabIndex={-1}
-        aria-label="Pool menu"
-        className="
-          relative grid max-h-full w-full max-w-90 min-h-0
+      <section ref={panel} tabIndex={-1} aria-label="Pool menu" className="relative grid max-h-full w-full max-w-90 min-h-0
           gap-3 overflow-y-auto overscroll-contain
           rounded-lg  backdrop-blur-2xl
           p-6 sm:p-8
           font-sans text-cyan-50
           shadow-[0_0_50px_rgba(15,35,100,0.2)]
-          outline-none
-        ">
+          outline-none">
 
         {/* Heading */}
         <div className="relative mb-3 text-center">
 
           <div className="pointer-events-none absolute inset-0 bg-blue-400/10 blur-[45px]" />
-
 
           <div className="mt-4 flex items-center justify-center gap-3">
             <div className="h-px w-10 bg-linear-to-r from-transparent to-cyan-400" />
@@ -75,15 +68,13 @@ export default function MenuScreen() {
                 hover:shadow-[0_0_18px_rgba(34,211,238,0.18)]
                 focus-visible:outline-none
                 focus-visible:ring-2 focus-visible:ring-cyan-300
-                cursor-pointer touch-manipulation
-              "
-            >
+                cursor-pointer touch-manipulation">
+             
               {/* Hover light */}
               <span className="pointer-events-none absolute inset-0
                 bg-linear-to-r from-transparent via-cyan-300/5 to-transparent
                 opacity-0 transition-opacity duration-300
-                group-hover:opacity-100"
-              />
+                group-hover:opacity-100" />
 
               <span className="relative flex items-center justify-center gap-3">
                 {button.label}

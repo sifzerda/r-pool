@@ -5,8 +5,8 @@ import { FaGithub } from "react-icons/fa";
 export default function Footer() {
   return (
     <footer className="fixed bottom-0 left-0 right-0 z-10 px-3 pb-3">
-      <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-black/40 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.08)]">
-
+  <div className="mx-auto overflow-hidden rounded-lg border border-cyan-400/15 bg-[#050d24]/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(15,35,100,0.18)]">
+    
         {/* Top Light Strip */}
         <div className="h-0.5 w-full bg-linear-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.8)]" />
 

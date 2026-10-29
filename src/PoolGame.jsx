@@ -31,7 +31,7 @@ function FittedCamera() {
             Math.max(1, size.height - 120) / (TABLE_H + 0.8)
         );
 
-        camera.current.zoom = Math.max(1, fittedZoom  );
+        camera.current.zoom = Math.max(1, fittedZoom);
 
         camera.current.updateProjectionMatrix();
         invalidate();
@@ -54,7 +54,8 @@ function Rack() {
         setSession({ cueBall: setupGame() });
         return clearWorld;
     }, []);
-    return <Canvas shadows dpr={[1, 1.5]} frameloop="demand" gl={{ powerPreference: "high-performance" }}>
+    return <Canvas shadows dpr={[1, 1.5]}
+        frameloop="demand" gl={{ powerPreference: "high-performance" }}>
         <FittedCamera />{session && <PoolScene cueBall={session.cueBall} />}
     </Canvas>;
 }
@@ -90,7 +91,7 @@ export default function PoolGame() {
             {screen === SCREENS.SCORE_BOARD && <ScoreboardScreen />}
             {screen === SCREENS.HOW_TO_PLAY && <HowToPlayScreen />}
             {screen === SCREENS.MENU && <MenuScreen />}
-            {screen === SCREENS.PLAY && <PlayScreen />} 
+            {screen === SCREENS.PLAY && <PlayScreen />}
             {screen === SCREENS.PAUSE && <PauseScreen />}
             {screen === SCREENS.SETTINGS && <SettingsScreen />}
             {screen === SCREENS.COMPLETE && <GameCompleteScreen />}
