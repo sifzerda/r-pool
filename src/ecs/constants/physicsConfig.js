@@ -1,14 +1,16 @@
 // ecs/constants/physicsConfig.js
 
 const PHYSICS_DEFAULTS = Object.freeze({
-  rollDecel: 1,
-  viscous: 0.25,
+  rollDecel: 1.2,
+  viscous: 0.35,
   sleepSpeed: 0.04,
-  cushionE: 0.82,
-  cushionSpeedLoss: 6e-3,
+
+  cushionE: 0.78,
+  cushionSpeedLoss: 0.008,
   cushionMinE: 0.55,
-  cushionFriction: 0.12,
-  ballE: 0.96
+  cushionFriction: 0.14,
+
+  ballE: 0.92,
 });
 
 const physicsConfig = { ...PHYSICS_DEFAULTS };

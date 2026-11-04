@@ -1,44 +1,83 @@
 // src/store/useGameStore.js
 
 import { create } from "zustand";
-import {
-  DEFAULT_PRESET,
-  PRESET_NAMES,
-  isPreset,
-  presetValues,
-} from "../paintjob/schema.js";
+import { DEFAULT_PRESET, PRESET_NAMES, isPreset, presetValues } from "../paintjob/schema.js";
+
+// --------------------------------------------------
+// CONSTANTS
+// --------------------------------------------------
 
 const STORAGE_KEY = "pool-appearance-preset-v1";
 const LEGACY_KEY = "pool-lab-v1";
 
+const SOLIDS = [1, 2, 3, 4, 5, 6, 7];
+const STRIPES = [9, 10, 11, 12, 13, 14, 15];
+
 const GROUPS = {
-  solids: [1, 2, 3, 4, 5, 6, 7],
-  stripes: [9, 10, 11, 12, 13, 14, 15],
+  solids: SOLIDS,
+  stripes: STRIPES,
 };
+
+const DIFFICULTIES = new Set([
+  "easy",
+  "medium",
+  "hard",
+]);
+
+const BOOLEAN_SETTINGS = new Set([
+  "showAimGuide",
+  "showHUD",
+  "solo",
+]);
+
+const INFO_SCREENS = new Set([
+  "menu",
+  "pause",
+  "complete",
+]);
+
+// --------------------------------------------------
+// APPEARANCE
+// --------------------------------------------------
 
 function loadPreset() {
   try {
     const selected = localStorage.getItem(STORAGE_KEY);
-    if (isPreset(selected)) return selected;
+
+    if (isPreset(selected)) {
+      return selected;
+    }
 
     const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || "null");
 
     if (legacy && typeof legacy === "object") {
       for (const name of PRESET_NAMES) {
         const values = presetValues(name);
-        if (Object.keys(values).every((key) => legacy[key] === values[key])) {
-          return name;
+
+        let matches = true;
+
+        for (const key of Object.keys(values)) {
+          if (legacy[key] !== values[key]) {
+            matches = false;
+            break;
+          }
         }
+
+        if (matches) return name;
       }
     }
   } catch {
-    // Use the default if storage is unavailable or corrupt.
+    // Storage unavailable or invalid.
   }
 
   return DEFAULT_PRESET;
 }
 
 const initialPreset = loadPreset();
+
+// --------------------------------------------------
+// SCREENS
+// --------------------------------------------------
 
 export const SCREENS = Object.freeze({
   MENU: "menu",
@@ -49,6 +88,10 @@ export const SCREENS = Object.freeze({
   SCORE_BOARD: "scoreboard",
   HOW_TO_PLAY: "howtoplay",
 });
+
+// --------------------------------------------------
+// INITIAL STATE HELPERS
+// --------------------------------------------------
 
 export const createInitialStats = () => ({
   shots: 0,
@@ -80,19 +123,68 @@ function getOpponent(player) {
   return player === "human" ? "ai" : "human";
 }
 
-function getRemainingGroupBalls(group, pottedIds) {
-  if (!group) return [];
-  return GROUPS[group].filter((id) => !pottedIds.has(id));
+function isValidBallId(id) {
+  return (Number.isInteger(id) && id >= 1 && id <= 15);
 }
 
+function countRemaining(group, pottedIds) {
+  const ids = GROUPS[group];
+
+  if (!ids) return 0;
+
+  let remaining = 0;
+
+  for (let i = 0; i < ids.length; i++) {
+    if (!pottedIds.has(ids[i])) {
+      remaining++;
+    }
+  }
+
+  return remaining;
+}
+
+function countRemainingSolo(pottedIds) {
+  let remaining = 0;
+
+  for (let id = 1; id <= 15; id++) {
+    if (id === 8) continue;
+
+    if (!pottedIds.has(id)) {
+      remaining++;
+    }
+  }
+
+  return remaining;
+}
+
+function firstPottedGroup(shotPottedIds) {
+  for (const id of shotPottedIds) {
+    const group = getBallGroup(id);
+
+    if (group) return group;
+  }
+
+  return null;
+}
+
+// --------------------------------------------------
+// STORE
+// --------------------------------------------------
+
 const useGameStore = create((set, get) => ({
-  // Appearance
+  // ------------------------------------------------
+  // APPEARANCE
+  // ------------------------------------------------
+
   selectedPreset: initialPreset,
   appearanceParams: Object.freeze(presetValues(initialPreset)),
 
   applyPreset: (name) => {
     if (!isPreset(name)) return false;
-    if (get().selectedPreset === name) return true;
+
+    if (get().selectedPreset === name) {
+      return true;
+    }
 
     set({
       selectedPreset: name,
@@ -102,60 +194,86 @@ const useGameStore = create((set, get) => ({
     try {
       localStorage.setItem(STORAGE_KEY, name);
     } catch {
-      // Keep choice in memory.
+      // Keep the in-memory selection.
     }
 
     return true;
   },
 
-  // Game configuration
+  // ------------------------------------------------
+  // GAME CONFIGURATION
+  // ------------------------------------------------
+
   gameMode: "8ball",
   difficulty: "medium",
-
-  // Player and 8-ball state
   currentPlayer: "human",
+
   playerGroups: {
     human: null,
     ai: null,
   },
+
   ballInHand: false,
   winner: null,
   foul: null,
 
-  // Per-shot state
+  // ------------------------------------------------
+  // SHOT STATE
+  // ------------------------------------------------
+
   shotPlayer: null,
   shotEvents: createShotEvents(),
   shotPottedIds: new Set(),
   shotStartPottedIds: new Set(),
 
-  // General game state
+  // ------------------------------------------------
+  // GENERAL STATE
+  // ------------------------------------------------
+
   stats: createInitialStats(),
   pottedIds: new Set(),
   completionRecorded: false,
-
   isPotted: (id) => get().pottedIds.has(id),
 
-  resetPotted: () => set({
-    stats: createInitialStats(),
-    pottedIds: new Set(),
-    shotPottedIds: new Set(),
-    shotStartPottedIds: new Set(),
-  }),
+  // ------------------------------------------------
+  // RESET
+  // ------------------------------------------------
+
+  resetPotted: () => {
+    set({
+      stats: createInitialStats(),
+      pottedIds: new Set(),
+      shotPottedIds: new Set(),
+      shotStartPottedIds: new Set(),
+    });
+  },
+
+  // ------------------------------------------------
+  // START GAME
+  // ------------------------------------------------
 
   startGame: (options = {}) => {
-    const difficulty = ["easy", "medium", "hard"].includes(options.difficulty)
-      ? options.difficulty : get().settings.aiDifficulty || "medium";
+    const current = get();
+
+    const difficulty = DIFFICULTIES.has(options.difficulty)
+      ? options.difficulty
+      : current.settings.aiDifficulty || "medium";
 
     set((s) => ({
       screen: SCREENS.PLAY,
+
       sessionId: s.sessionId + 1,
+
       result: null,
       completionRecorded: false,
 
       gameMode: "8ball",
       difficulty,
 
-      currentPlayer: options.startingPlayer === "ai" ? "ai" : "human",
+      currentPlayer: options.startingPlayer === "ai"
+        ? "ai"
+        : "human",
+
       playerGroups: {
         human: null,
         ai: null,
@@ -167,6 +285,7 @@ const useGameStore = create((set, get) => ({
 
       shotPlayer: null,
       shotEvents: createShotEvents(),
+
       shotPottedIds: new Set(),
       shotStartPottedIds: new Set(),
 
@@ -175,118 +294,142 @@ const useGameStore = create((set, get) => ({
     }));
   },
 
-  // Begin a shot and capture the table state before it happens.
-  recordShot: () => set((s) => {
-    if (
-      s.screen !== SCREENS.PLAY ||
-      s.stats.shotActive ||
-      s.stats.cleared ||
-      s.winner ||
-      s.ballInHand
-    ) {
-      return s;
-    }
+  // ------------------------------------------------
+  // RECORD SHOT
+  // ------------------------------------------------
 
-    return {
-      shotPlayer: s.currentPlayer,
-      shotEvents: createShotEvents(),
-      shotPottedIds: new Set(),
-      shotStartPottedIds: new Set(s.pottedIds),
+  recordShot: () => {
+    set((s) => {
+      if (
+        s.screen !== SCREENS.PLAY ||
+        s.stats.shotActive ||
+        s.stats.cleared ||
+        s.winner ||
+        s.ballInHand
+      ) {
+        return s;
+      }
 
-      stats: {
-        ...s.stats,
-        shots: s.stats.shots + 1,
-        shotPots: 0,
-        shotActive: true,
-        message: "Shot in play…",
-      },
-    };
-  }),
+      return {
+        shotPlayer: s.currentPlayer,
+        shotEvents: createShotEvents(),
+        shotPottedIds: new Set(),
+        shotStartPottedIds: new Set(s.pottedIds),
 
-  // The first object ball contacted by the cue ball.
-  recordFirstContact: (id) => set((s) => {
-    if (
-      !s.stats.shotActive ||
-      s.shotEvents.firstContactId !== null ||
-      !Number.isInteger(id) ||
-      id < 1 ||
-      id > 15
-    ) {
-      return s;
-    }
+        stats: {
+          ...s.stats,
+          shots: s.stats.shots + 1,
+          shotPots: 0,
+          shotActive: true,
+          message: "Shot in play…",
+        },
+      };
+    });
+  },
 
-    return {
-      shotEvents: {
-        ...s.shotEvents,
-        firstContactId: id,
-      },
-    };
-  }),
+  // ------------------------------------------------
+  // FIRST CONTACT
+  // ------------------------------------------------
 
-  // Called when any ball actually bounces off a cushion.
-  recordRailContact: () => set((s) => {
-    if (
-      !s.stats.shotActive ||
-      s.shotEvents.firstContactId === null ||
-      s.shotEvents.railAfterContact
-    ) {
-      return s;
-    }
+  recordFirstContact: (id) => {
+    if (!isValidBallId(id)) return;
 
-    return {
-      shotEvents: {
-        ...s.shotEvents,
-        railAfterContact: true,
-      },
-    };
-  }),
+    set((s) => {
+      if (!s.stats.shotActive || s.shotEvents.firstContactId !== null) {
+        return s;
+      }
 
-  markPotted: (id) => set((s) => {
-    if (
-      s.screen !== SCREENS.PLAY ||
-      !Number.isInteger(id) ||
-      id < 1 ||
-      id > 15 ||
-      s.pottedIds.has(id)
-    ) {
-      return s;
-    }
+      return {
+        shotEvents: {
+          ...s.shotEvents,
+          firstContactId: id,
+        },
+      };
+    });
+  },
 
-    const pottedIds = new Set(s.pottedIds);
-    const shotPottedIds = new Set(s.shotPottedIds);
+  // ------------------------------------------------
+  // RAIL CONTACT
+  // ------------------------------------------------
 
-    pottedIds.add(id);
-    shotPottedIds.add(id);
+  recordRailContact: () => {
+    set((s) => {
+      const events = s.shotEvents;
 
-    return {
-      pottedIds,
-      shotPottedIds,
-      stats: {
-        ...s.stats,
-        potted: pottedIds.size,
-        shotPots: shotPottedIds.size,
-      },
-    };
-  }),
+      if (!s.stats.shotActive || events.firstContactId === null || events.railAfterContact) {
+        return s;
+      }
 
-  recordScratch: () => set((s) => {
-    if (!s.stats.shotActive || s.shotEvents.cueScratch) return s;
+      return {
+        shotEvents: {
+          ...events,
+          railAfterContact: true,
+        },
+      };
+    });
+  },
 
-    return {
-      shotEvents: {
-        ...s.shotEvents,
-        cueScratch: true,
-      },
-      stats: {
-        ...s.stats,
-        scratches: s.stats.scratches + 1,
-        message: "Scratch • ball in hand",
-      },
-    };
-  }),
+  // ------------------------------------------------
+  // POT BALL
+  // ------------------------------------------------
 
-  // Resolve the shot after every ball has stopped and every pocket animation
-  // has completed.
+  markPotted: (id) => {
+    if (!isValidBallId(id)) return;
+
+    set((s) => {
+      if (s.screen !== SCREENS.PLAY || s.pottedIds.has(id)) {
+        return s;
+      }
+
+      // Copy-on-write preserves Zustand
+      // subscriptions and AI request validation.
+      const pottedIds = new Set(s.pottedIds);
+      const shotPottedIds = new Set(s.shotPottedIds);
+
+      pottedIds.add(id);
+      shotPottedIds.add(id);
+
+      return {
+        pottedIds,
+        shotPottedIds,
+
+        stats: {
+          ...s.stats,
+          potted: pottedIds.size,
+          shotPots: shotPottedIds.size,
+        },
+      };
+    });
+  },
+
+  // ------------------------------------------------
+  // SCRATCH
+  // ------------------------------------------------
+
+  recordScratch: () => {
+    set((s) => {
+      if (!s.stats.shotActive || s.shotEvents.cueScratch) {
+        return s;
+      }
+
+      return {
+        shotEvents: {
+          ...s.shotEvents,
+          cueScratch: true,
+        },
+
+        stats: {
+          ...s.stats,
+          scratches: s.stats.scratches + 1,
+          message: "Scratch • ball in hand",
+        },
+      };
+    });
+  },
+
+  // ------------------------------------------------
+  // FINISH SHOT
+  // ------------------------------------------------
 
   finishShot: () => {
     const s = get();
@@ -299,57 +442,80 @@ const useGameStore = create((set, get) => ({
     const shooter = s.shotPlayer;
     const opponent = getOpponent(shooter);
     const events = s.shotEvents;
-    const shotPots = [...s.shotPottedIds];
-
-    const groups = { ...s.playerGroups };
+    const shotPots = s.shotPottedIds;
+    const potCount = shotPots.size;
+    const groups = {
+      ...s.playerGroups,
+    };
     const shooterGroup = groups[shooter];
 
-    // In Solo, all 14 object balls must be cleared before the 8-ball.
-    const remainingBeforeShot = solo
-      ? [...GROUPS.solids, ...GROUPS.stripes].filter(
-        (id) => !s.shotStartPottedIds.has(id)
-      )
-      : getRemainingGroupBalls(
-        shooterGroup,
-        s.shotStartPottedIds
-      );
-
-    const eightBallWasLegal = remainingBeforeShot.length === 0;
-
+    // Calculate legality using the table
+    // state before the shot.
+    const remainingBeforeShot = solo ? countRemainingSolo(s.shotStartPottedIds) : countRemaining(shooterGroup, s.shotStartPottedIds);
+    const eightBallWasLegal = remainingBeforeShot === 0;
     const firstContactGroup = getBallGroup(events.firstContactId);
+
+    // ----------------------------------------------
+    // FOUL DETECTION
+    // ----------------------------------------------
 
     let foulReason = null;
 
     if (events.cueScratch) {
       foulReason = "Scratch";
-    } else if (events.firstContactId === null) {
+    } else if (
+      events.firstContactId === null
+    ) {
       foulReason = "No object ball contacted";
-    } else if (events.firstContactId === 8) {
+    } else if (
+      events.firstContactId === 8
+    ) {
       if (!eightBallWasLegal) {
         foulReason = "Early 8-ball contact";
       }
-    } else if (
-      !solo &&
-      shooterGroup &&
-      firstContactGroup !== shooterGroup
-    ) {
+    } else if (!solo && shooterGroup && firstContactGroup !== shooterGroup) {
       foulReason = "Wrong first contact";
     }
 
-    if (
-      !foulReason &&
-      !events.railAfterContact &&
-      shotPots.length === 0
-    ) {
+    if (!foulReason && !events.railAfterContact && potCount === 0) {
       foulReason = "No ball reached a cushion";
     }
 
-    const pottedEightBall = shotPots.includes(8);
+    // House rule:
+    // Pocketing only opponent-group balls is a foul.
+    // Pocketing at least one own-group ball makes
+    // opponent-group pots acceptable.
 
-    if (pottedEightBall) {
-      const legalEightBall = eightBallWasLegal && !foulReason;
+    if (!solo && !foulReason && shooterGroup) {
+      let ownBallPotted = false;
+      let opponentBallPotted = false;
 
-      const winner = solo ? legalEightBall ? "human" : null : legalEightBall ? shooter : opponent;
+      for (const id of shotPots) {
+        const group = getBallGroup(id);
+
+        if (group === shooterGroup) {
+          ownBallPotted = true;
+        } else if (group && group !== shooterGroup) {
+          opponentBallPotted = true;
+        }
+      }
+
+      if (opponentBallPotted && !ownBallPotted) {
+        foulReason = "Only opponent's balls potted";
+      }
+    }
+
+    // ----------------------------------------------
+    // EIGHT BALL
+    // ----------------------------------------------
+
+    if (shotPots.has(8)) {
+      const legalEightBall =
+        eightBallWasLegal && !foulReason;
+
+      const winner = solo ? legalEightBall
+        ? "human" : null : legalEightBall
+        ? shooter : opponent;
 
       const message = legalEightBall
         ? `${shooter === "human" ? "You" : "AI"} win!`
@@ -360,8 +526,11 @@ const useGameStore = create((set, get) => ({
       const stats = {
         ...s.stats,
         shotActive: false,
-        lastPots: shotPots.length,
-        bestPots: Math.max(s.stats.bestPots, shotPots.length),
+        lastPots: potCount,
+        bestPots: Math.max(
+          s.stats.bestPots,
+          potCount
+        ),
         cleared: true,
         message,
       };
@@ -375,6 +544,7 @@ const useGameStore = create((set, get) => ({
         shotPlayer: null,
         completionRecorded: true,
         screen: SCREENS.COMPLETE,
+
         result: {
           message,
           winner,
@@ -386,85 +556,125 @@ const useGameStore = create((set, get) => ({
       return;
     }
 
-    // Only assign groups in AI-versus-player mode.
-    if (
-      !solo &&
-      !foulReason &&
-      !groups[shooter] &&
-      shotPots.length > 0
-    ) {
-      const firstGroupPot = shotPots.find(
-        (id) => getBallGroup(id)
-      );
+    // ----------------------------------------------
+    // GROUP ASSIGNMENT
+    // ----------------------------------------------
 
-      const assignedGroup = getBallGroup(firstGroupPot);
+    if (!solo && !foulReason && !groups[shooter] && potCount > 0) {
+      const assignedGroup = firstPottedGroup(shotPots);
 
       if (assignedGroup) {
         groups[shooter] = assignedGroup;
-        groups[opponent] =
-          assignedGroup === "solids" ? "stripes" : "solids";
+        groups[opponent] = assignedGroup === "solids" ? "stripes" : "solids";
       }
     }
 
-    const nextPlayer = solo
-      ? "human"
-      : foulReason
-        ? opponent
-        : shotPots.length > 0
-          ? shooter
-          : opponent;
+    // ----------------------------------------------
+    // NEXT PLAYER
+    // ----------------------------------------------
 
-    const message = foulReason
-      ? `Foul: ${foulReason} • ${solo ? "Your" : nextPlayer === "human" ? "Your" : "AI"} turn — ball in hand`
-      : shotPots.length > 0
-        ? `${shotPots.length} ball${shotPots.length === 1 ? "" : "s"} potted`
-        : solo
-          ? "No pot • your turn"
-          : "No pot • turn changes";
+    const nextPlayer = solo ? "human" : foulReason
+      ? opponent : potCount > 0
+        ? shooter : opponent;
+
+    // ----------------------------------------------
+    // MESSAGE
+    // ----------------------------------------------
+
+    let message;
+
+    if (foulReason) {
+      const turnLabel = solo ? "Your" : nextPlayer === "human"
+        ? "Your" : "AI";
+
+      message = `Foul: ${foulReason} • ` + `${turnLabel} turn — ball in hand`;
+    } else if (potCount > 0) {
+      message = `${potCount} ball` + `${potCount === 1 ? "" : "s"} potted`;
+    } else {
+      message = solo
+        ? "No pot • your turn"
+        : "No pot • turn changes";
+    }
 
     const stats = {
       ...s.stats,
       shotActive: false,
-      lastPots: shotPots.length,
-      bestPots: Math.max(s.stats.bestPots, shotPots.length),
+      lastPots: potCount,
+      bestPots: Math.max(s.stats.bestPots, potCount),
       message,
     };
 
+    // Single Zustand update for the completed
+    // shot and next-turn transition.
     set({
       stats,
       playerGroups: groups,
       currentPlayer: nextPlayer,
       ballInHand: Boolean(foulReason),
       foul: foulReason,
+
       shotPlayer: null,
       shotEvents: createShotEvents(),
+
       shotPottedIds: new Set(),
       shotStartPottedIds: new Set(),
     });
   },
 
+  // ------------------------------------------------
+  // NAVIGATION
+  // ------------------------------------------------
 
-  // Existing screens and navigation
   infoReturnScreen: SCREENS.MENU,
 
-  openScoreboard: () => set((s) =>
-    [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen)
-      ? { screen: SCREENS.SCORE_BOARD, infoReturnScreen: s.screen }
-      : {}
-  ),
+  openScoreboard: () => {
+    set((s) => {
+      if (!INFO_SCREENS.has(s.screen)) {
+        return s;
+      }
 
-  openHowToPlay: () => set((s) =>
-    [SCREENS.MENU, SCREENS.PAUSE, SCREENS.COMPLETE].includes(s.screen) ? { screen: SCREENS.HOW_TO_PLAY, infoReturnScreen: s.screen } : {}
-  ),
+      return {
+        screen: SCREENS.SCORE_BOARD,
+        infoReturnScreen: s.screen,
+      };
+    });
+  },
 
-  closeInfo: () => set((s) =>
-    [SCREENS.SCORE_BOARD, SCREENS.HOW_TO_PLAY].includes(s.screen) ? { screen: s.infoReturnScreen } : {}
-  ),
+  openHowToPlay: () => {
+    set((s) => {
+      if (!INFO_SCREENS.has(s.screen)) {
+        return s;
+      }
+
+      return {
+        screen: SCREENS.HOW_TO_PLAY,
+        infoReturnScreen: s.screen,
+      };
+    });
+  },
+
+  closeInfo: () => {
+    set((s) => {
+      if (s.screen !== SCREENS.SCORE_BOARD && s.screen !== SCREENS.HOW_TO_PLAY) {
+        return s;
+      }
+
+      return {
+        screen: s.infoReturnScreen,
+      };
+    });
+  },
+
+  // ------------------------------------------------
+  // SCREENS AND SETTINGS
+  // ------------------------------------------------
 
   screen: SCREENS.MENU,
   settingsReturnScreen: SCREENS.MENU,
+
   sessionId: 0,
   result: null,
+
   settings: {
     showAimGuide: true,
     showHUD: true,
@@ -472,64 +682,99 @@ const useGameStore = create((set, get) => ({
     aiDifficulty: "medium",
   },
 
-  pauseGame: () => set((s) => s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : {}),
-  resumeGame: () => set((s) => s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : {}),
+  pauseGame: () => {
+    set((s) => s.screen === SCREENS.PLAY ? { screen: SCREENS.PAUSE } : s);
+  },
 
-  openSettings: () => set((s) =>
-    s.screen === SCREENS.SETTINGS
-      ? {}
-      : {
-        screen: SCREENS.SETTINGS,
-        settingsReturnScreen:
-          s.screen === SCREENS.PLAY ? SCREENS.PAUSE : s.screen,
+  resumeGame: () => {
+    set((s) => s.screen === SCREENS.PAUSE ? { screen: SCREENS.PLAY } : s);
+  },
+
+  openSettings: () => {
+    set((s) => {
+      if (s.screen === SCREENS.SETTINGS) {
+        return s;
       }
-  ),
 
-  closeSettings: () => set((s) => s.screen === SCREENS.SETTINGS ? { screen: s.settingsReturnScreen } : {}),
-
-  returnToMenu: () => set({
-    screen: SCREENS.MENU,
-    result: null,
-  }),
-
-  completeGame: (result = { message: "Rack complete!" }) => set((s) => {
-    if (s.screen !== SCREENS.PLAY || s.completionRecorded) return s;
-
-    return {
-      screen: SCREENS.COMPLETE,
-      completionRecorded: true,
-      result: result || { message: "Rack complete!" },
-    };
-  }),
-
-  setSetting: (key, value) => set((s) => {
-    // Boolean settings
-    if (
-      ["showAimGuide", "showHUD", "solo"].includes(key) && typeof value === "boolean"
-    ) {
       return {
-        settings: {
-          ...s.settings,
-          [key]: value,
-        },
+        screen: SCREENS.SETTINGS,
+        settingsReturnScreen: s.screen === SCREENS.PLAY ? SCREENS.PAUSE : s.screen,
       };
-    }
+    });
+  },
 
-    // AI difficulty
-    if (
-      key === "aiDifficulty" && ["easy", "medium", "hard"].includes(value)
-    ) {
+  closeSettings: () => {
+    set((s) => s.screen === SCREENS.SETTINGS ? { screen: s.settingsReturnScreen } : s);
+  },
+
+  returnToMenu: () => {
+    set((s) => {
+      if (s.screen === SCREENS.MENU && s.result === null) {
+        return s;
+      }
+
       return {
-        settings: {
-          ...s.settings,
-          aiDifficulty: value,
-        },
-        difficulty: value,
+        screen: SCREENS.MENU,
+        result: null,
       };
-    }
+    });
+  },
 
-    return {};
-  }),
+  completeGame: (
+    result = { message: "Rack complete!" }
+  ) => {
+    set((s) => {
+      if (s.screen !== SCREENS.PLAY || s.completionRecorded) {
+        return s;
+      }
+
+      return {
+        screen: SCREENS.COMPLETE,
+        completionRecorded: true,
+        result: result || { message: "Rack complete!" },
+      };
+    });
+  },
+
+  // ------------------------------------------------
+  // SETTINGS
+  // ------------------------------------------------
+
+  setSetting: (key, value) => {
+    set((s) => {
+      // Boolean settings
+      if (BOOLEAN_SETTINGS.has(key) && typeof value === "boolean") {
+        // Avoid unnecessary Zustand notifications.
+        if (s.settings[key] === value) {
+          return s;
+        }
+
+        return {
+          settings: {
+            ...s.settings,
+            [key]: value,
+          },
+        };
+      }
+
+      // AI difficulty
+      if (key === "aiDifficulty" && DIFFICULTIES.has(value)) {
+        if (s.settings.aiDifficulty === value && s.difficulty === value) {
+          return s;
+        }
+
+        return {
+          settings: {
+            ...s.settings,
+            aiDifficulty: value,
+          },
+          difficulty: value,
+        };
+      }
+
+      return s;
+    });
+  },
 }));
 
 export default useGameStore;

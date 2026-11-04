@@ -71,7 +71,8 @@ Select which apply:
 - [Jotai](https://github.com/pmndrs/jotai)
 - [Vite Plugin React](https://github.com/vitejs/vite-plugin-react)
 - [ESLint](https://eslint.org/)
- 
+- [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+
 ## Support
 
 For support, users can contact me through my portfolio contact form: [here](https://next-portfolio-sifzerdas-projects.vercel.app/contact)
@@ -111,7 +112,7 @@ Renderers	        Visuals only
 
 ## Tasks
 
-- [ ] make 2d handrenderer
+- [x] make 2d handrenderer
 
 
 

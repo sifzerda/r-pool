@@ -1,7 +1,5 @@
  // src/ai/aiPhysics.js
 
-// src/ai/aiPhysics.js
-
 import {
   MAX_POWER,
   MAX_SHOT_SPEED,
