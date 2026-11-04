@@ -16,8 +16,24 @@ const POCKETS = [
 ];
 const FALL_START_Y = BALL_Y, FALL_END_Y = POCKET_FLOOR_Y + BALL_R, FALL_GRAVITY = 12;
 
+// findCapturePocket runs several times per ball per physics substep (in both
+// the live engine and the AI's shot simulation), and almost every call is for
+// a ball in the middle of the table. A point can only be inside a capture
+// circle if it is close enough to that pocket's rail line, so anything nearer
+// the centre line than this bound can't be captured by any pocket. The result
+// is identical to checking every pocket.
+const CAPTURE_MIN_ABS_Z = Math.min(...POCKETS.map((p) => Math.abs(p.z) - p.captureRadius));
+
 function findCapturePocket(x, z) {
-  for (const p of POCKETS) if ((x - p.x) ** 2 + (z - p.z) ** 2 <= p.captureRadiusSq) return p;
+  if (Math.abs(z) < CAPTURE_MIN_ABS_Z) return null;
+
+  for (let i = 0; i < POCKETS.length; i++) {
+    const p = POCKETS[i];
+    const dx = x - p.x;
+    const dz = z - p.z;
+    if (dx * dx + dz * dz <= p.captureRadiusSq) return p;
+  }
+
   return null;
 }
 

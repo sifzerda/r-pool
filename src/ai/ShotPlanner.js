@@ -210,6 +210,13 @@ function fallbackShot({ cueBall, balls, playerGroup, isEightBallLegal }) {
     }
   }
 
+  // With the rack intact every geometric line is blocked, so this fallback is
+  // what actually plays the break: hit the rack hard instead of tapping it.
+  const objectBallsOnTable = balls.filter(
+    (ball) => !ball.cueBall && ball.id !== 0 && isOnTable(ball)
+  ).length;
+  const isBreak = objectBallsOnTable === 15;
+
   const angle = Math.atan2(nearest.z - cueBall.z, nearest.x - cueBall.x);
 
   return {
@@ -219,7 +226,7 @@ function fallbackShot({ cueBall, balls, playerGroup, isEightBallLegal }) {
     cos: Math.cos(angle),
     sin: Math.sin(angle),
 
-    power: MAX_POWER * 0.5,
+    power: MAX_POWER * (isBreak ? 0.85 : 0.5),
 
     score: 0,
     ghost: { x: nearest.x, z: nearest.z },

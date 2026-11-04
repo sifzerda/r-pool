@@ -383,6 +383,10 @@ function bounce(
     const normalKey = axis === "x" ? "vx" : "vz";
     const tangentKey = axis === "x" ? "vz" : "vx";
 
+    // Match the live engine: clamp to the cushion first, then only reflect
+    // if the ball is actually moving into it.
+    ball[axis] = limit;
+
     if (
         minimum
             ? ball[normalKey] >= 0
@@ -390,8 +394,6 @@ function bounce(
     ) {
         return;
     }
-
-    ball[axis] = limit;
 
     const speed = Math.abs(ball[normalKey]);
 

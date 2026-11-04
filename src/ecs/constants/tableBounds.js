@@ -1,4 +1,4 @@
-// src/ecs/constants/table.js
+// src/ecs/constants/tableBounds.js
 
 import { PLAY_X, PLAY_Z, BALL_R } from "./table.js";
 const MIN_X = -PLAY_X + BALL_R;

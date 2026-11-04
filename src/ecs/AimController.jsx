@@ -12,6 +12,7 @@ import {
 } from "./world.js";
 
 import {
+  BALL_R,
   BALL_Y,
   MAX_POWER,
   MAX_PULL,
@@ -54,6 +55,13 @@ function createAim() {
     handX: 0,
     handZ: 0,
     handLift: 0,
+    // AI aiming state. Listed here so resetting the aim (PoolScene does this
+    // on every pause/resume) also clears stale AI state.
+    aiControlled: false,
+    aiShotPower: 0,
+    aiShotType: null,
+    aiTargetId: null,
+    handPlacement: null,
   };
 }
 
@@ -82,7 +90,7 @@ function isValidCuePosition(x, z, cueBall) {
     return false;
   }
 
-  const minimumDistance = 2 * 0.1 + 0.01;
+  const minimumDistance = BALL_R * 2 + 0.01;
 
   for (const ball of ballQuery.entities) {
     if (
@@ -129,6 +137,20 @@ function placeCueBall(cueBall, x, z) {
   return true;
 }
 
+// Module-level so they don't close over component state and are not
+// recreated on every render.
+function isHumanTurn(game = useGameStore.getState()) {
+  return (
+    game.screen === "play" &&
+    game.currentPlayer === "human" &&
+    !game.winner
+  );
+}
+
+function isPlacingBall(game = useGameStore.getState()) {
+  return game.ballInHand && isHumanTurn(game);
+}
+
 function AimController({ cueBall, aimRef }) {
   const { gl, camera, invalidate } = useThree();
 
@@ -144,20 +166,6 @@ function AimController({ cueBall, aimRef }) {
     lastCueX: NaN,
     lastCueZ: NaN,
   }), []);
-
-  function isHumanTurn() {
-    const game = useGameStore.getState();
-    return (
-      game.screen === "play" &&
-      game.currentPlayer === "human" &&
-      !game.winner
-    );
-  }
-
-  function isPlacingBall() {
-    const game = useGameStore.getState();
-    return game.ballInHand && isHumanTurn();
-  }
 
   useFrame(() => {
     const aim = aimRef.current;

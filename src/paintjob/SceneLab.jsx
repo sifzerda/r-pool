@@ -2,14 +2,28 @@
 // Lights, reflections, background and exposure, all driven by the Lab.
 // Replaces the hard-coded lights that used to live in PoolScene.
 
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import useGameStore from "../store/useGameStore.js";
 import { applyAppearance } from "./applyAppearance.js";
 
-export default function SceneLab() {
+// The reflection environment never depends on the Lab settings. Keeping it in
+// a memoised component means it isn't re-rendered (and its cubemap isn't
+// re-captured) every time a slider moves.
+const LabEnvironment = memo(function LabEnvironment() {
+  return (
+    <Environment resolution={256} frames={1}>
+      <Lightformer form="rect" intensity={0.3} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} />
+      <Lightformer form="rect" intensity={1.8} color="#dbeaff" position={[-5, 4, -4]} target={[0, 0, 0]} scale={[5, 3, 1]} />
+      <Lightformer form="rect" intensity={1.3} color="#ffe6c4" position={[5, 3, 4]} target={[0, 0, 0]} scale={[5, 3, 1]} />
+      <Lightformer form="rect" intensity={1} position={[6, 3, -4]} target={[0, 0, 0]} scale={[3, 2, 1]} />
+      <Lightformer form="ring" intensity={0.8} color="#ffffff" position={[-5, 3, 4]} target={[0, 0, 0]} scale={2.5} />
+    </Environment>
+  );
+});
 
+export default function SceneLab() {
   const p = useGameStore((s) => s.appearanceParams);
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
@@ -26,28 +40,31 @@ export default function SceneLab() {
   const glow = p["scene.accentGlow"];
 
   return (
-    <>     
+    <>
       <ambientLight intensity={p["scene.ambient"]} />
-     
-      <directionalLight castShadow intensity={p["scene.key"]}
-        color={p["scene.keyColor"]} position={[4, 8, 2]}
-        shadow-mapSize-width={1024} shadow-mapSize-height={1024}
-        shadow-camera-near={1} shadow-camera-far={20}
-        shadow-camera-left={-5} shadow-camera-right={5}
-        shadow-camera-top={5} shadow-camera-bottom={-5}
-        shadow-bias={-0.0004} />
-     
+
+      <directionalLight
+        castShadow
+        intensity={p["scene.key"]}
+        color={p["scene.keyColor"]}
+        position={[4, 8, 2]}
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-camera-near={1}
+        shadow-camera-far={20}
+        shadow-camera-left={-5}
+        shadow-camera-right={5}
+        shadow-camera-top={5}
+        shadow-camera-bottom={-5}
+        shadow-bias={-0.0004}
+      />
+
+      {/* Kept mounted even at zero glow: adding or removing a light changes
+          the light count and forces every material to recompile. */}
       <pointLight position={[-3.2, 1.4, 0]} color={accent} intensity={glow * 3} distance={7} decay={2} />
       <pointLight position={[3.2, 1.4, 0]} color={accent} intensity={glow * 3} distance={7} decay={2} />
-    
-      <Environment resolution={256} frames={1}>
-        <Lightformer form="rect" intensity={0.3} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} />
-        <Lightformer form="rect" intensity={1.8} color="#dbeaff" position={[-5, 4, -4]} target={[0, 0, 0]} scale={[5, 3, 1]} />
-        <Lightformer form="rect" intensity={1.3} color="#ffe6c4" position={[5, 3, 4]} target={[0, 0, 0]} scale={[5, 3, 1]} />
-        <Lightformer form="rect" intensity={1} position={[6, 3, -4]} target={[0, 0, 0]} scale={[3, 2, 1]} />
-        <Lightformer form="ring" intensity={0.8} color="#ffffff" position={[-5, 3, 4]} target={[0, 0, 0]} scale={2.5} />
-      </Environment>
 
+      <LabEnvironment />
     </>
   );
 }

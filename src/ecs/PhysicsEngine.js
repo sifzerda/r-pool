@@ -15,7 +15,18 @@ const RESPAWN_SPACING = DIAMETER + 0.01;
 const RESPAWN_SPACING_SQ = RESPAWN_SPACING ** 2;
 const MAX_STEPS = Math.ceil(MAX_FRAME_DT / FIXED_DT);
 
+// Simulated seconds after which a shot that still hasn't come to rest is forced to.
+const MAX_SHOT_SECONDS = 30;
+
 bindTimeStep(FIXED_DT);
+
+const DEV = Boolean(import.meta.env?.DEV);
+
+// A rejected shot is consumed silently, which makes "the AI didn't shoot" bugs hard to diagnose. In dev, say why.
+function rejectShot(reason, detail) {
+  if (DEV) console.warn(`[shot] rejected: ${reason}`, detail);
+  return false;
+}
 
 function shotSystem(cueBall, aimRef) {
   const aim = aimRef.current;
@@ -27,25 +38,24 @@ function shotSystem(cueBall, aimRef) {
   const game = useGameStore.getState();
   const shooter = shot.player || "human";
 
-  if (game.currentPlayer !== shooter || game.ballInHand || game.winner) {
-    return false;
+  if (game.currentPlayer !== shooter) {
+    return rejectShot("not this player's turn", { shooter, current: game.currentPlayer });
+  }
+  if (game.ballInHand) return rejectShot("ball in hand", { shooter });
+  if (game.winner) return rejectShot("game already won", { shooter });
+
+  if (ballsAreMoving() || fallingBalls.size > 0) {
+    return rejectShot("balls still moving", { shooter });
+  }
+  if (cueBall.pocketed || cueBall.falling || cueBall.scratched) {
+    return rejectShot("cue ball is not on the table", { shooter });
+  }
+  if (!Number.isFinite(shot.power) || !Number.isFinite(shot.cos) || !Number.isFinite(shot.sin) || shot.power <= 0) {
+    return rejectShot("invalid shot values", shot);
   }
 
-  if (
-    ballsAreMoving() ||
-    fallingBalls.size > 0 ||
-    cueBall.pocketed ||
-    cueBall.falling ||
-    cueBall.scratched ||
-    !Number.isFinite(shot.power) ||
-    !Number.isFinite(shot.cos) ||
-    !Number.isFinite(shot.sin) ||
-    shot.power <= 0
-  ) {
-    return false;
-  }
   const length = Math.hypot(shot.cos, shot.sin);
-  if (length < 1e-8) return false;
+  if (length < 1e-8) return rejectShot("zero-length direction", shot);
   const speed = shotSpeed(Math.min(1, shot.power / MAX_POWER), MAX_SHOT_SPEED);
   cueBall.vx = shot.cos / length * speed;
   cueBall.vz = shot.sin / length * speed;
@@ -257,12 +267,32 @@ function respawnCueBall(cueBall) {
 function PhysicsEngine(cueBall, aimRef) {
   let accumulator = 0;
   let wasSimulating = false;
+  let shotClock = 0;
+
+  function enforceShotTimeLimit() {
+    if (!ballsAreMoving() && fallingBalls.size === 0) return;
+
+    shotClock += FIXED_DT;
+    if (shotClock <= MAX_SHOT_SECONDS) return;
+
+    if (DEV) console.warn("[physics] shot ran too long, forcing balls to rest");
+
+    for (const ball of [...activeBalls]) {
+      ball.vx = ball.vz = 0;
+      markDirty(ball);
+      deactiveBall(ball);
+    }
+
+    for (const ball of [...fallingBalls]) {
+      ball.y = FALL_END_Y;
+      ball.falling = false;
+      ball.pocketed = true;
+      fallingBalls.delete(ball);
+      markDirty(ball);
+    }
+  }
   function isSimulating() {
-    return (
-      ballsAreMoving() ||
-      fallingBalls.size > 0 ||
-      aimRef.current.pendingShot != null
-    );
+    return (ballsAreMoving() || fallingBalls.size > 0 || aimRef.current.pendingShot != null);
   }
 
   function updateSwing(dt) {
@@ -288,9 +318,11 @@ function PhysicsEngine(cueBall, aimRef) {
     for (const ball of activeBalls) markDirty(ball);
     updateFallingBalls(FIXED_DT);
     frictionSystem();
+    enforceShotTimeLimit();
     // Do not automatically respawn the cue ball.
     // A scratch will be resolved as ball-in-hand by the rules system.
     if (!ballsAreMoving() && fallingBalls.size === 0) {
+      shotClock = 0;
       logPendingShotComparison(
         ballQuery.entities,
         useGameStore.getState()
