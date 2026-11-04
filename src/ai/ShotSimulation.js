@@ -55,10 +55,7 @@ export function simulateShot({
 
     if (!cue) return null;
 
-    const directionLength = Math.hypot(
-        shot.cos,
-        shot.sin
-    );
+    const directionLength = Math.hypot(shot.cos, shot.sin);
 
     if (
         !Number.isFinite(directionLength) ||
@@ -89,22 +86,22 @@ export function simulateShot({
     };
 
     for (let step = 0; step < maxSteps; step++) {
-        const movingBalls = simulatedBalls.filter(
-            (ball) => ball.active && !ball.pocketed
-        );
-
-        if (movingBalls.length === 0) {
-            result.settled = true;
-            break;
-        }
-
+        // Count moving balls and find the fastest without allocating.
+        let movingCount = 0;
         let speedSq = 0;
 
-        for (const ball of movingBalls) {
-            speedSq = Math.max(
-                speedSq,
-                ball.vx * ball.vx + ball.vz * ball.vz
-            );
+        for (const ball of simulatedBalls) {
+            if (!ball.active || ball.pocketed) continue;
+
+            movingCount++;
+
+            const s = ball.vx * ball.vx + ball.vz * ball.vz;
+            if (s > speedSq) speedSq = s;
+        }
+
+        if (movingCount === 0) {
+            result.settled = true;
+            break;
         }
 
         const substeps = Math.min(
@@ -112,20 +109,14 @@ export function simulateShot({
             Math.max(
                 1,
                 Math.ceil(
-                    Math.sqrt(speedSq) *
-                    fixedDt /
-                    (BALL_R * 0.5)
+                    (Math.sqrt(speedSq) * fixedDt) / (BALL_R * 0.5)
                 )
             )
         );
 
         const dt = fixedDt / substeps;
 
-        for (
-            let substep = 0;
-            substep < substeps;
-            substep++
-        ) {
+        for (let substep = 0; substep < substeps; substep++) {
             // Match physicsSystem().
             integrate(
                 simulatedBalls,
@@ -143,11 +134,7 @@ export function simulateShot({
             );
 
             // Match collisionSystem().
-            resolveBallCollisions(
-                simulatedBalls,
-                physics,
-                result
-            );
+            resolveBallCollisions(simulatedBalls, physics, result);
 
             // Match the second detectPockets().
             detectPocketCaptures(
@@ -166,34 +153,20 @@ export function simulateShot({
         }
 
         // Match frictionSystem(), once per fixed step.
-        applyFriction(
-            simulatedBalls,
-            physics,
-            fixedDt
-        );
+        applyFriction(simulatedBalls, physics, fixedDt);
 
         result.steps = step + 1;
         result.duration = result.steps * fixedDt;
     }
 
-    result.balls = simulatedBalls.map((ball) => ({
-        ...ball,
-    }));
-
-    const finalCue = result.balls.find(
-        (ball) => ball.cueBall
-    );
+    // The balls are already private copies, so no need to clone them again.
+    const finalCue = simulatedBalls.find((ball) => ball.cueBall);
 
     result.cuePosition = finalCue
-        ? {
-            x: finalCue.x,
-            z: finalCue.z,
-        }
+        ? { x: finalCue.x, z: finalCue.z }
         : null;
 
-    result.pottedIds = [
-        ...new Set(result.pottedIds),
-    ];
+    result.pottedIds = [...new Set(result.pottedIds)];
 
     return result;
 }
@@ -254,10 +227,7 @@ function detectPocketCaptures(
     for (const ball of balls) {
         if (ball.pocketed) continue;
 
-        const pocket = findCapturePocket(
-            ball.x,
-            ball.z
-        );
+        const pocket = findCapturePocket(ball.x, ball.z);
 
         if (!pocket) continue;
 
@@ -274,11 +244,7 @@ function detectPocketCaptures(
     }
 }
 
-function resolveBallCollisions(
-    balls,
-    physics,
-    result
-) {
+function resolveBallCollisions(balls, physics, result) {
     for (let i = 0; i < balls.length - 1; i++) {
         const a = balls[i];
 
@@ -332,8 +298,7 @@ function resolveBallCollisions(
             }
 
             // Match equal overlap correction.
-            const correction =
-                (DIAMETER - distance) * 0.5;
+            const correction = (DIAMETER - distance) * 0.5;
 
             a.x -= nx * correction;
             a.z -= nz * correction;
@@ -431,12 +396,8 @@ function bounce(
     const speed = Math.abs(ball[normalKey]);
 
     const restitution = Math.max(
-        Math.min(
-            physics.cushionMinE,
-            physics.cushionE
-        ),
-        physics.cushionE -
-        physics.cushionSpeedLoss * speed
+        Math.min(physics.cushionMinE, physics.cushionE),
+        physics.cushionE - physics.cushionSpeedLoss * speed
     );
 
     ball[normalKey] *= -restitution;
@@ -458,23 +419,15 @@ function bounce(
     }
 }
 
-function applyFriction(
-    balls,
-    physics,
-    fixedDt
-) {
+function applyFriction(balls, physics, fixedDt) {
     const loss = physics.rollDecel * fixedDt;
 
     for (const ball of balls) {
         if (!ball.active || ball.pocketed) continue;
 
-        const speed = Math.hypot(
-            ball.vx,
-            ball.vz
-        );
+        const speed = Math.hypot(ball.vx, ball.vz);
 
-        const next =
-            speed * physics.damping - loss;
+        const next = speed * physics.damping - loss;
 
         if (
             speed === 0 ||

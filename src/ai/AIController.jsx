@@ -5,55 +5,151 @@ import { useFrame, useThree } from "@react-three/fiber";
 import useGameStore from "../store/useGameStore.js";
 import { ballQuery, ballsAreMoving } from "../ecs/world.js";
 import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "../ecs/constants/tableBounds.js";
-import { MAX_POWER, MAX_PULL, MIN_PULL } from "../ecs/constants/table.js";
+import {
+    BALL_R,
+    MAX_POWER,
+    MAX_PULL,
+    MIN_PULL,
+} from "../ecs/constants/table.js";
+import { POCKETS } from "../ecs/constants/pockets.js";
 import { placeCueBall } from "../ecs/AimController.jsx";
-import { planShot } from "./ShotPlanner.js";
+import { planShot, rankCueSpots } from "./ShotPlanner.js";
 import { aiPhysics } from "./aiPhysics.js";
 import { simulateShot } from "./ShotSimulation.js";
-import { setPendingPrediction, clearPendingPrediction } from "./AIPhysicsDebugger.js";
+import {
+    setPendingPrediction,
+    clearPendingPrediction,
+} from "./AIPhysicsDebugger.js";
 
 const GROUP_BALLS = {
     solids: [1, 2, 3, 4, 5, 6, 7],
     stripes: [9, 10, 11, 12, 13, 14, 15],
 };
 
+// --------------------------------------------------
+// TUNING
+// --------------------------------------------------
+
 const AI_CHARGE_DURATION = 0.55;
+const PLACE_DURATION = 0.65;
 
-function getAIPlacement(cueBall, balls, game) {
+// Seconds after releasing the cue for the engine to report an active shot.
+const SHOT_START_TIMEOUT = 3;
+
+// Seconds to wait for balls to settle before shooting anyway.
+const MAX_SETTLE_WAIT = 10;
+
+// Seconds to wait before retrying after a failed plan or placement.
+const RETRY_COOLDOWN = 0.4;
+
+// Only the debug comparison needs the extra prediction simulation.
+const DEBUG_PREDICTIONS = Boolean(import.meta.env?.DEV);
+
+// --------------------------------------------------
+// BALL-IN-HAND PLACEMENT
+// --------------------------------------------------
+
+const GRID_MARGIN = 0.12;
+const GRID_STEP = 0.2;
+const SPOT_CLEARANCE = BALL_R * 2.4;
+const POCKET_CLEARANCE = BALL_R * 3.5;
+const MAX_PLACEMENT_CHOICES = 6;
+const RANDOM_PLACEMENT_TRIES = 24;
+
+const FALLBACK_SPOTS = [
+    { x: MIN_X + (MAX_X - MIN_X) * 0.25, z: 0 },
+    { x: 0, z: 0 },
+];
+
+function getGroupState(game) {
     const group = game.playerGroups.ai;
-    const potted = game.pottedIds;
-    const remaining = group ? GROUP_BALLS[group].filter((id) => !potted.has(id)) : [];
-    const isEightBallLegal = Boolean(group && remaining.length === 0);
 
-    let best = null;
+    const remaining = group
+        ? GROUP_BALLS[group].filter((id) => !game.pottedIds.has(id))
+        : [];
 
-    for (let z = MIN_Z + 0.12; z <= MAX_Z - 0.12; z += 0.2) {
-        for (let x = MIN_X + 0.12; x <= MAX_X - 0.12; x += 0.2) {
-            const virtualCue = {
-                ...cueBall,
-                x,
-                z,
-                pocketed: false,
-                falling: false,
-                scratched: false,
-            };
+    return {
+        group,
+        isEightBallLegal: Boolean(group && remaining.length === 0),
+    };
+}
 
-            const shot = planShot({
-                cueBall: virtualCue,
-                balls,
-                playerGroup: group,
-                isEightBallLegal,
-                level: game.difficulty,
-            });
+function isSpotClear(x, z, balls, cueId) {
+    for (const ball of balls) {
+        if (
+            ball.id === cueId ||
+            ball.pocketed ||
+            ball.falling ||
+            ball.scratched
+        ) {
+            continue;
+        }
 
-            if (shot && (!best || shot.score > best.score)) {
-                best = { x, z, score: shot.score };
+        if (Math.hypot(ball.x - x, ball.z - z) < SPOT_CLEARANCE) {
+            return false;
+        }
+    }
+
+    for (const pocket of POCKETS) {
+        if (Math.hypot(pocket.x - x, pocket.z - z) < POCKET_CLEARANCE) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Returns an ordered list of spots to try. The first is the best choice;
+// the rest are fallbacks in case placeCueBall rejects it.
+function getAIPlacement(cueBall, balls, game) {
+    const { group, isEightBallLegal } = getGroupState(game);
+
+    const spots = [];
+
+    for (let z = MIN_Z + GRID_MARGIN; z <= MAX_Z - GRID_MARGIN; z += GRID_STEP) {
+        for (let x = MIN_X + GRID_MARGIN; x <= MAX_X - GRID_MARGIN; x += GRID_STEP) {
+            if (isSpotClear(x, z, balls, cueBall.id)) {
+                spots.push({ x, z });
             }
         }
     }
 
-    return best || { x: 0, z: 0 };
+    // Cheap scoring: direct-shot quality only, no physics simulation.
+    const ranked = rankCueSpots({
+        cueBall,
+        balls,
+        spots,
+        playerGroup: group,
+        isEightBallLegal,
+        level: game.difficulty,
+    }).slice(0, MAX_PLACEMENT_CHOICES);
+
+    return [...ranked, ...FALLBACK_SPOTS];
 }
+
+function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+}
+
+function tryPlaceCueBall(cueBall, spots, balls) {
+    for (const spot of spots) {
+        if (placeCueBall(cueBall, spot.x, spot.z)) return true;
+    }
+
+    for (let i = 0; i < RANDOM_PLACEMENT_TRIES; i++) {
+        const x = randomBetween(MIN_X + GRID_MARGIN, MAX_X - GRID_MARGIN);
+        const z = randomBetween(MIN_Z + GRID_MARGIN, MAX_Z - GRID_MARGIN);
+
+        if (!isSpotClear(x, z, balls, cueBall.id)) continue;
+        if (placeCueBall(cueBall, x, z)) return true;
+    }
+
+    return false;
+}
+
+// --------------------------------------------------
+// AIM RESET
+// --------------------------------------------------
 
 function resetAIAim(aim) {
     if (!aim.aiControlled) return;
@@ -67,6 +163,10 @@ function resetAIAim(aim) {
     aim.pendingShot = null;
 }
 
+// --------------------------------------------------
+// CONTROLLER
+// --------------------------------------------------
+
 export default function AIController({ cueBall, aimRef }) {
     const invalidate = useThree((state) => state.invalidate);
 
@@ -76,15 +176,25 @@ export default function AIController({ cueBall, aimRef }) {
     const chargeTime = useRef(0);
     const plannedPull = useRef(0);
 
+    const stuckTime = useRef(0);
+    const movingTime = useRef(0);
+    const retryIn = useRef(0);
+
     useEffect(() => {
         const unsubscribe = useGameStore.subscribe(() => invalidate());
         return unsubscribe;
     }, [invalidate]);
 
-    useFrame((_, dt) => {
+    useFrame((_, rawDt) => {
+        // Clamp so a long idle gap can't skip animations or trip watchdogs.
+        const dt = Math.min(Math.max(0, rawDt), 0.1);
+
         const game = useGameStore.getState();
         const aim = aimRef.current;
 
+        // --------------------------------------------------
+        // Not the AI's turn: reset everything.
+        // --------------------------------------------------
         if (
             game.screen !== "play" ||
             game.settings.solo ||
@@ -95,6 +205,9 @@ export default function AIController({ cueBall, aimRef }) {
             sawActiveShot.current = false;
             phase.current = "idle";
             chargeTime.current = 0;
+            stuckTime.current = 0;
+            movingTime.current = 0;
+            retryIn.current = 0;
 
             resetAIAim(aim);
             clearPendingPrediction();
@@ -103,9 +216,12 @@ export default function AIController({ cueBall, aimRef }) {
 
         invalidate();
 
+        // --------------------------------------------------
         // Wait while the AI's shot is being simulated.
+        // --------------------------------------------------
         if (game.stats.shotActive) {
             sawActiveShot.current = true;
+            stuckTime.current = 0;
             phase.current = "waiting";
             return;
         }
@@ -114,11 +230,14 @@ export default function AIController({ cueBall, aimRef }) {
         if (sawActiveShot.current) {
             sawActiveShot.current = false;
             submitted.current = false;
+            stuckTime.current = 0;
             phase.current = "idle";
             resetAIAim(aim);
         }
 
-        // Animate the hand carrying the cue ball to the AI's chosen position.
+        // --------------------------------------------------
+        // Animate the hand carrying the cue ball.
+        // --------------------------------------------------
         if (phase.current === "placing") {
             const placement = aim.handPlacement;
 
@@ -127,18 +246,21 @@ export default function AIController({ cueBall, aimRef }) {
                 return;
             }
 
-            placement.elapsed += Math.max(0, dt);
+            placement.elapsed += dt;
 
             const progress = Math.min(1, placement.elapsed / placement.duration);
             const eased = progress * progress * (3 - 2 * progress);
 
             aim.handX = placement.fromX + (placement.toX - placement.fromX) * eased;
             aim.handZ = placement.fromZ + (placement.toZ - placement.fromZ) * eased;
-
             aim.handLift = Math.sin(progress * Math.PI) * 0.12;
 
             if (progress >= 1) {
-                const placed = placeCueBall(cueBall, placement.toX, placement.toZ);
+                const placed = tryPlaceCueBall(
+                    cueBall,
+                    placement.spots,
+                    ballQuery.entities
+                );
 
                 aim.handLift = 0;
                 aim.handPlacement = null;
@@ -146,6 +268,10 @@ export default function AIController({ cueBall, aimRef }) {
 
                 if (placed) {
                     useGameStore.setState({ ballInHand: false });
+                } else {
+                    // Nothing was accepted. Wait briefly, then replan.
+                    console.warn("[AI] could not place the cue ball, retrying");
+                    retryIn.current = RETRY_COOLDOWN;
                 }
             }
 
@@ -153,13 +279,13 @@ export default function AIController({ cueBall, aimRef }) {
             return;
         }
 
-        // Animate the cue pulling backwards before releasing the shot.
+        // --------------------------------------------------
+        // Animate the cue pulling backwards before the shot.
+        // --------------------------------------------------
         if (phase.current === "charging") {
-            chargeTime.current += Math.max(0, dt);
+            chargeTime.current += dt;
 
             const progress = Math.min(1, chargeTime.current / AI_CHARGE_DURATION);
-
-            // Ease the stick into its pulled-back position.
             const eased = 1 - (1 - progress) ** 2;
 
             aim.pullBack = plannedPull.current * eased;
@@ -187,20 +313,72 @@ export default function AIController({ cueBall, aimRef }) {
 
                 phase.current = "waiting";
                 submitted.current = true;
+                stuckTime.current = 0;
             }
 
             return;
         }
 
-        if (submitted.current || phase.current === "waiting" || ballsAreMoving() || aim.pendingShot) {
+        // --------------------------------------------------
+        // Watchdog: a submitted shot must become active.
+        // If the engine dropped it, recover instead of waiting forever.
+        // --------------------------------------------------
+        if (
+            submitted.current ||
+            phase.current === "waiting" ||
+            aim.pendingShot
+        ) {
+            stuckTime.current += dt;
+
+            if (stuckTime.current > SHOT_START_TIMEOUT) {
+                console.warn("[AI] shot never started, resetting", {
+                    pendingShot: aim.pendingShot,
+                });
+
+                stuckTime.current = 0;
+                submitted.current = false;
+                phase.current = "idle";
+                aim.pendingShot = null;
+                aim.aiControlled = true; // make sure resetAIAim clears it
+                resetAIAim(aim);
+            }
+
             return;
+        }
+
+        stuckTime.current = 0;
+
+        // --------------------------------------------------
+        // Cooldown after a failed plan or placement.
+        // --------------------------------------------------
+        if (retryIn.current > 0) {
+            retryIn.current -= dt;
+            return;
+        }
+
+        // --------------------------------------------------
+        // Wait for balls to settle, but never forever.
+        // --------------------------------------------------
+        if (ballsAreMoving()) {
+            const before = movingTime.current;
+            movingTime.current += dt;
+
+            if (movingTime.current < MAX_SETTLE_WAIT) return;
+
+            if (before < MAX_SETTLE_WAIT) {
+                console.warn("[AI] balls never settled, shooting anyway");
+            }
+        } else {
+            movingTime.current = 0;
         }
 
         const balls = ballQuery.entities;
 
-        // Handle ball-in-hand using the animated hand.
+        // --------------------------------------------------
+        // Ball-in-hand: choose a spot and animate the hand.
+        // --------------------------------------------------
         if (game.ballInHand) {
-            const position = getAIPlacement(cueBall, balls, game);
+            const spots = getAIPlacement(cueBall, balls, game);
 
             aim.handX = cueBall.x;
             aim.handZ = cueBall.z;
@@ -209,10 +387,11 @@ export default function AIController({ cueBall, aimRef }) {
             aim.handPlacement = {
                 fromX: cueBall.x,
                 fromZ: cueBall.z,
-                toX: position.x,
-                toZ: position.z,
+                toX: spots[0].x,
+                toZ: spots[0].z,
+                spots,
                 elapsed: 0,
-                duration: 0.65,
+                duration: PLACE_DURATION,
             };
 
             phase.current = "placing";
@@ -220,9 +399,10 @@ export default function AIController({ cueBall, aimRef }) {
             return;
         }
 
-        const group = game.playerGroups.ai;
-        const remaining = group ? GROUP_BALLS[group].filter((id) => !game.pottedIds.has(id)) : [];
-        const isEightBallLegal = Boolean(group && remaining.length === 0);
+        // --------------------------------------------------
+        // Plan the shot.
+        // --------------------------------------------------
+        const { group, isEightBallLegal } = getGroupState(game);
 
         const shot = planShot({
             cueBall,
@@ -232,16 +412,26 @@ export default function AIController({ cueBall, aimRef }) {
             level: game.difficulty,
         });
 
-        if (!shot) return;
+        if (!shot) {
+            // Only happens when there is nothing to hit. Don't re-run the
+            // planner every frame.
+            console.warn("[AI] no shot available, retrying");
+            retryIn.current = RETRY_COOLDOWN;
+            return;
+        }
+
+        movingTime.current = 0;
 
         // Record the prediction for comparison with the actual shot.
-        const prediction = simulateShot({
-            balls,
-            shot,
-            ...aiPhysics,
-        });
-
-        setPendingPrediction(prediction);
+        if (DEBUG_PREDICTIONS) {
+            setPendingPrediction(
+                simulateShot({
+                    balls,
+                    shot,
+                    ...aiPhysics,
+                })
+            );
+        }
 
         // Point the cue in the selected shot direction.
         const angle = Math.atan2(shot.sin, shot.cos);
@@ -254,12 +444,15 @@ export default function AIController({ cueBall, aimRef }) {
         aim.lockedCos = shot.cos;
         aim.lockedSin = shot.sin;
 
-        // Store the AI's chosen shot power.
+        // Store the AI's chosen shot.
         aim.aiShotPower = shot.power;
         aim.aiShotType = shot.type;
         aim.aiTargetId = shot.targetId;
 
-        plannedPull.current = Math.min(MAX_PULL, Math.max(MIN_PULL, (shot.power / MAX_POWER) * MAX_PULL));
+        plannedPull.current = Math.min(
+            MAX_PULL,
+            Math.max(MIN_PULL, (shot.power / MAX_POWER) * MAX_PULL)
+        );
 
         // Start the visible pullback animation.
         aim.aiControlled = true;
