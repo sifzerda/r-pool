@@ -10,7 +10,6 @@ import AimGuideRenderer from "./renderers/AimGuideRenderer.jsx";
 import AimController, { createAim } from "./ecs/AimController.jsx";
 import HandRenderer from "./renderers/HandRenderer.jsx";
 import AIController from "./ai/AIController.jsx";
-import SceneLab from "./paintjob/SceneLab";
 import { PhysicsEngine } from "./ecs/PhysicsEngine.js";
 import useGameStore, { SCREENS } from "./store/useGameStore.js";
 
@@ -36,7 +35,6 @@ export default function PoolScene({ cueBall }) {
 
     return (
         <>
-            <Suspense fallback={null}><SceneLab /></Suspense>
             <Suspense fallback={null}><TableRenderer /></Suspense>
             <BallRenderer balls={ballQuery.entities} />
             {playing &&

@@ -1,10 +1,4 @@
 // src/renderers/TableRenderer.jsx
-// Static scene: repeated meshes are merged once at module load. Materials are
-// shared singletons (materials.js) so the Lab can restyle the table live.
-// The playing surface, cloth overlay and table body have real holes at the
-// pockets (see tableGeometry.js), so balls physically drop into them.
-
-// src/renderers/TableRenderer.jsx
 
 import { useLayoutEffect } from "react";
 import { useThree } from "@react-three/fiber";
@@ -203,10 +197,7 @@ function makeClothGeometry() {
     uv[i * 2 + 1] = (positions.getY(i) + PLAY_H / 2) / PLAY_H;
   }
 
-  geometry.setAttribute(
-    "uv",
-    new THREE.BufferAttribute(uv, 2),
-  );
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uv, 2),);
 
   geometry.rotateX(-PI / 2);
   geometry.translate(0, CLOTH_Y, 0);
@@ -228,14 +219,7 @@ function makeFrameGeometry() {
   for (const pocket of POCKETS) {
     const hole = new THREE.Path();
 
-    hole.absarc(
-      pocket.x,
-      pocket.z,
-      pocket.radius,
-      0,
-      PI * 2,
-      true,
-    );
+    hole.absarc(pocket.x, pocket.z, pocket.radius, 0, PI * 2, true,);
 
     shape.holes.push(hole);
   }
@@ -253,28 +237,16 @@ function makeFrameGeometry() {
 }
 
 function makeLinerGeometry() {
-  const height =
-    FRAME_TOP + FELT_THICKNESS + 0.01 - FRAME_BOTTOM;
+  const height = FRAME_TOP + FELT_THICKNESS + 0.01 - FRAME_BOTTOM;
 
   const parts = [];
 
   for (const pocket of POCKETS) {
     const radius = pocket.radius - 0.005;
 
-    const wall = new THREE.CylinderGeometry(
-      radius,
-      radius,
-      height,
-      CURVE,
-      1,
-      true,
-    );
+    const wall = new THREE.CylinderGeometry(radius, radius, height, CURVE, 1, true,);
 
-    wall.translate(
-      pocket.x,
-      FRAME_BOTTOM + height / 2,
-      pocket.z,
-    );
+    wall.translate(pocket.x, FRAME_BOTTOM + height / 2, pocket.z);
 
     const floor = new THREE.CircleGeometry(radius, CURVE);
 
@@ -303,77 +275,22 @@ const diamonds = [];
 
 for (const sz of [-1, 1]) {
   for (const sx of [-1, 1]) {
-    rails.push(
-      box(
-        LONG_LEN,
-        RAIL_H,
-        CUSHION,
-        sx * LONG_X,
-        RAIL_Y,
-        sz * PLAY_Z,
-      ),
-      box(
-        0.24,
-        RAIL_H,
-        0.08,
-        sx * (PLAY_X - 0.12),
-        RAIL_Y,
-        sz * (PLAY_Z - 0.12),
-        (sx * sz * PI) / 4,
-      ),
-    );
+    rails.push(box(LONG_LEN, RAIL_H, CUSHION, sx * LONG_X, RAIL_Y, sz * PLAY_Z,),
+      box(0.24, RAIL_H, 0.08, sx * (PLAY_X - 0.12), RAIL_Y, sz * (PLAY_Z - 0.12), (sx * sz * PI) / 4));
 
-    trim.push(
-      box(
-        LONG_LEN,
-        0.03,
-        0.05,
-        sx * LONG_X,
-        RAIL_Y + 0.08,
-        sz * PLAY_Z,
-      ),
-    );
+    trim.push(box(LONG_LEN, 0.03, 0.05, sx * LONG_X, RAIL_Y + 0.08, sz * PLAY_Z));
   }
 
   for (const n of [-2, -1, 1, 2]) {
-    diamonds.push(
-      box(
-        0.05,
-        0.02,
-        0.05,
-        n * 0.9,
-        0.48,
-        sz * (PLAY_Z + 0.02),
-        PI / 4,
-      ),
-    );
+    diamonds.push(box(0.05, 0.02, 0.05, n * 0.9, 0.48, sz * (PLAY_Z + 0.02), PI / 4,),);
   }
 }
 
 for (const sx of [-1, 1]) {
-  rails.push(
-    box(
-      CUSHION,
-      RAIL_H,
-      PLAY_H - CORNER_GAP * 1.4,
-      sx * PLAY_X,
-      RAIL_Y,
-      0,
-    ),
-  );
+  rails.push(box(CUSHION, RAIL_H, PLAY_H - CORNER_GAP * 1.4, sx * PLAY_X, RAIL_Y, 0,),);
 
   for (const n of [-1, 1]) {
-    diamonds.push(
-      box(
-        0.05,
-        0.02,
-        0.05,
-        sx * (PLAY_X + 0.02),
-        0.48,
-        n * 0.5,
-        PI / 4,
-      ),
-    );
+    diamonds.push(box(0.05, 0.02, 0.05, sx * (PLAY_X + 0.02), 0.48, n * 0.5, PI / 4,),);
   }
 }
 
@@ -398,11 +315,7 @@ function TableRenderer() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
 
-    texture.repeat.set(
-      PLAY_W / 1.7,
-      PLAY_H / 1.7
-    );
-
+    texture.repeat.set(PLAY_W / 1.7, PLAY_H / 1.7);
     texture.needsUpdate = true;
 
     clothMat.map = texture;
@@ -413,45 +326,13 @@ function TableRenderer() {
 
   return (
     <group dispose={null}>
-      <mesh
-        geometry={frameGeometry}
-        material={frameMat}
-        receiveShadow
-      />
-
-      <mesh
-        geometry={feltGeometry}
-        material={feltMat}
-        receiveShadow
-      />
-
-      <mesh
-        geometry={clothGeometry}
-        material={clothMat}
-      />
-
-      <mesh
-        geometry={linerGeometry}
-        material={wellMat}
-        receiveShadow
-      />
-
-      <mesh
-        geometry={railsGeometry}
-        material={railMat}
-        castShadow
-        receiveShadow
-      />
-
-      <mesh
-        geometry={trimGeometry}
-        material={trimMat}
-      />
-
-      <mesh
-        geometry={diamondsGeometry}
-        material={diamondMat}
-      />
+      <mesh geometry={frameGeometry} material={frameMat} receiveShadow />
+      <mesh geometry={feltGeometry} material={feltMat} receiveShadow />
+      <mesh geometry={clothGeometry} material={clothMat} />
+      <mesh geometry={linerGeometry} material={wellMat} receiveShadow />
+      <mesh geometry={railsGeometry} material={railMat} castShadow receiveShadow />
+      <mesh geometry={trimGeometry} material={trimMat} />
+      <mesh geometry={diamondsGeometry} material={diamondMat} />
     </group>
   );
 }

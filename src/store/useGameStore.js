@@ -510,8 +510,7 @@ const useGameStore = create((set, get) => ({
     // ----------------------------------------------
 
     if (shotPots.has(8)) {
-      const legalEightBall =
-        eightBallWasLegal && !foulReason;
+      const legalEightBall = eightBallWasLegal && !foulReason;
 
       const winner = solo ? legalEightBall
         ? "human" : null : legalEightBall
