@@ -1,65 +1,95 @@
 // // src/renderers/HandRenderer.jsx
 // renders the hand for ball-in-hand events
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
+
 import useGameStore from "../store/useGameStore.js";
 import { BALL_Y } from "../ecs/constants/table.js";
 
 const HAND_WIDTH = 0.68;
 const HAND_HEIGHT = 0.43;
-// Position the image just above the table.
 const HAND_Y = BALL_Y + 0.01;
-// The cue ball is approximately 19% across the generated image.
+
 const BALL_IMAGE_X = 0.19;
 const BALL_IMAGE_Z = 0.48;
 
+const OFFSET_X = (0.5 - BALL_IMAGE_X) * HAND_WIDTH;
+const OFFSET_Z = (0.5 - BALL_IMAGE_Z) * HAND_HEIGHT;
+
+const HAND_GEOMETRY = new THREE.PlaneGeometry(
+  HAND_WIDTH,
+  HAND_HEIGHT
+);
+
 export default function HandRenderer({ cueBall, aimRef }) {
-    const groupRef = useRef();
-    const texture = useLoader(THREE.TextureLoader, "/hand-ball.png");
+  const groupRef = useRef(null);
 
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.minFilter = THREE.LinearMipmapLinearFilter;
-    texture.magFilter = THREE.LinearFilter;
+  const texture = useLoader(
+    THREE.TextureLoader,
+    "/hand-ball.png"
+  );
 
-    useFrame(() => {
-        const game = useGameStore.getState();
-        const aim = aimRef.current;
-        const hand = groupRef.current;
+  const material = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        alphaTest: 0.01,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      }),
+    [texture]
+  );
 
-        if (!hand) return;
+  const visible = useGameStore(
+    (s) =>
+      s.screen === "play" &&
+      !s.winner &&
+      s.ballInHand &&
+      (s.currentPlayer === "human" ||
+        s.currentPlayer === "ai")
+  );
 
-        const visible = game.screen === "play" && !game.winner && (game.ballInHand && (game.currentPlayer === "human" || game.currentPlayer === "ai"));
-        hand.visible = visible;
+  useFrame(() => {
+    const hand = groupRef.current;
+    if (!hand || !visible) return;
 
-        if (!visible) return;
+    const aim = aimRef.current;
+    if (!aim || !cueBall) return;
 
-        const ballX = Number.isFinite(aim.handX) ? aim.handX : cueBall.x;
-        const ballZ = Number.isFinite(aim.handZ) ? aim.handZ : cueBall.z;
+    const ballX = Number.isFinite(aim.handX)
+      ? aim.handX
+      : cueBall.x;
 
-        // Offset the image so its illustrated cue ball
-        // stays directly over the actual placement position.
-        const offsetX = (0.5 - BALL_IMAGE_X) * HAND_WIDTH;
-        const offsetZ = (0.5 - BALL_IMAGE_Z) * HAND_HEIGHT;
+    const ballZ = Number.isFinite(aim.handZ)
+      ? aim.handZ
+      : cueBall.z;
 
-        hand.position.set(ballX + offsetX, HAND_Y + (aim.handLift || 0), ballZ + offsetZ);
-    });
+    const x = ballX + OFFSET_X;
+    const y = HAND_Y + (aim.handLift || 0);
+    const z = ballZ + OFFSET_Z;
 
-    return (
-        <group ref={groupRef} visible={false}>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} renderOrder={5}>
-                <planeGeometry args={[HAND_WIDTH, HAND_HEIGHT]} />
+    if (
+      hand.position.x !== x ||
+      hand.position.y !== y ||
+      hand.position.z !== z
+    ) {
+      hand.position.set(x, y, z);
+    }
+  });
 
-                <meshBasicMaterial
-                    map={texture}
-                    transparent
-                    alphaTest={0.01}
-                    depthWrite={false}
-                    side={THREE.DoubleSide}
-                    toneMapped={false}
-                />
-            </mesh>
-        </group>
-    );
+  return (
+    <group ref={groupRef} visible={visible}>
+      <mesh
+        geometry={HAND_GEOMETRY}
+        material={material}
+        rotation={[-Math.PI / 2, 0, 0]}
+        renderOrder={5}
+        dispose={null}
+      />
+    </group>
+  );
 }

@@ -393,12 +393,14 @@ function TableRenderer() {
   const invalidate = useThree((state) => state.invalidate);
 
   useLayoutEffect(() => {
+    if (clothMat.map === texture) return;
+
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
 
     texture.repeat.set(
       PLAY_W / 1.7,
-      PLAY_H / 1.7,
+      PLAY_H / 1.7
     );
 
     texture.needsUpdate = true;

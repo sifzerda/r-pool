@@ -1,6 +1,6 @@
 // src/renderers/BallRenderer.jsx
 
-import { useRef, useMemo, useLayoutEffect } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -10,66 +10,116 @@ import { dirtyBalls } from "../ecs/world.js";
 import useGameStore from "../store/useGameStore.js";
 
 function writeBall(mesh, dummy, ball, ballInHand) {
-    dummy.position.set(ball.x, ball.y, ball.z);
-    dummy.rotation.set(ball.rotX, ball.rotY, ball.rotZ);
+  dummy.position.set(ball.x, ball.y, ball.z);
+  dummy.rotation.set(
+    ball.rotX || 0,
+    ball.rotY || 0,
+    ball.rotZ || 0
+  );
 
-    const hidden = ball.pocketed || (ball.id === 0 && ballInHand);
+  const hidden =
+    ball.pocketed ||
+    (ball.id === 0 && ballInHand);
 
-    dummy.scale.setScalar(hidden ? 0 : 1);
-    dummy.updateMatrix();
+  dummy.scale.setScalar(hidden ? 0 : 1);
+  dummy.updateMatrix();
 
-    mesh.setMatrixAt(ball.instanceId, dummy.matrix);
-    ball.dirty = false;
+  mesh.setMatrixAt(ball.instanceId, dummy.matrix);
+  ball.dirty = false;
 }
 
 function BallRenderer({ balls }) {
-    const meshRef = useRef();
-    const dummy = useMemo(() => new THREE.Object3D(), []);
+  const meshRef = useRef(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    const ballInHand = useGameStore((s) => s.ballInHand);
+  const ballInHand = useGameStore((s) => s.ballInHand);
 
-    useLayoutEffect(() => {
-        const mesh = meshRef.current;
-        if (!mesh) return;
+  const ballInHandRef = useRef(ballInHand);
+  const cueBallRef = useRef(null);
 
-        mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
-        const offsets = ballGeometry.getAttribute("instanceUvOffset");
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
-        for (const ball of balls) {
-            const [u, v] = getBallUvOffset(ball.id);
-            offsets.setXY(ball.instanceId, u, v);
-
-            writeBall(mesh, dummy, ball, ballInHand);
-        }
-
-        dirtyBalls.clear();
-        offsets.needsUpdate = true;
-        mesh.instanceMatrix.needsUpdate = true;
-    }, [balls, dummy, ballInHand]);
-
-    useFrame(() => {
-        const mesh = meshRef.current;
-        if (!mesh || !dirtyBalls.size) return;
-
-        for (const ball of dirtyBalls) {
-            writeBall(mesh, dummy, ball, ballInHand);
-        }
-
-        dirtyBalls.clear();
-        mesh.instanceMatrix.needsUpdate = true;
-    });
-
-    return (
-        <instancedMesh
-            ref={meshRef}
-            args={[ballGeometry, ballMaterial, balls.length]}
-            frustumCulled={false}
-            castShadow
-            receiveShadow
-            dispose={null}
-        />
+    const offsets = ballGeometry.getAttribute(
+      "instanceUvOffset"
     );
+
+    cueBallRef.current = null;
+
+    for (const ball of balls) {
+      if (ball.id === 0) cueBallRef.current = ball;
+
+      const [u, v] = getBallUvOffset(ball.id);
+      offsets.setXY(ball.instanceId, u, v);
+
+      writeBall(mesh, dummy, ball, ballInHand);
+      dirtyBalls.delete(ball);
+    }
+
+    offsets.needsUpdate = true;
+    mesh.instanceMatrix.needsUpdate = true;
+
+    ballInHandRef.current = ballInHand;
+  }, [balls, dummy]);
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current;
+    const cueBall = cueBallRef.current;
+
+    ballInHandRef.current = ballInHand;
+
+    if (!mesh || !cueBall) return;
+
+    writeBall(mesh, dummy, cueBall, ballInHand);
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [ballInHand, dummy]);
+
+  useFrame(() => {
+    const mesh = meshRef.current;
+
+    if (!mesh || dirtyBalls.size === 0) return;
+
+    let updated = false;
+
+    for (const ball of dirtyBalls) {
+      if (
+        ball.instanceId == null ||
+        ball.instanceId < 0 ||
+        ball.instanceId >= mesh.count
+      ) {
+        continue;
+      }
+
+      writeBall(
+        mesh,
+        dummy,
+        ball,
+        ballInHandRef.current
+      );
+
+      updated = true;
+    }
+
+    dirtyBalls.clear();
+
+    if (updated) {
+      mesh.instanceMatrix.needsUpdate = true;
+    }
+  });
+
+  return (
+    <instancedMesh
+      ref={meshRef}
+      args={[ballGeometry, ballMaterial, balls.length]}
+      frustumCulled={false}
+      castShadow
+      receiveShadow
+      dispose={null}
+    />
+  );
 }
 
 export default BallRenderer;

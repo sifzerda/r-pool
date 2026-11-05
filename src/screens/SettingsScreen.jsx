@@ -1,4 +1,3 @@
-
 // src/screens/SettingsScreen.jsx
 
 import { useEffect, useRef } from "react";
@@ -53,7 +52,9 @@ export default function SettingsScreen() {
           </p>
 
           <div className="relative min-h-60 overflow-hidden rounded-md border border-cyan-400/20 bg-[#091a32]/50 shadow-[0_0_25px_rgba(34,211,238,0.05)] md:min-h-0">
-            <PreviewTable />
+           
+            <PreviewTable preset={selectedPreset} className="h-full" />
+
           </div>
         </div>
 
@@ -69,10 +70,7 @@ export default function SettingsScreen() {
               onChange={(event) => applyPreset(event.target.value)}
               className={selectClass}>
 
-              {PRESET_NAMES.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
+              {PRESET_NAMES.map((name) => (<option key={name} value={name}>{name}</option>
               ))}
             </select>
           </div>
@@ -127,7 +125,7 @@ export default function SettingsScreen() {
               id="ai-difficulty"
               value={difficulty}
               disabled={!aiEnabled}
-              onChange={(event) => setSetting("aiDifficulty", event.target.value) }
+              onChange={(event) => setSetting("aiDifficulty", event.target.value)}
               className={selectClass}>
               {Object.keys(AI_DIFFICULTIES).map((level) => (
                 <option key={level} value={level}>
