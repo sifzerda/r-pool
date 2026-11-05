@@ -8,13 +8,10 @@ const ballGeometry = new THREE.SphereGeometry(BALL_R, 24, 16);
 
 const ballMaterial = new THREE.MeshPhysicalMaterial({
   map: ballAtlas,
-
   roughness: 0.08,
   metalness: 0,
-
   clearcoat: 1,
   clearcoatRoughness: 0.08,
-
   envMapIntensity: 1.5,
 });
 
