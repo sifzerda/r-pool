@@ -52,7 +52,7 @@ export default function SettingsScreen() {
           </p>
 
           <div className="relative min-h-60 overflow-hidden rounded-md border border-cyan-400/20 bg-[#091a32]/50 shadow-[0_0_25px_rgba(34,211,238,0.05)] md:min-h-0">
-           
+
             <PreviewTable preset={selectedPreset} className="h-full" />
 
           </div>
@@ -64,42 +64,36 @@ export default function SettingsScreen() {
           {/* Appearance */}
           <div className="grid content-center gap-2 rounded-md border border-cyan-400/20 bg-[#091a32]/50 p-3">
 
-            <select
-              id="appearance-preset"
-              value={selectedPreset}
+            <select id="appearance-preset" value={selectedPreset}
               onChange={(event) => applyPreset(event.target.value)}
               className={selectClass}>
 
-              {PRESET_NAMES.map((name) => (<option key={name} value={name}>{name}</option>
-              ))}
+              {PRESET_NAMES.map((name) => (<option key={name} value={name}>{name}</option>))}
+
             </select>
           </div>
 
           {/* Aim guide */}
           <label className={optionClass}>
-            <input
-              type="checkbox"
+
+            <input type="checkbox"
               className="h-3.5 w-3.5 shrink-0 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
               checked={settings.showAimGuide}
-              onChange={(event) =>
-                setSetting("showAimGuide", event.target.checked)
-              }
-            />
+              onChange={(event) => setSetting("showAimGuide", event.target.checked)} />
+
             <span>Show aim guide</span>
           </label>
 
           {/* Solo */}
           <div className="grid gap-1">
             <label className={optionClass}>
-              <input
-                type="checkbox"
+
+              <input type="checkbox"
                 className="h-3.5 w-3.5 shrink-0 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
                 checked={settings.solo}
-                onChange={(event) =>
-                  setSetting("solo", event.target.checked)
-                }
-              />
+                onChange={(event) => setSetting("solo", event.target.checked)} />
               <span>Solo mode</span>
+
             </label>
 
             <p className="px-1 text-[10px] leading-relaxed text-cyan-100/45">
@@ -115,14 +109,12 @@ export default function SettingsScreen() {
               ? "border-cyan-400/20 bg-[#091a32]/50 opacity-100"
               : "border-cyan-400/10 bg-[#091a32]/20 opacity-40"
               }`}>
-            <label
-              htmlFor="ai-difficulty"
+            <label htmlFor="ai-difficulty"
               className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-300">
               AI difficulty
             </label>
 
-            <select
-              id="ai-difficulty"
+            <select id="ai-difficulty"
               value={difficulty}
               disabled={!aiEnabled}
               onChange={(event) => setSetting("aiDifficulty", event.target.value)}
@@ -135,34 +127,29 @@ export default function SettingsScreen() {
             </select>
 
             <p className="text-[10px] text-cyan-100/45">
-              {aiEnabled
-                ? "Select opponent difficulty."
-                : "Unavailable in Solo mode."}
+              {aiEnabled ? "Select opponent difficulty." : "Unavailable in Solo mode."}
             </p>
+
           </div>
 
           {/* HUD */}
           <label className={optionClass}>
-            <input
-              type="checkbox"
+
+            <input type="checkbox"
               className="h-3.5 w-3.5 shrink-0 accent-cyan-400 focus-visible:outline-2 focus-visible:outline-cyan-300"
               checked={settings.showHUD}
-              onChange={(event) =>
-                setSetting("showHUD", event.target.checked)
-              }
-            />
+              onChange={(event) => setSetting("showHUD", event.target.checked)} />
+
             <span>Show HUD</span>
           </label>
 
           {/* Back */}
-          <button
-            type="button"
-            onClick={closeSettings}
-            className="group relative mt-1 cursor-pointer touch-manipulation overflow-hidden rounded-md border border-cyan-400/20 bg-[#091a32]/80 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-all duration-300 hover:border-cyan-300/70 hover:bg-[#102b48] hover:text-cyan-200 hover:shadow-[0_0_18px_rgba(34,211,238,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
-          >
+          <button type="button" onClick={closeSettings}
+            className="group relative mt-1 cursor-pointer touch-manipulation overflow-hidden rounded-md border border-cyan-400/20 bg-[#091a32]/80 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-100 transition-all duration-300 hover:border-cyan-300/70 hover:bg-[#102b48] hover:text-cyan-200 hover:shadow-[0_0_18px_rgba(34,211,238,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">
             <span className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-cyan-300/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <span className="relative">Back</span>
           </button>
+          
         </div>
       </div>
     </section>
