@@ -25,10 +25,7 @@ export default function SettingsScreen() {
   const optionClass = "flex min-h-10 cursor-pointer items-center gap-2 rounded-md border border-cyan-400/15 bg-[#091a32]/50 px-3 py-2 text-[10px] uppercase tracking-[0.15em] text-cyan-100/90 transition-colors hover:border-cyan-300/40 hover:bg-cyan-400/5";
 
   return (
-    <section
-      ref={panel}
-      tabIndex={-1}
-      aria-label="Settings"
+    <section ref={panel} tabIndex={-1} aria-label="Settings"
       className="relative grid h-full min-h-0 w-full max-w-none grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-y-auto overscroll-contain rounded-lg backdrop-blur-2xl p-3 font-sans text-cyan-50 shadow-[0_0_50px_rgba(15,35,100,0.2)] outline-none sm:p-4">
       {/* Heading */}
       <div className="relative text-center">
@@ -149,7 +146,7 @@ export default function SettingsScreen() {
             <span className="pointer-events-none absolute inset-0 bg-linear-to-r from-transparent via-cyan-300/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <span className="relative">Back</span>
           </button>
-          
+
         </div>
       </div>
     </section>
