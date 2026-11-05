@@ -11,10 +11,7 @@ export function createAIWorker() {
   const pending = new Map();
 
   function abortError() {
-    return new DOMException(
-      "AI request cancelled",
-      "AbortError"
-    );
+    return new DOMException("AI request cancelled", "AbortError");
   }
 
   function settle(id, error, result) {
@@ -23,10 +20,7 @@ export function createAIWorker() {
 
     pending.delete(id);
 
-    request.signal?.removeEventListener(
-      "abort",
-      request.onAbort
-    );
+    request.signal?.removeEventListener("abort", request.onAbort);
 
     if (error) request.reject(error);
     else request.resolve(result);
@@ -39,10 +33,7 @@ export function createAIWorker() {
   }
 
   function startWorker() {
-    const next = new Worker(
-      new URL("./ai.worker.js", import.meta.url),
-      { type: "module" }
-    );
+    const next = new Worker(new URL("./ai.worker.js", import.meta.url), { type: "module" });
 
     next.onmessage = ({ data }) => {
       if (worker !== next) return;
@@ -56,15 +47,8 @@ export function createAIWorker() {
 
     next.onerror = (event) => {
       if (worker !== next) return;
-
-      console.error(
-        "[AI Worker]",
-        event.message || "Worker error"
-      );
-
-      restartWorker(
-        new Error(event.message || "AI worker failed")
-      );
+      console.error("[AI Worker]", event.message || "Worker error");
+      restartWorker(new Error(event.message || "AI worker failed"));
     };
 
     worker = next;
@@ -75,11 +59,8 @@ export function createAIWorker() {
 
     const old = worker;
     worker = null;
-
     old?.terminate();
-
     rejectAll(error);
-
     startWorker();
   }
 
@@ -91,9 +72,7 @@ export function createAIWorker() {
 
   function request(type, payload, options = {}) {
     if (disposed) {
-      return Promise.reject(
-        new Error("AI worker disposed")
-      );
+      return Promise.reject(new Error("AI worker disposed"));
     }
 
     const { signal } = options;
@@ -118,11 +97,7 @@ export function createAIWorker() {
         onAbort,
       });
 
-      signal?.addEventListener(
-        "abort",
-        onAbort,
-        { once: true }
-      );
+      signal?.addEventListener("abort", onAbort, { once: true });
 
       try {
         worker.postMessage({
@@ -142,7 +117,6 @@ export function createAIWorker() {
     if (disposed) return;
 
     disposed = true;
-
     worker?.terminate();
     worker = null;
 

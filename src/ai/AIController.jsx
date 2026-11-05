@@ -2,32 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-
 import useGameStore from "../store/useGameStore.js";
 import { ballQuery, ballsAreMoving } from "../ecs/world.js";
-
-import {
-  MIN_X,
-  MAX_X,
-  MIN_Z,
-  MAX_Z,
-} from "../ecs/constants/tableBounds.js";
-
-import {
-  BALL_R,
-  MAX_POWER,
-  MAX_PULL,
-  MIN_PULL,
-} from "../ecs/constants/table.js";
-
+import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "../ecs/constants/tableBounds.js";
+import { BALL_R, MAX_POWER, MAX_PULL, MIN_PULL } from "../ecs/constants/table.js";
 import { POCKETS } from "../ecs/constants/pockets.js";
 import { placeCueBall } from "../ecs/AimController.jsx";
 import { createAIWorker } from "./AIWorkerClient.js";
-
-import {
-  setPendingPrediction,
-  clearPendingPrediction,
-} from "./AIPhysicsDebugger.js";
+import { setPendingPrediction, clearPendingPrediction } from "./AIPhysicsDebugger.js";
 
 // --------------------------------------------------
 // CONSTANTS
@@ -57,10 +39,7 @@ const MAX_PLACEMENT_CHOICES = 6;
 const RANDOM_PLACEMENT_TRIES = 24;
 
 const FALLBACK_SPOTS = [
-  {
-    x: MIN_X + (MAX_X - MIN_X) * 0.25,
-    z: 0,
-  },
+  { x: MIN_X + (MAX_X - MIN_X) * 0.25, z: 0 },
   { x: 0, z: 0 },
 ];
 
@@ -69,12 +48,7 @@ const FALLBACK_SPOTS = [
 // --------------------------------------------------
 
 function isAITurn(game) {
-  return (
-    game.screen === "play" &&
-    !game.settings.solo &&
-    game.currentPlayer === "ai" &&
-    !game.winner
-  );
+  return (game.screen === "play" && !game.settings.solo && game.currentPlayer === "ai" && !game.winner);
 }
 
 function getGroupState(game) {
@@ -92,10 +66,7 @@ function getGroupState(game) {
   }
 
   return {
-    group,
-    isEightBallLegal: Boolean(
-      group && remaining === 0
-    ),
+    group, isEightBallLegal: Boolean(group && remaining === 0),
   };
 }
 
@@ -133,22 +104,14 @@ function isSpotClear(x, z, balls, cueId) {
   for (let i = 0; i < balls.length; i++) {
     const ball = balls[i];
 
-    if (
-      ball.id === cueId ||
-      ball.pocketed ||
-      ball.falling ||
-      ball.scratched
-    ) {
+    if (ball.id === cueId || ball.pocketed || ball.falling || ball.scratched) {
       continue;
     }
 
     const dx = ball.x - x;
     const dz = ball.z - z;
 
-    if (
-      dx * dx + dz * dz <
-      SPOT_CLEARANCE_SQ
-    ) {
+    if (dx * dx + dz * dz < SPOT_CLEARANCE_SQ) {
       return false;
     }
   }
@@ -159,10 +122,7 @@ function isSpotClear(x, z, balls, cueId) {
     const dx = pocket.x - x;
     const dz = pocket.z - z;
 
-    if (
-      dx * dx + dz * dz <
-      POCKET_CLEARANCE_SQ
-    ) {
+    if (dx * dx + dz * dz < POCKET_CLEARANCE_SQ) {
       return false;
     }
   }
@@ -180,13 +140,8 @@ function generatePlacementSpots(cueBall, balls) {
 
   // Integer grid indices avoid accumulated
   // floating-point drift from repeated += 0.2.
-  const xCount = Math.floor(
-    (maxX - minX) / GRID_STEP
-  );
-
-  const zCount = Math.floor(
-    (maxZ - minZ) / GRID_STEP
-  );
+  const xCount = Math.floor((maxX - minX) / GRID_STEP);
+  const zCount = Math.floor((maxZ - minZ) / GRID_STEP);
 
   for (let zi = 0; zi <= zCount; zi++) {
     const z = minZ + zi * GRID_STEP;
@@ -211,58 +166,24 @@ function tryPlaceCueBall(cueBall, spots, balls) {
   for (let i = 0; i < spots.length; i++) {
     const spot = spots[i];
 
-    if (
-      !Number.isFinite(spot.x) ||
-      !Number.isFinite(spot.z)
-    ) {
+    if (!Number.isFinite(spot.x) || !Number.isFinite(spot.z)) {
       continue;
     }
 
-    if (
-      !isSpotClear(
-        spot.x,
-        spot.z,
-        balls,
-        cueBall.id
-      )
-    ) {
+    if (!isSpotClear(spot.x, spot.z, balls, cueBall.id)) {
       continue;
     }
 
-    if (
-      placeCueBall(
-        cueBall,
-        spot.x,
-        spot.z
-      )
-    ) {
+    if (placeCueBall(cueBall, spot.x, spot.z)) {
       return true;
     }
   }
 
-  for (
-    let i = 0;
-    i < RANDOM_PLACEMENT_TRIES;
-    i++
-  ) {
-    const x = randomBetween(
-      MIN_X + GRID_MARGIN,
-      MAX_X - GRID_MARGIN
-    );
+  for (let i = 0; i < RANDOM_PLACEMENT_TRIES; i++) {
+    const x = randomBetween(MIN_X + GRID_MARGIN, MAX_X - GRID_MARGIN);
+    const z = randomBetween(MIN_Z + GRID_MARGIN, MAX_Z - GRID_MARGIN);
 
-    const z = randomBetween(
-      MIN_Z + GRID_MARGIN,
-      MAX_Z - GRID_MARGIN
-    );
-
-    if (
-      !isSpotClear(
-        x,
-        z,
-        balls,
-        cueBall.id
-      )
-    ) {
+    if (!isSpotClear(x, z, balls, cueBall.id)) {
       continue;
     }
 
@@ -281,10 +202,7 @@ function tryPlaceCueBall(cueBall, spots, balls) {
 function resetAIAim(aim) {
   if (!aim) return;
 
-  if (
-    !aim.aiControlled &&
-    !aim.handPlacement
-  ) {
+  if (!aim.aiControlled && !aim.handPlacement) {
     return;
   }
 
@@ -308,10 +226,7 @@ function resetAIAim(aim) {
 }
 
 function applyAIShot(aim, cueBall, shot) {
-  const angle = Math.atan2(
-    shot.sin,
-    shot.cos
-  );
+  const angle = Math.atan2(shot.sin, shot.cos);
 
   aim.angle = angle;
   aim.cos = shot.cos;
@@ -339,26 +254,14 @@ function applyAIShot(aim, cueBall, shot) {
 }
 
 function validShot(shot) {
-  return (
-    shot &&
-    Number.isFinite(shot.cos) &&
-    Number.isFinite(shot.sin) &&
-    Number.isFinite(shot.power) &&
-    shot.power > 0 &&
-    shot.cos * shot.cos +
-      shot.sin * shot.sin >
-      1e-16
-  );
+  return (shot && Number.isFinite(shot.cos) && Number.isFinite(shot.sin) && Number.isFinite(shot.power) && shot.power > 0 && shot.cos * shot.cos + shot.sin * shot.sin > 1e-16);
 }
 
 // --------------------------------------------------
 // CONTROLLER
 // --------------------------------------------------
 
-export default function AIController({
-  cueBall,
-  aimRef,
-}) {
+export default function AIController({ cueBall, aimRef }) {
   const invalidate = useThree(
     (state) => state.invalidate
   );
@@ -443,7 +346,6 @@ export default function AIController({
   function cancelPlanning() {
     requestId.current++;
     requestContext.current = null;
-
     workerRef.current?.cancel();
   }
 
@@ -471,22 +373,14 @@ export default function AIController({
   }
 
   function isRequestValid(id, expectedPhase) {
-    if (
-      id !== requestId.current ||
-      phase.current !== expectedPhase
-    ) {
+    if (id !== requestId.current || phase.current !== expectedPhase) {
       return false;
     }
 
     const game = useGameStore.getState();
     const context = requestContext.current;
 
-    if (
-      !context ||
-      !isAITurn(game) ||
-      game.stats.shotActive ||
-      ballsAreMoving()
-    ) {
+    if (!context || !isAITurn(game) || game.stats.shotActive || ballsAreMoving()) {
       return false;
     }
 
@@ -520,13 +414,8 @@ export default function AIController({
   function failRequest(id, error, label) {
     if (id !== requestId.current) return;
 
-    if (
-      error?.name !== "AbortError"
-    ) {
-      console.error(
-        `[AI] ${label} failed:`,
-        error
-      );
+    if (error?.name !== "AbortError") {
+      console.error(`[AI] ${label} failed:`, error);
     }
 
     requestContext.current = null;
@@ -545,22 +434,10 @@ export default function AIController({
 
     if (!worker) return;
 
-    const balls = snapshotBalls(
-      ballQuery.entities
-    );
-
+    const balls = snapshotBalls(ballQuery.entities);
     const cue = snapshotBall(cueBall);
-
-    const spots = generatePlacementSpots(
-      cue,
-      balls
-    );
-
-    const {
-      group,
-      isEightBallLegal,
-    } = getGroupState(game);
-
+    const spots = generatePlacementSpots(cue, balls);
+    const { group, isEightBallLegal } = getGroupState(game);
     const id = beginRequest(game);
 
     worker
@@ -573,14 +450,11 @@ export default function AIController({
         level: game.difficulty,
       })
       .then((ranked) => {
-        if (
-          !isRequestValid(id, "planning")
-        ) {
+        if (!isRequestValid(id, "planning")) {
           return;
         }
 
-        const currentGame =
-          useGameStore.getState();
+        const currentGame = useGameStore.getState();
 
         if (!currentGame.ballInHand) {
           phase.current = "idle";
@@ -591,10 +465,7 @@ export default function AIController({
 
         const candidates = [
           ...(Array.isArray(ranked)
-            ? ranked.slice(
-                0,
-                MAX_PLACEMENT_CHOICES
-              )
+            ? ranked.slice(0, MAX_PLACEMENT_CHOICES)
             : []),
           ...FALLBACK_SPOTS,
         ];
@@ -636,11 +507,7 @@ export default function AIController({
         invalidate();
       })
       .catch((error) => {
-        failRequest(
-          id,
-          error,
-          "Placement"
-        );
+        failRequest(id, error, "Placement");
       });
   }
 
@@ -653,17 +520,9 @@ export default function AIController({
 
     if (!worker) return;
 
-    const balls = snapshotBalls(
-      ballQuery.entities
-    );
-
+    const balls = snapshotBalls(ballQuery.entities);
     const cue = snapshotBall(cueBall);
-
-    const {
-      group,
-      isEightBallLegal,
-    } = getGroupState(game);
-
+    const { group, isEightBallLegal } = getGroupState(game);
     const id = beginRequest(game);
 
     worker
@@ -675,15 +534,11 @@ export default function AIController({
         level: game.difficulty,
       })
       .then((shot) => {
-        if (
-          !isRequestValid(id, "planning")
-        ) {
+        if (!isRequestValid(id, "planning")) {
           return;
         }
 
-        if (
-          useGameStore.getState().ballInHand
-        ) {
+        if (useGameStore.getState().ballInHand) {
           requestContext.current = null;
           phase.current = "idle";
           invalidate();
@@ -691,9 +546,7 @@ export default function AIController({
         }
 
         if (!validShot(shot)) {
-          console.warn(
-            "[AI] No valid shot returned"
-          );
+          console.warn("[AI] No valid shot returned");
 
           requestContext.current = null;
           phase.current = "idle";
@@ -704,12 +557,7 @@ export default function AIController({
         }
 
         function startCharging() {
-          if (
-            !isRequestValid(
-              id,
-              "planning"
-            )
-          ) {
+          if (!isRequestValid(id, "planning")) {
             return;
           }
 
@@ -717,20 +565,9 @@ export default function AIController({
 
           if (!aim) return;
 
-          applyAIShot(
-            aim,
-            cueBall,
-            shot
-          );
+          applyAIShot(aim, cueBall, shot);
 
-          plannedPull.current = Math.min(
-            MAX_PULL,
-            Math.max(
-              MIN_PULL,
-              (shot.power / MAX_POWER) *
-                MAX_PULL
-            )
-          );
+          plannedPull.current = Math.min(MAX_PULL, Math.max(MIN_PULL, (shot.power / MAX_POWER) * MAX_PULL));
 
           chargeTime.current = 0;
           movingTime.current = 0;
@@ -755,19 +592,12 @@ export default function AIController({
             shot,
           })
           .then((prediction) => {
-            if (
-              !isRequestValid(
-                id,
-                "planning"
-              )
-            ) {
+            if (!isRequestValid(id, "planning")) {
               return;
             }
 
             if (prediction) {
-              setPendingPrediction(
-                prediction
-              );
+              setPendingPrediction(prediction);
             } else {
               clearPendingPrediction();
             }
@@ -775,19 +605,12 @@ export default function AIController({
             startCharging();
           })
           .catch((error) => {
-            if (
-              id !== requestId.current
-            ) {
+            if (id !== requestId.current) {
               return;
             }
 
-            if (
-              error?.name !== "AbortError"
-            ) {
-              console.warn(
-                "[AI] Prediction failed:",
-                error
-              );
+            if (error?.name !== "AbortError") {
+              console.warn("[AI] Prediction failed:", error);
             }
 
             clearPendingPrediction();
@@ -795,11 +618,7 @@ export default function AIController({
           });
       })
       .catch((error) => {
-        failRequest(
-          id,
-          error,
-          "Planning"
-        );
+        failRequest(id, error, "Planning");
       });
   }
 
@@ -808,11 +627,7 @@ export default function AIController({
   // --------------------------------------------------
 
   useFrame((_, rawDt) => {
-    const dt = Math.min(
-      Math.max(0, rawDt),
-      0.1
-    );
-
+    const dt = Math.min(Math.max(0, rawDt), 0.1);
     const game = useGameStore.getState();
     const aim = aimRef.current;
 
@@ -823,11 +638,7 @@ export default function AIController({
     // ----------------------------------------------
 
     if (!isAITurn(game)) {
-      if (
-        phase.current !== "idle" ||
-        aim.aiControlled ||
-        aim.handPlacement
-      ) {
+      if (phase.current !== "idle" || aim.aiControlled || aim.handPlacement) {
         resetController(aim);
       }
 
@@ -839,9 +650,7 @@ export default function AIController({
     // ----------------------------------------------
 
     if (game.stats.shotActive) {
-      if (
-        phase.current === "planning"
-      ) {
+      if (phase.current === "planning") {
         cancelPlanning();
       }
 
@@ -885,8 +694,7 @@ export default function AIController({
     // ----------------------------------------------
 
     if (phase.current === "placing") {
-      const placement =
-        aim.handPlacement;
+      const placement = aim.handPlacement;
 
       if (!placement) {
         phase.current = "idle";
@@ -896,40 +704,15 @@ export default function AIController({
 
       placement.elapsed += dt;
 
-      const progress = Math.min(
-        1,
-        placement.elapsed /
-          placement.duration
-      );
+      const progress = Math.min(1, placement.elapsed / placement.duration);
+      const eased = progress * progress * (3 - 2 * progress);
 
-      const eased =
-        progress *
-        progress *
-        (3 - 2 * progress);
-
-      aim.handX =
-        placement.fromX +
-        (placement.toX -
-          placement.fromX) *
-          eased;
-
-      aim.handZ =
-        placement.fromZ +
-        (placement.toZ -
-          placement.fromZ) *
-          eased;
-
-      aim.handLift =
-        Math.sin(
-          progress * Math.PI
-        ) * 0.12;
+      aim.handX = placement.fromX + (placement.toX - placement.fromX) * eased;
+      aim.handZ = placement.fromZ + (placement.toZ - placement.fromZ) * eased;
+      aim.handLift = Math.sin(progress * Math.PI) * 0.12;
 
       if (progress >= 1) {
-        const placed = tryPlaceCueBall(
-          cueBall,
-          placement.spots,
-          ballQuery.entities
-        );
+        const placed = tryPlaceCueBall(cueBall, placement.spots, ballQuery.entities);
 
         aim.handLift = 0;
         aim.handPlacement = null;
@@ -941,12 +724,9 @@ export default function AIController({
             ballInHand: false,
           });
         } else {
-          console.warn(
-            "[AI] Cue-ball placement failed"
-          );
+          console.warn("[AI] Cue-ball placement failed");
 
-          retryIn.current =
-            RETRY_COOLDOWN;
+          retryIn.current = RETRY_COOLDOWN;
         }
       }
 
@@ -961,23 +741,11 @@ export default function AIController({
     if (phase.current === "charging") {
       chargeTime.current += dt;
 
-      const progress = Math.min(
-        1,
-        chargeTime.current /
-          AI_CHARGE_DURATION
-      );
-
+      const progress = Math.min(1, chargeTime.current / AI_CHARGE_DURATION);
       const remaining = 1 - progress;
-
-      const eased =
-        1 - remaining * remaining;
-
-      aim.pullBack =
-        plannedPull.current * eased;
-
-      aim.power =
-        (aim.pullBack / MAX_PULL) *
-        MAX_POWER;
+      const eased = 1 - remaining * remaining;
+      aim.pullBack = plannedPull.current * eased;
+      aim.power = (aim.pullBack / MAX_PULL) * MAX_POWER;
 
       if (progress >= 1) {
         aim.pendingShot = {
@@ -995,8 +763,7 @@ export default function AIController({
         aim.shotX = cueBall.x;
         aim.shotZ = cueBall.z;
 
-        aim.shotPullBack =
-          plannedPull.current;
+        aim.shotPullBack = plannedPull.current;
 
         aim.charging = false;
 
@@ -1020,29 +787,17 @@ export default function AIController({
     // WAIT FOR SHOT TO START
     // ----------------------------------------------
 
-    if (
-      submitted.current ||
-      phase.current === "waiting" ||
-      aim.pendingShot
-    ) {
+    if (submitted.current || phase.current === "waiting" || aim.pendingShot) {
       stuckTime.current += dt;
 
-      if (
-        stuckTime.current >
-        SHOT_START_TIMEOUT
-      ) {
-        console.warn(
-          "[AI] Shot never started, resetting"
-        );
+      if (stuckTime.current > SHOT_START_TIMEOUT) {
+        console.warn("[AI] Shot never started, resetting");
 
         submitted.current = false;
         stuckTime.current = 0;
-
         phase.current = "idle";
-
         aim.aiControlled = true;
         resetAIAim(aim);
-
         clearPendingPrediction();
       }
 
@@ -1058,10 +813,7 @@ export default function AIController({
     // ----------------------------------------------
 
     if (retryIn.current > 0) {
-      retryIn.current = Math.max(
-        0,
-        retryIn.current - dt
-      );
+      retryIn.current = Math.max(0, retryIn.current - dt);
 
       invalidate();
       return;
@@ -1074,21 +826,15 @@ export default function AIController({
     if (ballsAreMoving()) {
       movingTime.current += dt;
 
-      if (
-        movingTime.current <
-        MAX_SETTLE_WAIT
-      ) {
+      if (movingTime.current < MAX_SETTLE_WAIT) {
         invalidate();
         return;
       }
 
-      console.warn(
-        "[AI] Waiting for physics to settle"
-      );
+      console.warn("[AI] Waiting for physics to settle");
 
       movingTime.current = 0;
-      retryIn.current =
-        RETRY_COOLDOWN;
+      retryIn.current = RETRY_COOLDOWN;
 
       invalidate();
       return;

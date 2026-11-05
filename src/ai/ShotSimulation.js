@@ -12,15 +12,7 @@ export function simulateShot({
   maxSteps = 1800,
   maxSubsteps = 8,
 }) {
-  if (
-    !Array.isArray(balls) ||
-    !shot ||
-    !physics ||
-    typeof shotSpeed !== "function" ||
-    typeof findCapturePocket !== "function" ||
-    !Number.isFinite(fixedDt) ||
-    fixedDt <= 0
-  ) {
+  if (!Array.isArray(balls) || !shot || !physics || typeof shotSpeed !== "function" || typeof findCapturePocket !== "function" || !Number.isFinite(fixedDt) || fixedDt <= 0) {
     return null;
   }
 
@@ -35,11 +27,7 @@ export function simulateShot({
   for (let i = 0; i < balls.length; i++) {
     const ball = balls[i];
 
-    if (
-      ball.pocketed ||
-      ball.falling ||
-      ball.scratched
-    ) {
+    if (ball.pocketed || ball.falling || ball.scratched) {
       continue;
     }
 

@@ -1,30 +1,17 @@
 // src/ai/ai.worker.js
 
-
-import {
-  planShot,
-  rankCueSpots,
-} from "./ShotPlanner.js";
-
+import { planShot, rankCueSpots } from "./ShotPlanner.js";
 import { simulateShot } from "./ShotSimulation.js";
 import { aiPhysics } from "./aiPhysics.js";
-
-import {
-  setPhysics,
-  bindTimeStep,
-} from "../ecs/constants/physicsConfig.js";
+import { setPhysics, bindTimeStep } from "../ecs/constants/physicsConfig.js";
 
 // --------------------------------------------------
 // WORKER CONFIGURATION
 // --------------------------------------------------
 
-// Cache the last timestep so it is not rebound
-// unnecessarily for every AI request.
+// Cache the last timestep
 let lastFixedDt = null;
-
-// Cache physics values, not object references.
-// Structured cloning creates new objects when
-// messages cross the worker boundary.
+// Cache physics values
 let lastPhysics = null;
 
 function samePhysics(a, b) {
@@ -41,10 +28,7 @@ function samePhysics(a, b) {
   for (let i = 0; i < aKeys.length; i++) {
     const key = aKeys[i];
 
-    if (
-      !Object.prototype.hasOwnProperty.call(b, key) ||
-      !Object.is(a[key], b[key])
-    ) {
+    if (!Object.prototype.hasOwnProperty.call(b, key) || !Object.is(a[key], b[key])) {
       return false;
     }
   }
@@ -53,20 +37,13 @@ function samePhysics(a, b) {
 }
 
 function configurePhysics(physics, fixedDt) {
-  if (
-    fixedDt !== undefined &&
-    fixedDt !== lastFixedDt
-  ) {
+  if (fixedDt !== undefined && fixedDt !== lastFixedDt) {
     bindTimeStep(fixedDt);
     lastFixedDt = fixedDt;
   }
 
-  if (
-    physics != null &&
-    !samePhysics(physics, lastPhysics)
-  ) {
+  if (physics != null && !samePhysics(physics, lastPhysics)) {
     setPhysics(physics);
-
     lastPhysics = { ...physics };
   }
 }
@@ -109,15 +86,11 @@ self.onmessage = ({ data }) => {
     const handler = handlers[type];
 
     if (!handler) {
-      throw new Error(
-        `Unknown AI request: ${type}`
-      );
+      throw new Error(`Unknown AI request: ${type}`);
     }
 
     if (!payload || typeof payload !== "object") {
-      throw new Error(
-        `Invalid payload for AI request: ${type}`
-      );
+      throw new Error(`Invalid payload for AI request: ${type}`);
     }
 
     configurePhysics(physics, fixedDt);

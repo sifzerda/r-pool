@@ -1,5 +1,5 @@
 
- // src/ai/AIPhysicsDebugger.js
+// src/ai/AIPhysicsDebugger.js
 
 const POSITION_TOLERANCE = 0.025;
 
@@ -14,10 +14,7 @@ export function clearPendingPrediction() {
 }
 
 function distance(a, b) {
-  return Math.hypot(
-    a.x - b.x,
-    a.z - b.z
-  );
+  return Math.hypot(a.x - b.x, a.z - b.z);
 }
 
 function sortedIds(ids) {
@@ -31,34 +28,22 @@ export function captureActualShot(balls, game) {
       x: ball.x,
       z: ball.z,
       cueBall: !!ball.cueBall,
-      pocketed:
-        !!ball.pocketed ||
-        game.pottedIds.has(ball.id),
+      pocketed: !!ball.pocketed || game.pottedIds.has(ball.id),
     })),
 
     pottedIds: [...game.shotPottedIds],
 
-    firstContactId:
-      game.shotEvents.firstContactId,
-
-    railAfterContact:
-      game.shotEvents.railAfterContact,
-
-    cueScratch:
-      game.shotEvents.cueScratch,
+    firstContactId: game.shotEvents.firstContactId,
+    railAfterContact: game.shotEvents.railAfterContact,
+    cueScratch: game.shotEvents.cueScratch,
   };
 }
 
 export function compareShotResults(predicted, actual) {
   if (!predicted || !actual) return null;
 
-  const predictedMap = new Map(
-    predicted.balls.map((ball) => [ball.id, ball])
-  );
-
-  const actualMap = new Map(
-    actual.balls.map((ball) => [ball.id, ball])
-  );
+  const predictedMap = new Map(predicted.balls.map((ball) => [ball.id, ball]));
+  const actualMap = new Map(actual.balls.map((ball) => [ball.id, ball]));
 
   const ballResults = [];
 
@@ -82,10 +67,7 @@ export function compareShotResults(predicted, actual) {
       continue;
     }
 
-    const error = distance(
-      predictedBall,
-      actualBall
-    );
+    const error = distance(predictedBall, actualBall);
 
     ballResults.push({
       id,
@@ -109,29 +91,14 @@ export function compareShotResults(predicted, actual) {
     : 0;
 
   // The cue ball is not included in the rules system's pottedIds.
-  const cueId = predicted.balls.find(
-    (ball) => ball.cueBall
-  )?.id;
-
-  const predictedPotted = sortedIds(
-    predicted.pottedIds.filter((id) => id !== cueId)
-  );
-
+  const cueId = predicted.balls.find((ball) => ball.cueBall)?.id;
+  const predictedPotted = sortedIds(predicted.pottedIds.filter((id) => id !== cueId));
   const actualPotted = sortedIds(actual.pottedIds);
 
-  const pottedMatch =
-    JSON.stringify(predictedPotted) ===
-    JSON.stringify(actualPotted);
-
-  const firstContactMatch =
-    predicted.firstContactId === actual.firstContactId;
-
-  const railAfterContactMatch =
-    predicted.railAfterContact === actual.railAfterContact;
-
-  const scratchMatch =
-    !!predicted.cueScratch === !!actual.cueScratch;
-
+  const pottedMatch = JSON.stringify(predictedPotted) === JSON.stringify(actualPotted);
+  const firstContactMatch = predicted.firstContactId === actual.firstContactId;
+  const railAfterContactMatch = predicted.railAfterContact === actual.railAfterContact;
+  const scratchMatch = !!predicted.cueScratch === !!actual.cueScratch;
   const settled = !!predicted.settled;
 
   return {
@@ -161,37 +128,20 @@ export function logPendingShotComparison(balls, game) {
   pendingPrediction = null;
 
   const actual = captureActualShot(balls, game);
-
-  const comparison = compareShotResults(
-    predicted,
-    actual
-  );
+  const comparison = compareShotResults(predicted, actual);
 
   if (!comparison) return null;
 
   const passed = comparison.passed;
 
-  console.group(
-    `%cAI Physics Test: ${passed ? "PASS" : "MISMATCH"}`,
-    `color:${passed ? "#22c55e" : "#ef4444"};font-weight:bold`
-  );
+  console.group(`%cAI Physics Test: ${passed ? "PASS" : "MISMATCH"}`, `color:${passed ? "#22c55e" : "#ef4444"};font-weight:bold`);
 
   if (!comparison.settled) {
-    console.warn(
-      "Prediction did not settle before its simulation limit."
-    );
+    console.warn("Prediction did not settle before its simulation limit.");
   }
 
-  console.log(
-    "Average position error:",
-    comparison.averageError.toFixed(5)
-  );
-
-  console.log(
-    "Maximum position error:",
-    comparison.maximumError.toFixed(5)
-  );
-
+  console.log("Average position error:", comparison.averageError.toFixed(5));
+  console.log("Maximum position error:", comparison.maximumError.toFixed(5));
   console.log("Potted balls match:", comparison.pottedMatch);
   console.log("First contact matches:", comparison.firstContactMatch);
   console.log("Rail after contact matches:", comparison.railAfterContactMatch);
