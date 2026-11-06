@@ -18,22 +18,12 @@ const BALL_IMAGE_Z = 0.48;
 const OFFSET_X = (0.5 - BALL_IMAGE_X) * HAND_WIDTH;
 const OFFSET_Z = (0.5 - BALL_IMAGE_Z) * HAND_HEIGHT;
 
-const HAND_GEOMETRY = new THREE.PlaneGeometry(
-  HAND_WIDTH,
-  HAND_HEIGHT
-);
+const HAND_GEOMETRY = new THREE.PlaneGeometry(HAND_WIDTH, HAND_HEIGHT);
 
 export default function HandRenderer({ cueBall, aimRef }) {
   const groupRef = useRef(null);
-
-  const texture = useLoader(
-    THREE.TextureLoader,
-    "/hand-ball.png"
-  );
-
-  const material = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
+  const texture = useLoader(THREE.TextureLoader, "/hand-ball.png");
+  const material = useMemo(() => new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
         alphaTest: 0.01,
@@ -44,14 +34,7 @@ export default function HandRenderer({ cueBall, aimRef }) {
     [texture]
   );
 
-  const visible = useGameStore(
-    (s) =>
-      s.screen === "play" &&
-      !s.winner &&
-      s.ballInHand &&
-      (s.currentPlayer === "human" ||
-        s.currentPlayer === "ai")
-  );
+  const visible = useGameStore((s) => s.screen === "play" && !s.winner && s.ballInHand && (s.currentPlayer === "human" || s.currentPlayer === "ai"));
 
   useFrame(() => {
     const hand = groupRef.current;
@@ -60,23 +43,14 @@ export default function HandRenderer({ cueBall, aimRef }) {
     const aim = aimRef.current;
     if (!aim || !cueBall) return;
 
-    const ballX = Number.isFinite(aim.handX)
-      ? aim.handX
-      : cueBall.x;
-
-    const ballZ = Number.isFinite(aim.handZ)
-      ? aim.handZ
-      : cueBall.z;
+    const ballX = Number.isFinite(aim.handX) ? aim.handX : cueBall.x;
+    const ballZ = Number.isFinite(aim.handZ) ? aim.handZ : cueBall.z;
 
     const x = ballX + OFFSET_X;
     const y = HAND_Y + (aim.handLift || 0);
     const z = ballZ + OFFSET_Z;
 
-    if (
-      hand.position.x !== x ||
-      hand.position.y !== y ||
-      hand.position.z !== z
-    ) {
+    if (hand.position.x !== x || hand.position.y !== y || hand.position.z !== z) {
       hand.position.set(x, y, z);
     }
   });

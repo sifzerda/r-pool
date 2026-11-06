@@ -14,8 +14,8 @@ const PHYSICS_DEFAULTS = Object.freeze({
 });
 
 const physicsConfig = { ...PHYSICS_DEFAULTS };
-
 const physicsDerived = { damping: 1, sleepSq: 0 };
+
 let stepDt = 1 / 120;
 
 function recompute() {

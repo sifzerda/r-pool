@@ -1,51 +1,11 @@
 // src/ecs/PhysicsEngine.js
 
-import {
-  ballQuery,
-  activeBalls,
-  fallingBalls,
-  activeBall,
-  deactiveBall,
-  markDirty,
-  ballsAreMoving,
-} from "./world.js";
-
-import {
-  BALL_R,
-  MAX_POWER,
-  MAX_SHOT_SPEED,
-  CUE_SWING_DURATION,
-} from "./constants/table.js";
-
-import {
-  FIXED_DT,
-  MAX_SUBSTEPS,
-  MAX_FRAME_DT,
-} from "./constants/simulation.js";
-
-import {
-  physicsConfig as cfg,
-  physicsDerived,
-  bindTimeStep,
-  shotSpeed,
-} from "./constants/physicsConfig.js";
-
-import {
-  FALL_END_Y,
-  FALL_GRAVITY,
-  findCapturePocket,
-} from "./constants/pockets.js";
-
-import {
-  applyShot,
-  stepPhysics,
-  integrateBalls,
-  collideBalls,
-  capturePockets,
-  resolveCushion,
-  applyFriction,
-} from "./physicsCore.js";
-
+import { ballQuery, activeBalls, fallingBalls, activeBall, deactiveBall, markDirty, ballsAreMoving } from "./world.js";
+import { BALL_R, MAX_POWER, MAX_SHOT_SPEED, CUE_SWING_DURATION } from "./constants/table.js";
+import { FIXED_DT, MAX_SUBSTEPS, MAX_FRAME_DT } from "./constants/simulation.js";
+import { physicsConfig as cfg, physicsDerived, bindTimeStep, shotSpeed } from "./constants/physicsConfig.js";
+import { FALL_END_Y, FALL_GRAVITY, findCapturePocket } from "./constants/pockets.js";
+import { applyShot, stepPhysics, integrateBalls, collideBalls, capturePockets, resolveCushion, applyFriction } from "./physicsCore.js";
 import useGameStore from "../store/useGameStore.js";
 import { logPendingShotComparison } from "../ai/AIPhysicsDebugger.js";
 
@@ -146,11 +106,9 @@ function rejectShot(reason, detail) {
 
 function shotSystem(cueBall, aimRef) {
   const aim = aimRef.current;
-
   if (!aim) return false;
 
   const shot = aim.pendingShot;
-
   if (!shot) return false;
 
   aim.pendingShot = null;
@@ -159,9 +117,7 @@ function shotSystem(cueBall, aimRef) {
   const shooter = shot.player || "human";
 
   if (game.screen !== "play" || game.stats.shotActive || game.stats.cleared) {
-    return rejectShot(
-      "game not ready for shot"
-    );
+    return rejectShot("game not ready for shot");
   }
 
   if (game.currentPlayer !== shooter) {
@@ -176,9 +132,7 @@ function shotSystem(cueBall, aimRef) {
   }
 
   if (game.winner) {
-    return rejectShot(
-      "game already won"
-    );
+    return rejectShot("game already won");
   }
 
   if (ballsAreMoving() || fallingBalls.size > 0) {
@@ -403,7 +357,6 @@ function PhysicsEngine(cueBall, aimRef) {
       shotClock = 0;
 
       logPendingShotComparison(ballQuery.entities, game);
-
       game.finishShot();
     }
   }

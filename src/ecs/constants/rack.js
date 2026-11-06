@@ -6,11 +6,8 @@ import { BALLS } from "./balls.js";
 
 const DIAMETER = BALL_R * 2;
 const ROW_SPACING = DIAMETER * Math.sqrt(3) / 2;
-
 const RACK_X = 0.9;
-
-// Small positional variations to prevent
-// identical breaks every game.
+// Small positional variations to prevent identical breaks every game.
 const RACK_VARIATION = BALL_R * 0.015;
 
 // Preserve your existing rack arrangement.
@@ -23,9 +20,7 @@ const ORDER = [
 ];
 
 function randomOffset() {
-  return (
-    Math.random() * 2 - 1
-  ) * RACK_VARIATION;
+  return (Math.random() * 2 - 1) * RACK_VARIATION;
 }
 
 function buildRack() {
@@ -44,16 +39,8 @@ function buildRack() {
         num,
         type: BALLS[num].type,
         group: "object",
-
-        x:
-          RACK_X +
-          row * ROW_SPACING +
-          randomOffset(),
-
-        z:
-          (column - row / 2) *
-          DIAMETER +
-          randomOffset(),
+        x: RACK_X + row * ROW_SPACING + randomOffset(),
+        z: (column - row / 2) * DIAMETER + randomOffset(),
       });
     }
   }

@@ -11,15 +11,9 @@ import useGameStore from "../store/useGameStore.js";
 
 function writeBall(mesh, dummy, ball, ballInHand) {
   dummy.position.set(ball.x, ball.y, ball.z);
-  dummy.rotation.set(
-    ball.rotX || 0,
-    ball.rotY || 0,
-    ball.rotZ || 0
-  );
+  dummy.rotation.set(ball.rotX || 0, ball.rotY || 0, ball.rotZ || 0);
 
-  const hidden =
-    ball.pocketed ||
-    (ball.id === 0 && ballInHand);
+  const hidden = ball.pocketed || (ball.id === 0 && ballInHand);
 
   dummy.scale.setScalar(hidden ? 0 : 1);
   dummy.updateMatrix();
@@ -43,10 +37,7 @@ function BallRenderer({ balls }) {
 
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
-    const offsets = ballGeometry.getAttribute(
-      "instanceUvOffset"
-    );
-
+    const offsets = ballGeometry.getAttribute("instanceUvOffset");
     cueBallRef.current = null;
 
     for (const ball of balls) {
@@ -85,20 +76,11 @@ function BallRenderer({ balls }) {
     let updated = false;
 
     for (const ball of dirtyBalls) {
-      if (
-        ball.instanceId == null ||
-        ball.instanceId < 0 ||
-        ball.instanceId >= mesh.count
-      ) {
+      if (ball.instanceId == null || ball.instanceId < 0 || ball.instanceId >= mesh.count) {
         continue;
       }
 
-      writeBall(
-        mesh,
-        dummy,
-        ball,
-        ballInHandRef.current
-      );
+      writeBall(mesh, dummy, ball, ballInHandRef.current);
 
       updated = true;
     }

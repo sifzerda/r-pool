@@ -55,17 +55,9 @@ function StickRenderer({ cueBall, aimRef }) {
     stick.current.position.set((following ? aim.shotX : cueBall.x) - cos * distance, CUE_RENDER_Y, (following ? aim.shotZ : cueBall.z) - sin * distance);
     stick.current.rotation.set(0, -angle + Math.PI, 0);
     if (meter.current.visible) {
-      meter.current.position.set(
-        cueBall.x,
-        BALL_Y + 0.3,
-        cueBall.z - 0.55
-      );
+      meter.current.position.set(cueBall.x, BALL_Y + 0.3, cueBall.z - 0.55);
 
-      const ratio = THREE.MathUtils.clamp(
-        aim.power / MAX_POWER,
-        0,
-        1
-      );
+      const ratio = THREE.MathUtils.clamp(aim.power / MAX_POWER, 0, 1);
 
       fill.current.scale.x = Math.max(1e-3, ratio);
       fill.current.position.x = -0.4 + ratio * 0.4;
@@ -83,6 +75,4 @@ function StickRenderer({ cueBall, aimRef }) {
   )
 }
 
-export {
-  StickRenderer as default
-};
+export { StickRenderer as default };

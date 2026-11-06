@@ -254,10 +254,7 @@ const useGameStore = create((set, get) => ({
 
   startGame: (options = {}) => {
     const current = get();
-
-    const difficulty = DIFFICULTIES.has(options.difficulty)
-      ? options.difficulty
-      : current.settings.aiDifficulty || "medium";
+    const difficulty = DIFFICULTIES.has(options.difficulty) ? options.difficulty : current.settings.aiDifficulty || "medium";
 
     set((s) => ({
       screen: SCREENS.PLAY,
@@ -270,9 +267,7 @@ const useGameStore = create((set, get) => ({
       gameMode: "8ball",
       difficulty,
 
-      currentPlayer: options.startingPlayer === "ai"
-        ? "ai"
-        : "human",
+      currentPlayer: options.startingPlayer === "ai" ? "ai" : "human",
 
       playerGroups: {
         human: null,
@@ -300,13 +295,7 @@ const useGameStore = create((set, get) => ({
 
   recordShot: () => {
     set((s) => {
-      if (
-        s.screen !== SCREENS.PLAY ||
-        s.stats.shotActive ||
-        s.stats.cleared ||
-        s.winner ||
-        s.ballInHand
-      ) {
+      if (s.screen !== SCREENS.PLAY || s.stats.shotActive || s.stats.cleared || s.winner || s.ballInHand) {
         return s;
       }
 
@@ -512,9 +501,7 @@ const useGameStore = create((set, get) => ({
     if (shotPots.has(8)) {
       const legalEightBall = eightBallWasLegal && !foulReason;
 
-      const winner = solo ? legalEightBall
-        ? "human" : null : legalEightBall
-        ? shooter : opponent;
+      const winner = solo ? legalEightBall ? "human" : null : legalEightBall ? shooter : opponent;
 
       const message = legalEightBall
         ? `${shooter === "human" ? "You" : "AI"} win!`
@@ -526,10 +513,7 @@ const useGameStore = create((set, get) => ({
         ...s.stats,
         shotActive: false,
         lastPots: potCount,
-        bestPots: Math.max(
-          s.stats.bestPots,
-          potCount
-        ),
+        bestPots: Math.max(s.stats.bestPots, potCount),
         cleared: true,
         message,
       };
@@ -572,9 +556,7 @@ const useGameStore = create((set, get) => ({
     // NEXT PLAYER
     // ----------------------------------------------
 
-    const nextPlayer = solo ? "human" : foulReason
-      ? opponent : potCount > 0
-        ? shooter : opponent;
+    const nextPlayer = solo ? "human" : foulReason ? opponent : potCount > 0 ? shooter : opponent;
 
     // ----------------------------------------------
     // MESSAGE
@@ -583,16 +565,12 @@ const useGameStore = create((set, get) => ({
     let message;
 
     if (foulReason) {
-      const turnLabel = solo ? "Your" : nextPlayer === "human"
-        ? "Your" : "AI";
-
+      const turnLabel = solo ? "Your" : nextPlayer === "human" ? "Your" : "AI";
       message = `Foul: ${foulReason} • ` + `${turnLabel} turn — ball in hand`;
     } else if (potCount > 0) {
       message = `${potCount} ball` + `${potCount === 1 ? "" : "s"} potted`;
     } else {
-      message = solo
-        ? "No pot • your turn"
-        : "No pot • turn changes";
+      message = solo ? "No pot • your turn" : "No pot • turn changes";
     }
 
     const stats = {

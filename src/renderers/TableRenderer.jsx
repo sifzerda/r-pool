@@ -5,7 +5,7 @@ import { useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
-
+import { POCKETS } from "../ecs/constants/pockets.js";
 import {
   TABLE_W,
   TABLE_H,
@@ -23,81 +23,21 @@ import {
   SIDE_POCKET_R,
 } from "../ecs/constants/table.js";
 
-import { POCKETS } from "../ecs/constants/pockets.js";
-
 /* -------------------- SHARED MATERIALS -------------------- */
 
-const feltMat = new THREE.MeshPhysicalMaterial({
-  color: "#008000",
-  roughness: 0.95,
-  sheen: 0,
-  sheenRoughness: 0.5,
-});
-
-const clothMat = new THREE.MeshBasicMaterial({
-  transparent: true,
-  blending: THREE.AdditiveBlending,
-  opacity: 1,
-  depthWrite: false,
-});
-
-const frameMat = new THREE.MeshStandardMaterial({
-  color: "#3a1f0f",
-  roughness: 0.8,
-});
-
-const baseMat = new THREE.MeshStandardMaterial({
-  color: "#5b3418",
-  roughness: 0.7,
-});
-
-const railMat = new THREE.MeshStandardMaterial({
-  color: "#5b3418",
-});
-
-const trimMat = new THREE.MeshStandardMaterial({
-  color: "#7b4a25",
-});
-
-const diamondMat = new THREE.MeshStandardMaterial({
-  color: "#f0d080",
-});
-
-const wellMat = new THREE.MeshStandardMaterial({
-  color: "#120c08",
-  roughness: 1,
-  side: THREE.BackSide,
-});
-
-const stickTipMat = new THREE.MeshStandardMaterial({
-  color: "#5c3317",
-  roughness: 0.9,
-});
-
-const stickFerruleMat = new THREE.MeshStandardMaterial({
-  color: "#f0ede8",
-  roughness: 0.3,
-  metalness: 0.1,
-});
-
-const stickShaftMat = new THREE.MeshStandardMaterial({
-  color: "#d4a84b",
-  roughness: 0.25,
-  metalness: 0.05,
-});
-
-const stickAccentMat = new THREE.MeshStandardMaterial({
-  color: "#c8a030",
-  roughness: 0.2,
-  metalness: 0.6,
-  emissive: "#c8a030",
-  emissiveIntensity: 0.3,
-});
-
-const stickButtMat = new THREE.MeshStandardMaterial({
-  color: "#1a0e06",
-  roughness: 0.95,
-});
+const feltMat = new THREE.MeshPhysicalMaterial({ color: "#008000", roughness: 0.95, sheen: 0, sheenRoughness: 0.5 });
+const clothMat = new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, opacity: 1, depthWrite: false });
+const frameMat = new THREE.MeshStandardMaterial({ color: "#3a1f0f", roughness: 0.8 });
+const baseMat = new THREE.MeshStandardMaterial({ color: "#5b3418", roughness: 0.7 });
+const railMat = new THREE.MeshStandardMaterial({ color: "#5b3418" });
+const trimMat = new THREE.MeshStandardMaterial({ color: "#7b4a25" });
+const diamondMat = new THREE.MeshStandardMaterial({ color: "#f0d080" });
+const wellMat = new THREE.MeshStandardMaterial({ color: "#120c08", roughness: 1, side: THREE.BackSide });
+const stickTipMat = new THREE.MeshStandardMaterial({ color: "#5c3317", roughness: 0.9 });
+const stickFerruleMat = new THREE.MeshStandardMaterial({ color: "#f0ede8", roughness: 0.3, metalness: 0.1 });
+const stickShaftMat = new THREE.MeshStandardMaterial({ color: "#d4a84b", roughness: 0.25, metalness: 0.05 });
+const stickAccentMat = new THREE.MeshStandardMaterial({ color: "#c8a030", roughness: 0.2, metalness: 0.6, emissive: "#c8a030", emissiveIntensity: 0.3 });
+const stickButtMat = new THREE.MeshStandardMaterial({ color: "#1a0e06", roughness: 0.95 });
 
 const labMaterials = [
   feltMat,
@@ -218,9 +158,7 @@ function makeFrameGeometry() {
 
   for (const pocket of POCKETS) {
     const hole = new THREE.Path();
-
     hole.absarc(pocket.x, pocket.z, pocket.radius, 0, PI * 2, true,);
-
     shape.holes.push(hole);
   }
 
@@ -238,18 +176,14 @@ function makeFrameGeometry() {
 
 function makeLinerGeometry() {
   const height = FRAME_TOP + FELT_THICKNESS + 0.01 - FRAME_BOTTOM;
-
   const parts = [];
 
   for (const pocket of POCKETS) {
     const radius = pocket.radius - 0.005;
-
     const wall = new THREE.CylinderGeometry(radius, radius, height, CURVE, 1, true,);
-
     wall.translate(pocket.x, FRAME_BOTTOM + height / 2, pocket.z);
 
     const floor = new THREE.CircleGeometry(radius, CURVE);
-
     floor.rotateX(PI / 2);
     floor.translate(pocket.x, POCKET_FLOOR_Y, pocket.z);
 

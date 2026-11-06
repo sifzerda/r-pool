@@ -47,12 +47,7 @@ export function applyShot(ball, shot, speed) {
   const sin = shot.sin;
   const lengthSq = cos * cos + sin * sin;
 
-  if (
-    !Number.isFinite(lengthSq) ||
-    lengthSq < 1e-16 ||
-    !Number.isFinite(speed) ||
-    speed <= 0
-  ) {
+  if (!Number.isFinite(lengthSq) || lengthSq < 1e-16 || !Number.isFinite(speed) || speed <= 0) {
     return false;
   }
 
@@ -69,106 +64,50 @@ export function applyShot(ball, shot, speed) {
 // CUSHIONS
 // --------------------------------------------------
 
-function bounceX(
-  ball,
-  limit,
-  minimum,
-  cfg,
-  events
-) {
+function bounceX(ball, limit, minimum, cfg, events) {
   ball.x = limit;
-
   const vx = ball.vx;
 
-  if (
-    minimum
-      ? vx >= 0
-      : vx <= 0
-  ) {
+  if (minimum ? vx >= 0 : vx <= 0) {
     return;
   }
 
   const speed = Math.abs(vx);
 
-  const restitution = Math.max(
-    Math.min(cfg.cushionMinE, cfg.cushionE),
-    cfg.cushionE -
-      cfg.cushionSpeedLoss * speed
-  );
+  const restitution = Math.max(Math.min(cfg.cushionMinE, cfg.cushionE), cfg.cushionE - cfg.cushionSpeedLoss * speed);
 
   ball.vx = -vx * restitution;
 
   const side = ball.vz;
-  const friction =
-    cfg.cushionFriction *
-    (1 + restitution) *
-    speed;
+  const friction = cfg.cushionFriction * (1 + restitution) * speed;
 
-  ball.vz =
-    Math.sign(side) *
-    Math.max(
-      0,
-      Math.abs(side) - friction
-    );
-
+  ball.vz = Math.sign(side) * Math.max(0, Math.abs(side) - friction);
   events?.onRail?.(ball);
 }
 
-function bounceZ(
-  ball,
-  limit,
-  minimum,
-  cfg,
-  events
-) {
+function bounceZ(ball, limit, minimum, cfg, events) {
   ball.z = limit;
 
   const vz = ball.vz;
 
-  if (
-    minimum
-      ? vz >= 0
-      : vz <= 0
-  ) {
+  if (minimum ? vz >= 0 : vz <= 0) {
     return;
   }
 
   const speed = Math.abs(vz);
-
-  const restitution = Math.max(
-    Math.min(cfg.cushionMinE, cfg.cushionE),
-    cfg.cushionE -
-      cfg.cushionSpeedLoss * speed
-  );
+  const restitution = Math.max(Math.min(cfg.cushionMinE, cfg.cushionE), cfg.cushionE - cfg.cushionSpeedLoss * speed);
 
   ball.vz = -vz * restitution;
 
   const side = ball.vx;
-  const friction =
-    cfg.cushionFriction *
-    (1 + restitution) *
-    speed;
+  const friction = cfg.cushionFriction * (1 + restitution) * speed;
 
-  ball.vx =
-    Math.sign(side) *
-    Math.max(
-      0,
-      Math.abs(side) - friction
-    );
-
+  ball.vx = Math.sign(side) * Math.max(0, Math.abs(side) - friction);
   events?.onRail?.(ball);
 }
 
-export function resolveCushion(
-  ball,
-  cfg,
-  findPocket,
-  events
-) {
-  if (
-    ball.pocketed ||
-    ball.falling
-  ) {
+export function resolveCushion(ball, cfg, findPocket, events) {
+  if (ball.pocketed || ball.falling) {
     return;
   }
 
@@ -176,51 +115,22 @@ export function resolveCushion(
   const z = ball.z;
 
   // Avoid pocket lookup when safely inside bounds.
-  if (
-    x >= MIN_X &&
-    x <= MAX_X &&
-    z >= MIN_Z &&
-    z <= MAX_Z
-  ) {
+  if (x >= MIN_X && x <= MAX_X && z >= MIN_Z && z <= MAX_Z) {
     return;
   }
 
   if (findPocket(x, z)) return;
 
   if (x < MIN_X) {
-    bounceX(
-      ball,
-      MIN_X,
-      true,
-      cfg,
-      events
-    );
+    bounceX(ball, MIN_X, true, cfg, events);
   } else if (x > MAX_X) {
-    bounceX(
-      ball,
-      MAX_X,
-      false,
-      cfg,
-      events
-    );
+    bounceX(ball, MAX_X, false, cfg, events);
   }
 
   if (z < MIN_Z) {
-    bounceZ(
-      ball,
-      MIN_Z,
-      true,
-      cfg,
-      events
-    );
+    bounceZ(ball, MIN_Z, true, cfg, events);
   } else if (z > MAX_Z) {
-    bounceZ(
-      ball,
-      MAX_Z,
-      false,
-      cfg,
-      events
-    );
+    bounceZ(ball, MAX_Z, false, cfg, events);
   }
 }
 
@@ -228,21 +138,11 @@ export function resolveCushion(
 // INTEGRATION
 // --------------------------------------------------
 
-export function integrateBalls(
-  balls,
-  dt,
-  cfg,
-  findPocket,
-  events
-) {
+export function integrateBalls(balls, dt, cfg, findPocket, events) {
   for (let i = 0; i < balls.length; i++) {
     const ball = balls[i];
 
-    if (
-      !ball.active ||
-      ball.pocketed ||
-      ball.falling
-    ) {
+    if (!ball.active || ball.pocketed || ball.falling) {
       continue;
     }
 
@@ -260,12 +160,7 @@ export function integrateBalls(
       ball.rotZ -= dx * INV_BALL_R;
     }
 
-    resolveCushion(
-      ball,
-      cfg,
-      findPocket,
-      events
-    );
+    resolveCushion(ball, cfg, findPocket, events);
   }
 }
 
@@ -273,26 +168,15 @@ export function integrateBalls(
 // POCKET CAPTURE
 // --------------------------------------------------
 
-export function capturePockets(
-  balls,
-  findPocket,
-  events
-) {
+export function capturePockets(balls, findPocket, events) {
   for (let i = 0; i < balls.length; i++) {
     const ball = balls[i];
 
-    if (
-      !ball.active ||
-      ball.pocketed ||
-      ball.falling
-    ) {
+    if (!ball.active || ball.pocketed || ball.falling) {
       continue;
     }
 
-    const pocket = findPocket(
-      ball.x,
-      ball.z
-    );
+    const pocket = findPocket(ball.x, ball.z);
 
     if (!pocket) continue;
 
@@ -391,8 +275,7 @@ export function collideBalls(balls, cfg, events) {
       const b = balls[contact.j];
       const { nx, nz } = contact;
 
-      const normalSpeed =
-        (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
+      const normalSpeed = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
       if (normalSpeed >= -1e-9) continue;
 
       const restitution = iteration === 0 ? cfg.ballE : 0;
@@ -464,14 +347,7 @@ export function collideBalls(balls, cfg, events) {
 // FRICTION
 // --------------------------------------------------
 
-export function applyFriction(
-  balls,
-  cfg,
-  damping,
-  sleepSq,
-  fixedDt,
-  events
-) {
+export function applyFriction(balls, cfg, damping, sleepSq, fixedDt, events) {
   const loss = cfg.rollDecel * fixedDt;
 
   for (let i = 0; i < balls.length; i++) {
@@ -488,9 +364,7 @@ export function applyFriction(
     const vx = ball.vx;
     const vz = ball.vz;
 
-    const speedSq =
-      vx * vx +
-      vz * vz;
+    const speedSq = vx * vx + vz * vz;
 
     if (speedSq === 0) {
       ball.vx = 0;
@@ -504,10 +378,7 @@ export function applyFriction(
     const speed = Math.sqrt(speedSq);
     const next = speed * damping - loss;
 
-    if (
-      next <= 0 ||
-      next * next <= sleepSq
-    ) {
+    if (next <= 0 || next * next <= sleepSq) {
       ball.vx = 0;
       ball.vz = 0;
       ball.active = false;
@@ -536,40 +407,14 @@ export function stepPhysics({
   sleepSq,
   events,
 }) {
-  const substeps = getSubsteps(
-    balls,
-    fixedDt,
-    maxSubsteps
-  );
-
+  const substeps = getSubsteps(balls, fixedDt, maxSubsteps);
   const dt = fixedDt / substeps;
 
   for (let step = 0; step < substeps; step++) {
-    integrateBalls(
-      balls,
-      dt,
-      cfg,
-      findPocket,
-      events
-    );
-
-    capturePockets(
-      balls,
-      findPocket,
-      events
-    );
-
-    collideBalls(
-      balls,
-      cfg,
-      events
-    );
-
-    capturePockets(
-      balls,
-      findPocket,
-      events
-    );
+    integrateBalls(balls, dt, cfg, findPocket, events);
+    capturePockets(balls, findPocket, events);
+    collideBalls(balls, cfg, events);
+    capturePockets(balls, findPocket, events);
 
     // Cushion correction after collisions.
     // Only check active balls outside table bounds.
@@ -578,28 +423,11 @@ export function stepPhysics({
 
       if (!ball.active) continue;
 
-      if (
-        ball.x < MIN_X ||
-        ball.x > MAX_X ||
-        ball.z < MIN_Z ||
-        ball.z > MAX_Z
-      ) {
-        resolveCushion(
-          ball,
-          cfg,
-          findPocket,
-          events
-        );
+      if (ball.x < MIN_X || ball.x > MAX_X || ball.z < MIN_Z || ball.z > MAX_Z) {
+        resolveCushion(ball, cfg, findPocket, events);
       }
     }
   }
 
-  applyFriction(
-    balls,
-    cfg,
-    damping,
-    sleepSq,
-    fixedDt,
-    events
-  );
+  applyFriction(balls, cfg, damping, sleepSq, fixedDt, events);
 }

@@ -3,29 +3,9 @@
 import { useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-
-import {
-  canAim,
-  ballQuery,
-  markDirty,
-  deactiveBall,
-} from "./world.js";
-
-import {
-  BALL_R,
-  BALL_Y,
-  MAX_POWER,
-  MAX_PULL,
-  MIN_PULL,
-} from "./constants/table.js";
-
-import {
-  MIN_X,
-  MAX_X,
-  MIN_Z,
-  MAX_Z,
-} from "./constants/tableBounds.js";
-
+import { canAim, ballQuery, markDirty, deactiveBall } from "./world.js";
+import { BALL_R, BALL_Y, MAX_POWER, MAX_PULL, MIN_PULL } from "./constants/table.js";
+import { MIN_X, MAX_X, MIN_Z, MAX_Z } from "./constants/tableBounds.js";
 import { findCapturePocket } from "./constants/pockets.js";
 import useGameStore from "../store/useGameStore.js";
 
@@ -80,32 +60,18 @@ function aimAtPointer(aim, cue) {
 }
 
 function isValidCuePosition(x, z, cueBall) {
-  if (
-    x < MIN_X ||
-    x > MAX_X ||
-    z < MIN_Z ||
-    z > MAX_Z ||
-    findCapturePocket(x, z)
-  ) {
+  if (x < MIN_X || x > MAX_X || z < MIN_Z || z > MAX_Z || findCapturePocket(x, z)) {
     return false;
   }
 
   const minimumDistance = BALL_R * 2 + 0.01;
 
   for (const ball of ballQuery.entities) {
-    if (
-      ball === cueBall ||
-      ball.pocketed ||
-      ball.falling ||
-      ball.scratched
-    ) {
+    if (ball === cueBall || ball.pocketed || ball.falling || ball.scratched) {
       continue;
     }
 
-    if (
-      (ball.x - x) ** 2 + (ball.z - z) ** 2 <
-      minimumDistance ** 2
-    ) {
+    if ((ball.x - x) ** 2 + (ball.z - z) ** 2 < minimumDistance ** 2) {
       return false;
     }
   }
@@ -140,11 +106,7 @@ function placeCueBall(cueBall, x, z) {
 // Module-level so they don't close over component state and are not
 // recreated on every render.
 function isHumanTurn(game = useGameStore.getState()) {
-  return (
-    game.screen === "play" &&
-    game.currentPlayer === "human" &&
-    !game.winner
-  );
+  return (game.screen === "play" && game.currentPlayer === "human" && !game.winner);
 }
 
 function isPlacingBall(game = useGameStore.getState()) {
@@ -159,10 +121,7 @@ function AimController({ cueBall, aimRef }) {
     pointer: new THREE.Vector2(),
     hit: new THREE.Vector3(),
     wasPlacing: false,
-    plane: new THREE.Plane(
-      new THREE.Vector3(0, 1, 0),
-      -BALL_Y
-    ),
+    plane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -BALL_Y),
     lastCueX: NaN,
     lastCueZ: NaN,
   }), []);
@@ -184,18 +143,11 @@ function AimController({ cueBall, aimRef }) {
 
     scratch.wasPlacing = false;
 
-    if (
-      !isHumanTurn() ||
-      aim.charging ||
-      !canAim(cueBall, aim)
-    ) {
+    if (!isHumanTurn() || aim.charging || !canAim(cueBall, aim)) {
       return;
     }
 
-    if (
-      cueBall.x === scratch.lastCueX &&
-      cueBall.z === scratch.lastCueZ
-    ) {
+    if (cueBall.x === scratch.lastCueX && cueBall.z === scratch.lastCueZ) {
       return;
     }
 
@@ -220,20 +172,11 @@ function AimController({ cueBall, aimRef }) {
 
       if (rect.width <= 0 || rect.height <= 0) return false;
 
-      scratch.pointer.set(
-        ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.clientY - rect.top) / rect.height) * 2 + 1
-      );
-
+      scratch.pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
       camera.updateMatrixWorld();
       scratch.raycaster.setFromCamera(scratch.pointer, camera);
 
-      if (
-        !scratch.raycaster.ray.intersectPlane(
-          scratch.plane,
-          scratch.hit
-        )
-      ) {
+      if (!scratch.raycaster.ray.intersectPlane(scratch.plane, scratch.hit)) {
         return false;
       }
 
@@ -251,14 +194,7 @@ function AimController({ cueBall, aimRef }) {
     }
 
     function updatePull() {
-      const pull = Math.max(
-        0,
-        -(
-          (aim.pointerX - aim.dragStartX) * aim.lockedCos +
-          (aim.pointerZ - aim.dragStartZ) * aim.lockedSin
-        )
-      );
-
+      const pull = Math.max(0, -((aim.pointerX - aim.dragStartX) * aim.lockedCos + (aim.pointerZ - aim.dragStartZ) * aim.lockedSin));
       aim.pullBack = Math.min(MAX_PULL, pull);
       aim.power = (aim.pullBack / MAX_PULL) * MAX_POWER;
     }
@@ -309,11 +245,7 @@ function AimController({ cueBall, aimRef }) {
 
       if (aim.charging) {
         updatePull();
-      } else if (
-        isHumanTurn() &&
-        !isPlacingBall() &&
-        canAim(cueBall, aim)
-      ) {
+      } else if (isHumanTurn() && !isPlacingBall() && canAim(cueBall, aim)) {
         aimAtPointer(aim, cueBall);
       }
 
@@ -321,11 +253,7 @@ function AimController({ cueBall, aimRef }) {
     }
 
     function onMove(event) {
-      if (
-        aim.charging
-          ? event.pointerId !== aim.pointerId
-          : event.isPrimary === false
-      ) {
+      if (aim.charging ? event.pointerId !== aim.pointerId : event.isPrimary === false) {
         return;
       }
 
@@ -340,12 +268,7 @@ function AimController({ cueBall, aimRef }) {
     }
 
     function onDown(event) {
-      if (
-        event.button !== 0 ||
-        event.isPrimary === false ||
-        aim.charging ||
-        !isHumanTurn()
-      ) {
+      if (event.button !== 0 || event.isPrimary === false || aim.charging || !isHumanTurn()) {
         return;
       }
 
@@ -357,11 +280,7 @@ function AimController({ cueBall, aimRef }) {
       if (isPlacingBall()) {
         event.preventDefault();
 
-        const placed = placeCueBall(
-          cueBall,
-          aim.pointerX,
-          aim.pointerZ
-        );
+        const placed = placeCueBall(cueBall, aim.pointerX, aim.pointerZ);
 
         if (placed) {
           useGameStore.setState({ ballInHand: false });

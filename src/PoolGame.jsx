@@ -19,20 +19,17 @@ import HowToPlayScreen from "./screens/HowToPlayScreen.jsx";
 const POSITION = [0, 10, 0], ROTATION = [-Math.PI / 2, 0, 0];
 
 function FittedCamera() {
+
     const camera = useRef(null);
     const size = useThree((s) => s.size);
     const invalidate = useThree((s) => s.invalidate);
 
     useLayoutEffect(() => {
-        if (!camera.current) return;
 
-        const fittedZoom = Math.min(
-            Math.max(1, size.width - 24) / (TABLE_W + 0.8),
-            Math.max(1, size.height - 120) / (TABLE_H + 0.8)
-        );
+        if (!camera.current) return;
+        const fittedZoom = Math.min(Math.max(1, size.width - 24) / (TABLE_W + 0.8), Math.max(1, size.height - 120) / (TABLE_H + 0.8));
 
         camera.current.zoom = Math.max(1, fittedZoom);
-
         camera.current.updateProjectionMatrix();
         invalidate();
     }, [size.width, size.height, invalidate]);
@@ -49,15 +46,21 @@ function FittedCamera() {
 }
 
 function Rack() {
+
     const [session, setSession] = useState(null);
+
     useEffect(() => {
         setSession({ cueBall: setupGame() });
         return clearWorld;
     }, []);
-    return <Canvas shadows dpr={[1, 1.5]}
-        frameloop="demand" gl={{ powerPreference: "high-performance" }}>
-        <FittedCamera />{session && <PoolScene cueBall={session.cueBall} />}
-    </Canvas>;
+
+    return (
+        <Canvas shadows dpr={[1, 1.5]}
+            frameloop="demand" gl={{ powerPreference: "high-performance" }}>
+            <FittedCamera />
+            {session && <PoolScene cueBall={session.cueBall} />}
+        </Canvas>
+    )
 }
 
 export default function PoolGame() {
@@ -77,10 +80,17 @@ export default function PoolGame() {
             else if ([SCREENS.SCORE_BOARD, SCREENS.HOW_TO_PLAY].includes(s.screen)) s.closeInfo();
         }
 
-        function onVisibility() { if (document.hidden) useGameStore.getState().pauseGame(); }
+        function onVisibility() {
+            if (document.hidden) useGameStore.getState().pauseGame();
+        }
         window.addEventListener("keydown", onKeyDown);
         document.addEventListener("visibilitychange", onVisibility);
-        return () => { window.removeEventListener("keydown", onKeyDown); document.removeEventListener("visibilitychange", onVisibility); };
+
+        return (() => {
+                window.removeEventListener("keydown", onKeyDown);
+                document.removeEventListener("visibilitychange", onVisibility);
+            }
+        )
     }, []);
 
     return (

@@ -1,12 +1,6 @@
 // src/renderers/ballTextures.js
 
-import {
-  CanvasTexture,
-  Color,
-  SRGBColorSpace,
-  LinearFilter,
-} from "three";
-
+import { CanvasTexture, Color, SRGBColorSpace, LinearFilter } from "three";
 import { BALLS } from "../ecs/constants/balls.js";
 
 const GRID = 4;
@@ -39,8 +33,7 @@ const BADGE_X1 = CELL_SIZE * 0.25;
 const BADGE_X2 = CELL_SIZE * 0.75;
 const BADGE_Y = CELL_SIZE * 0.5;
 
-const clamp01 = (value) =>
-  Math.max(0, Math.min(1, value));
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
 
 // --------------------------------------------------
 // COLOR ADJUSTMENT
@@ -49,13 +42,7 @@ const clamp01 = (value) =>
 function adjust(hex, saturation, brightness) {
   color.set(hex);
   color.getHSL(hsl, SRGBColorSpace);
-
-  color.setHSL(
-    hsl.h,
-    clamp01(hsl.s * saturation),
-    clamp01(hsl.l * brightness),
-    SRGBColorSpace
-  );
+  color.setHSL(hsl.h, clamp01(hsl.s * saturation), clamp01(hsl.l * brightness), SRGBColorSpace);
 
   return `#${color.getHexString(SRGBColorSpace)}`;
 }
@@ -65,21 +52,12 @@ function adjust(hex, saturation, brightness) {
 // --------------------------------------------------
 
 function paint(options = DEFAULT_ATLAS_OPTS) {
-  const saturation =
-    options.saturation ?? DEFAULT_ATLAS_OPTS.saturation;
-
-  const brightness =
-    options.brightness ?? DEFAULT_ATLAS_OPTS.brightness;
-
-  const stripeWidth =
-    options.stripeWidth ?? DEFAULT_ATLAS_OPTS.stripeWidth;
-
-  const badgeSize =
-    options.badgeSize ?? DEFAULT_ATLAS_OPTS.badgeSize;
-
+  const saturation = options.saturation ?? DEFAULT_ATLAS_OPTS.saturation;
+  const brightness = options.brightness ?? DEFAULT_ATLAS_OPTS.brightness;
+  const stripeWidth = options.stripeWidth ?? DEFAULT_ATLAS_OPTS.stripeWidth;
+  const badgeSize = options.badgeSize ?? DEFAULT_ATLAS_OPTS.badgeSize;
   const stripeHeight = CELL_SIZE * stripeWidth;
   const stripeY = (CELL_SIZE - stripeHeight) * 0.5;
-
   const badgeRadius = CELL_SIZE * badgeSize;
 
   // Shared canvas text and stroke settings.
@@ -94,34 +72,19 @@ function paint(options = DEFAULT_ATLAS_OPTS) {
   for (const ball of BALLS) {
     const x = (ball.id % GRID) * CELL_SIZE;
     const y = Math.floor(ball.id / GRID) * CELL_SIZE;
-
-    const ballColor = adjust(
-      ball.color,
-      saturation,
-      brightness
-    );
+    const ballColor = adjust(ball.color, saturation, brightness);
 
     ctx.save();
     ctx.translate(x, y);
 
     // Base colour
-    ctx.fillStyle =
-      ball.type === "solid" || ball.type === "eight"
-        ? ballColor
-        : WHITE;
-
+    ctx.fillStyle = ball.type === "solid" || ball.type === "eight" ? ballColor : WHITE;
     ctx.fillRect(0, 0, CELL_SIZE, CELL_SIZE);
 
     // Stripe
     if (ball.type === "stripe") {
       ctx.fillStyle = ballColor;
-
-      ctx.fillRect(
-        0,
-        stripeY,
-        CELL_SIZE,
-        stripeHeight
-      );
+      ctx.fillRect(0, stripeY, CELL_SIZE, stripeHeight);
     }
 
     // Number badges
@@ -130,25 +93,12 @@ function paint(options = DEFAULT_ATLAS_OPTS) {
 
       for (const badgeX of [BADGE_X1, BADGE_X2]) {
         ctx.beginPath();
-
-        ctx.arc(
-          badgeX,
-          BADGE_Y,
-          badgeRadius,
-          0,
-          Math.PI * 2
-        );
-
+        ctx.arc(badgeX, BADGE_Y, badgeRadius, 0, Math.PI * 2);
         ctx.fillStyle = WHITE;
         ctx.fill();
         ctx.stroke();
-
         ctx.fillStyle = BLACK;
-        ctx.fillText(
-          number,
-          badgeX,
-          BADGE_Y
-        );
+        ctx.fillText(number, badgeX, BADGE_Y);
       }
     }
 

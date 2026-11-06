@@ -48,10 +48,7 @@ function rayCircleDistance(x, z, dx, dz, centreX, centreZ, radiusSq) {
   if (perpendicularSq > radiusSq) {
     return Infinity;
   }
-  return Math.max(
-    0,
-    projection - Math.sqrt(radiusSq - perpendicularSq)
-  );
+  return Math.max(0, projection - Math.sqrt(radiusSq - perpendicularSq));
 }
 
 function findNextEvent(result, x, z, dx, dz, budget, ignoreA, ignoreB) {
@@ -101,10 +98,7 @@ function findNextEvent(result, x, z, dx, dz, budget, ignoreA, ignoreB) {
     if (perpendicularSq >= DIAMETER_SQ) {
       continue;
     }
-    const distance = Math.max(
-      0,
-      projection - Math.sqrt(DIAMETER_SQ - Math.max(0, perpendicularSq))
-    );
+    const distance = Math.max(0, projection - Math.sqrt(DIAMETER_SQ - Math.max(0, perpendicularSq)));
     if (distance < result.distance) {
       result.type = EVENT_BALL;
       result.distance = distance;
@@ -155,10 +149,7 @@ function extendPath(event, points, count, x, z, dx, dz, length, maxBounces, igno
 function GuideLine({ color, geometryRef }) {
   const positions = useMemo(() => new Float32Array(MAX_POINTS * 3), []);
   return <line renderOrder={999} frustumCulled={false}>
-    <bufferGeometry
-      ref={geometryRef}
-      drawRange={{ start: 0, count: 0 }}
-    >
+    <bufferGeometry ref={geometryRef} drawRange={{ start: 0, count: 0 }}>
       <bufferAttribute attach="attributes-position" args={[positions, 3]} />
     </bufferGeometry>
 
@@ -186,24 +177,12 @@ function GhostBall({ lineRef }) {
     return array;
   }, []);
 
-  return <lineLoop
-    ref={lineRef}
-    renderOrder={999}
-    frustumCulled={false}
-    visible={false}
-  >
+  return <lineLoop ref={lineRef} renderOrder={999} frustumCulled={false} visible={false}>
     <bufferGeometry>
       <bufferAttribute attach="attributes-position" args={[positions, 3]} />
     </bufferGeometry>
 
-    <lineBasicMaterial
-      color="white"
-      depthTest={false}
-      depthWrite={false}
-      transparent
-      opacity={0.7}
-      toneMapped={false}
-    />
+    <lineBasicMaterial color="white" depthTest={false} depthWrite={false} transparent opacity={0.7} toneMapped={false} />
   </lineLoop>;
 }
 
@@ -325,6 +304,4 @@ function AimGuideRenderer({ cueBall, aimRef }) {
   )
 }
 
-export {
-  AimGuideRenderer as default
-};
+export { AimGuideRenderer as default };
