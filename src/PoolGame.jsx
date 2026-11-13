@@ -15,6 +15,7 @@ import SettingsScreen from "./screens/SettingsScreen.jsx";
 import GameCompleteScreen from "./screens/GameCompleteScreen.jsx";
 import ScoreboardScreen from "./screens/ScoreboardScreen.jsx";
 import HowToPlayScreen from "./screens/HowToPlayScreen.jsx";
+import SceneLighting from "./renderers/SceneLighting.jsx";
 
 const POSITION = [0, 10, 0], ROTATION = [-Math.PI / 2, 0, 0];
 
@@ -55,12 +56,18 @@ function Rack() {
     }, []);
 
     return (
-        <Canvas shadows dpr={[1, 1.5]}
-            frameloop="demand" gl={{ powerPreference: "high-performance" }}>
+        <Canvas
+            shadows
+            dpr={[1, 1.5]}
+            frameloop="demand"
+            gl={{ powerPreference: "high-performance" }}
+        >
             <FittedCamera />
+            <SceneLighting />
+
             {session && <PoolScene cueBall={session.cueBall} />}
         </Canvas>
-    )
+    );
 }
 
 export default function PoolGame() {
@@ -87,9 +94,9 @@ export default function PoolGame() {
         document.addEventListener("visibilitychange", onVisibility);
 
         return (() => {
-                window.removeEventListener("keydown", onKeyDown);
-                document.removeEventListener("visibilitychange", onVisibility);
-            }
+            window.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("visibilitychange", onVisibility);
+        }
         )
     }, []);
 
