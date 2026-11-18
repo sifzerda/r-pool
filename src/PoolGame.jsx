@@ -60,8 +60,7 @@ function Rack() {
             shadows
             dpr={[1, 1.5]}
             frameloop="demand"
-            gl={{ powerPreference: "high-performance" }}
-        >
+            gl={{ powerPreference: "high-performance" }}>
             <FittedCamera />
             <SceneLighting />
 

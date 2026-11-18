@@ -29,7 +29,7 @@ The database of users was switched from mongoDB to Prisma to enable app to be se
 
 ## Visuals
 
-This app has been deployed to Vercel. Visit the site: [Pool Next.js](https://nx-pool.vercel.app/)
+This app has been deployed to Vercel. Visit the site: [Pool Next.js](https://r-pool-sand.vercel.app/)
 
 ![pic1](...)
 ![pic2](...)
